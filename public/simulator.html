@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Allergy Guard · Alexa+ simulator</title>
+<style>
+  :root { --bg: #0a0d11; --bezel: #050608; --panel: #141a21; --text: #eef1f4; --muted: #95a0ab; --ring: #2aa8ff; --line: #232b34; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; padding: 24px; max-width: 1400px; margin: 0 auto; }
+  @media (max-width: 1000px) { .wrap { grid-template-columns: 1fr; } }
+  .device { background: var(--bezel); border-radius: 26px; padding: 22px; box-shadow: 0 30px 80px #000a, inset 0 0 0 1px #1d232b; }
+  .screen { aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; background: #0f1419; }
+  .screen iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .bar { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+  .ring { width: 54px; height: 54px; border-radius: 50%; border: 4px solid #1f2a35; flex: none; cursor: pointer; background: #10161d; display: grid; place-items: center; font-size: 22px; transition: border-color .2s, box-shadow .2s; }
+  .ring.listening { border-color: var(--ring); box-shadow: 0 0 24px var(--ring); }
+  .ring.speaking { border-color: #59d6ff; box-shadow: 0 0 18px #59d6ff88; }
+  .said { flex: 1; min-height: 54px; display: flex; align-items: center; font-size: 19px; color: #dfe7ee; }
+  form { display: flex; gap: 8px; margin-top: 14px; }
+  input { flex: 1; background: var(--panel); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 12px 14px; font-size: 16px; }
+  button { background: #1e2832; color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 15px; cursor: pointer; text-align: left; }
+  button:hover { background: #26323e; }
+  aside h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin: 0 0 10px; }
+  .script { display: grid; gap: 8px; margin-bottom: 22px; }
+  .script button small { display: block; color: var(--muted); font-size: 12px; }
+  .log { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; max-height: 420px; overflow: auto; font-size: 14px; }
+  .log div { padding: 6px 0; border-top: 1px solid var(--line); } .log div:first-child { border-top: 0; }
+  .you { color: #9fd3ff; } .alexa { color: var(--text); } .sys { color: var(--muted); font-style: italic; }
+  .note { color: var(--muted); font-size: 12px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section>
+    <div class="device">
+      <div class="screen"><iframe id="view" src="/widget.html" title="Allergy Guard screen" sandbox="allow-scripts allow-popups"></iframe></div>
+      <div class="bar">
+        <div class="ring" id="ring" title="Tap to talk" role="button" aria-label="Tap to talk">🎙️</div>
+        <div class="said" id="said">Tap the ring and talk, or type below.</div>
+      </div>
+    </div>
+    <form id="form"><input id="text" placeholder="“Alexa, check tonight's lasagne for Saturday”" autocomplete="off"><button>Send</button></form>
+    <p class="note">Simulated Alexa+: an LLM drives the add-on through a real MCP client over Streamable HTTP. The screen is the add-on's MCP Apps view, rendered as an Echo Show would. Voice uses the browser's speech APIs (Chrome sends audio to its own speech service).</p>
+  </section>
+  <aside>
+    <h2>Demo script (no LLM needed)</h2>
+    <div class="script" id="script"></div>
+    <h2>Conversation</h2>
+    <div class="log" id="log"></div>
+  </aside>
+</div>
+<script>
+(() => {
+  const frame = document.getElementById("view");
+  const said = document.getElementById("said");
+  const ring = document.getElementById("ring");
+  const log = document.getElementById("log");
+  let history = [];
+  let lastSwaps = null;
+  let viewReady = false;
+  let queued = null;
+
+  // --- MCP Apps host side: answer the view's JSON-RPC and push tool results to it.
+  window.addEventListener("message", async (event) => {
+    if (event.source !== frame.contentWindow) return;
+    const msg = event.data;
+    if (!msg || msg.jsonrpc !== "2.0") return;
+    const reply = (result) => frame.contentWindow.postMessage({ jsonrpc: "2.0", id: msg.id, result }, "*");
+    if (msg.method === "ui/initialize") {
+      reply({
+        protocolVersion: "2026-01-26",
+        hostInfo: { name: "alexa-plus-simulator", version: "0.1.0" },
+        hostCapabilities: { serverTools: {} },
+        hostContext: { theme: "dark", displayMode: "inline", platform: "web", locale: "en-US" },
+      });
+    } else if (msg.method === "ui/notifications/initialized") {
+      viewReady = true;
+      if (queued) { show(queued); queued = null; }
+    } else if (msg.method === "tools/call") {
+      const out = await tool(msg.params.name, msg.params.arguments, false);
+      reply({ content: [], structuredContent: out?.view, isError: out?.isError ?? false });
+    }
+  });
+
+  function show(view) {
+    if (!view) return;
+    if (view.swaps?.length) lastSwaps = view;
+    if (!viewReady) { queued = view; return; }
+    frame.contentWindow.postMessage({ jsonrpc: "2.0", method: "ui/notifications/tool-result", params: { content: [], structuredContent: view } }, "*");
+  }
+
+  // --- voice
+  function speak(text) {
+    said.textContent = text;
+    add("alexa", text);
+    if (!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const voice = speechSynthesis.getVoices().find((v) => /en-US/.test(v.lang) && /Samantha|Google US|Aria|Jenny/.test(v.name)) || speechSynthesis.getVoices().find((v) => /^en/.test(v.lang));
+    if (voice) u.voice = voice;
+    u.onstart = () => ring.classList.add("speaking");
+    u.onend = () => ring.classList.remove("speaking");
+    speechSynthesis.speak(u);
+  }
+
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  ring.addEventListener("click", () => {
+    if (!Rec) { add("sys", "This browser has no speech recognition; type instead (Chrome supports it)."); return; }
+    const rec = new Rec();
+    rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 1;
+    ring.classList.add("listening");
+    rec.onresult = (e) => turn(e.results[0][0].transcript);
+    rec.onend = () => ring.classList.remove("listening");
+    rec.onerror = () => ring.classList.remove("listening");
+    rec.start();
+  });
+
+  document.getElementById("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("text");
+    if (input.value.trim()) turn(input.value.trim());
+    input.value = "";
+  });
+
+  async function turn(text) {
+    add("you", text);
+    said.textContent = "…";
+    const res = await fetch("/sim/turn", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ history, text }) });
+    const body = await res.json();
+    if (!res.ok) { said.textContent = body.error; add("sys", body.error); return; }
+    history = body.history.slice(-12);
+    body.views.forEach(show);
+    speak(body.speech);
+  }
+
+  async function tool(name, args, announce = true) {
+    const res = await fetch("/sim/tool", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, args }) });
+    const body = await res.json();
+    if (!res.ok) { add("sys", body.error); return null; }
+    show(body.view);
+    if (body.view?.speech) speak(body.view.speech);
+    return body;
+  }
+
+  function add(cls, text) {
+    const d = document.createElement("div");
+    d.className = cls;
+    d.textContent = (cls === "you" ? "You: " : cls === "alexa" ? "Alexa: " : "") + text;
+    log.prepend(d);
+  }
+
+  // --- scripted demo (each button is one MCP tool call)
+  const saturday = (() => { const d = new Date(); d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7)); return d.toISOString().slice(0, 10); })();
+  const steps = [
+    ["Save Maya", "peanuts, tree nuts", () => tool("save_person", { name: "Maya", allergies: ["peanuts", "tree nuts"] })],
+    ["Save guest Leo", `dairy, celery · until ${saturday}`, () => tool("save_person", { name: "Leo", allergies: ["dairy", "celery"], guest: true, until: saturday })],
+    ["Check lasagne", "recipe from TheMealDB", () => tool("check_recipe", { dish: "lasagne" })],
+    ["Add the swaps to the list", "first safe option for each", () => {
+      if (!lastSwaps) return add("sys", "Check a recipe first.");
+      tool("add_to_shopping_list", { items: lastSwaps.swaps.map((s) => s.options[0]).filter((o) => !/^Leave it out/.test(o)), note: `swaps for ${lastSwaps.title}` });
+    }],
+    ["Check Nutella", "several products: asks which", () => tool("check_product", { name: "Nutella" })],
+    ["Check Nutella by barcode", "3017624010701", () => tool("check_product", { barcode: "3017624010701" })],
+    ["Check pesto ingredients", "basil, pine nuts, parmesan…", () => tool("check_recipe", { recipe_name: "Pesto", ingredients: ["basil", "pine nuts", "parmesan", "olive oil", "garlic"] })],
+    ["Who's saved", "", () => tool("list_people", {})],
+  ];
+  const script = document.getElementById("script");
+  for (const [label, sub, run] of steps) {
+    const b = document.createElement("button");
+    b.innerHTML = `${label}${sub ? `<small>${sub}</small>` : ""}`;
+    b.addEventListener("click", run);
+    script.appendChild(b);
+  }
+
+  fetch("/health").then((r) => r.json()).then((h) => {
+    if (!h.llm) add("sys", "No LLM configured: talking is off, the demo buttons work. Set LLM_BASE_URL and LLM_MODEL to talk.");
+  });
+})();
+</script>
+</body>
+</html>

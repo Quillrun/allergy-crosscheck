@@ -1,0 +1,10 @@
+{
+  "name": "allergen-guard",
+  "version": "0.1.0",
+  "description": "Fail-closed allergen checks for recipes and packaged foods (EU 14 + US Big 9). Never says 'safe'.",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "license": "MIT",
+  "engines": { "node": ">=22.6" },
+  "keywords": ["allergen", "allergy", "food", "open-food-facts", "fail-closed"]
+}

@@ -1,0 +1,52 @@
+# Devpost submission draft: Alexa+ track
+
+Edit freely before submitting. Facts below match the repo as built.
+
+## Name
+Allergy Guard: a fail-closed allergy checker for Alexa+
+
+## Tagline
+Tell Alexa who's allergic to what. It checks recipes and products for everyone at the table, and never says "safe".
+
+## What it does
+A household tells Alexa who is allergic to what, guests included, with an end date for visitors. Allergy Guard then checks:
+
+- **Recipes**: a dish name, or ingredients read out. It shows a verdict per person on the Echo Show screen, highlights the risky ingredients, and suggests swaps. Each swap is checked against everyone's allergies, so a fix for one person never trips another.
+- **Packaged foods** by name or barcode, from Open Food Facts. If a name matches several products, it asks which one instead of guessing.
+
+The swaps go onto a shopping list.
+
+The core rule is fail-closed. When data is missing, ambiguous, not in English, or the lookup fails, the answer is "I can't confirm it's OK, treat it as unsafe". Even a clean result ends with "check the label".
+
+## Why
+Food allergies are a high-stakes decision made several times a day, often with flour on your hands. The open data behind most allergy apps is volunteer-entered. The main Nutella record lists only nuts as an allergen, while its own ingredient list contains milk powder and soy lecithin. Another Nutella record has no ingredient data at all. A voice assistant that answers confidently from data like that is dangerous. One that knows when it doesn't know is useful.
+
+## How it's built
+- Self-hosted MCP server in TypeScript using the MCP TypeScript SDK 1.32. It negotiates MCP spec **2025-11-25** over **Streamable HTTP** (stateless) and exposes 9 tools.
+- An **MCP Apps** view (`text/html;profile=mcp-app`, MCP Apps 2026-01-26) as the Echo Show screen, with tap-to-choose that calls back into the server via `tools/call`.
+- An open-source engine, `allergen-guard`, with zero dependencies and an MIT licence. It covers the EU 14 and US Big 9 allergens, with wheat separate from gluten, plus an ingredient dictionary with exclusions (peanut butter isn't dairy; oyster mushrooms aren't shellfish). Product checks read allergen tags, traces, the English ingredient text and the ingredient taxonomy together.
+- A simulated Alexa+ experience: any OpenAI-compatible LLM drives the server through a real MCP client. The browser does voice in and out and acts as the MCP Apps host. A **verdict lock** makes the spoken answer after a check the tool's own sentence, so the model can't soften it.
+- 34 automated tests:
+  - 47 dangerous ingredients that must never pass;
+  - look-alikes that must not be flagged;
+  - end-to-end MCP over HTTP;
+  - a test where a fake model tries to say "totally safe" and is overridden.
+- Built with Claude Code as the coding agent.
+
+## Challenges
+- Open data that contradicts itself. The answer was never to trust allergen tags alone and to scan ingredient text too.
+- Plant-based names that contain dairy words ("coconut yoghurt"). Swaps declare their own allergens explicitly instead of being re-parsed.
+- Voice has to be short, but it can't lose the reason. Every verdict says who, what, and where it came from.
+
+## What's next
+- Barcode scanning from the Alexa app's camera.
+- Ingredient text in more languages: Open Food Facts carries them, and the engine needs dictionaries.
+- Deploying through the Alexa+ MCP Toolkit once available on a supported account.
+- Allergist-reviewed dictionary entries.
+
+## Product feedback (required)
+- **MCP Apps / Alexa+ MCP Toolkit:** the docs give a strong static Local Inspector, but no automated way to test multi-turn spoken conversations against an add-on, so I built a simulator. A scripted conversation-test mode would help add-on builders. The Toolkit being US-only meant I couldn't test on a real Alexa+ account from outside the US.
+- **MCP TypeScript SDK:** the stateless Streamable HTTP server took a few lines. Tool `_meta` for linking a UI resource worked without extra packages.
+
+## Built with
+TypeScript, Node.js, MCP TypeScript SDK, MCP Apps, Open Food Facts API, TheMealDB API, Web Speech API
