@@ -146,3 +146,41 @@ test("defined sauces don't get the generic 'sauce can hide anything' warning", (
   const people: Person[] = [{ name: "Zed", allergies: ["milk", "celery", "peanut"] }];
   assert.equal(checkIngredients(["2 tbsp fish sauce", "1 tbsp soy sauce"], people).overall, "no_listed_allergens");
 });
+
+test("allergies the way people say them", () => {
+  const cases: [string, AllergenId[]][] = [
+    ["seafood", ["fish", "crustacean", "mollusc"]], ["lactose intolerant", ["milk"]], ["cow's milk", ["milk"]], ["casein", ["milk"]],
+    ["gluten intolerant", ["gluten"]], ["gluten-free", ["gluten"]], ["egg whites", ["egg"]], ["sesame seeds", ["sesame"]],
+    ["sulphur dioxide", ["sulphites"]], ["pine nuts", ["tree_nut"]], ["shell fish", ["crustacean", "mollusc"]],
+    ["nut allergy", ["tree_nut", "peanut"]], ["peanuts and tree nuts", ["peanut", "tree_nut"]], ["dairy, eggs", ["milk", "egg"]], ["Crème fraîche", []],
+  ];
+  for (const [said, ids] of cases) {
+    const r = resolveAllergies([said]);
+    if (ids.length) assert.deepEqual(r.ids.sort(), [...ids].sort(), said);
+    else assert.deepEqual(r.unknown, [said], said);
+  }
+  assert.deepEqual(resolveAllergies(["coconut"]).unknown, ["coconut"]); // not tracked: refused out loud, never dropped
+});
+
+test("a word it doesn't recognise means 'can't confirm', never 'none listed'", () => {
+  const maya: Person[] = [{ name: "Maya", allergies: ["peanut"] }];
+  for (const dish of ["chicken korma", "2 tbsp garam masala", "brioche bun", "paella", "1 tsp harissa", "zorblax"]) {
+    assert.notEqual(checkIngredients([dish], maya).overall, "no_listed_allergens", dish);
+  }
+  const r = checkIngredients(["2 tsp garam masala"], maya);
+  assert.match(r.speech, /I don't know what's in garam masala/);
+  // plain recipes stay plain
+  assert.equal(checkIngredients(["1 tblsp Olive Oil", "1 finely chopped Onion", "500g Minced Beef", "800g Chopped Tomatoes", "Topping Basil Leaves", "1 banana"], maya).overall, "no_listed_allergens");
+});
+
+test("a free-from claim is 'check the label', not 'contains'", () => {
+  const sam: Person[] = [{ name: "Sam", allergies: ["egg", "milk"] }];
+  const r = checkIngredients(["egg-free mayonnaise", "dairy free butter"], sam);
+  assert.equal(r.overall, "cannot_confirm");
+});
+
+test("look-alike characters can't sneak an allergen past", () => {
+  const leo: Person[] = [{ name: "Leo", allergies: ["milk"] }];
+  for (const tricky of ["Ｍｉｌｋ", "m\u200Bilk", "MILK", "Crème fraîche"]) assert.equal(checkIngredients([tricky], leo).overall, "unsafe", tricky);
+  assert.equal(checkIngredients(["water chestnuts"], [{ name: "T", allergies: ["tree_nut"] }]).overall, "no_listed_allergens");
+});

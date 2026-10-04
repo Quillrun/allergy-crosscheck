@@ -20,7 +20,7 @@ The submitted video is a real run, not a mock-up:
 | Tap a product | Alexa: "I can't confirm this is OK for Maya and Leo: the ingredient list is missing…" Narrator: a naive checker would call it allergen-free. |
 | Demo button: by barcode | Alexa: avoid for both: tree nuts (hazelnut) for Maya, milk (milk powder) for Leo. Narrator: the record lists only nuts as an allergen, but the milk powder is in the ingredients. |
 | Slide: keeping the model honest | The verdict lock and the no-tool guard, found by testing on a real model. |
-| Slide: how it's built | MCP server (spec 2025-11-25, Streamable HTTP), MCP Apps screen built to the Alexa+ design guide, open-source engine, 42 tests. |
+| Slide: how it's built | MCP server (spec 2025-11-25, Streamable HTTP), MCP Apps screen built to the Alexa+ design guide, open-source engine, and its tests. |
 
 ## Recording it yourself
 

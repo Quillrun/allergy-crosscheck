@@ -35,6 +35,9 @@ export const fakeFetch: Fetcher = (async (input: string | URL | Request) => {
   if (url.includes("themealdb.com") && url.includes("s=lasagne")) {
     return json({ meals: [{ idMeal: "52844", strMeal: "Lasagne", strIngredient1: "Olive Oil", strMeasure1: "1 tblsp", strIngredient2: "Celery", strMeasure2: "1 Stick", strIngredient3: "Lasagne Sheets", strMeasure3: "500g", strIngredient4: "Creme Fraiche", strMeasure4: "400ml", strIngredient5: "Parmesan Cheese", strMeasure5: "50g", strIngredient6: "", strMeasure6: "" }] });
   }
+  if (url.includes("themealdb.com") && url.endsWith("s=carbonara")) {
+    return json({ meals: [{ idMeal: "2", strMeal: "Spaghetti alla Carbonara", strIngredient1: "Spaghetti", strMeasure1: "320g", strIngredient2: "Egg Yolks", strMeasure2: "6", strIngredient3: "Pecorino", strMeasure3: "50g" }] });
+  }
   if (url.includes("themealdb.com")) return json({ meals: null });
   return json({}, 404);
 }) as Fetcher;

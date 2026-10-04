@@ -40,10 +40,17 @@ export class Sources {
     return { candidates: hits };
   }
 
+  /** A dish by name. If the full name isn't found, leading words are dropped ("shrimp pad thai" -> "pad thai"). */
   async recipe(name: string): Promise<{ recipe?: Recipe; error?: string }> {
-    const res = await this.json(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(name.trim())}`);
-    if (res.error) return { error: res.error };
-    const meal = ((res.value as { meals?: Record<string, string | null>[] | null }).meals ?? [])[0];
+    const words = name.trim().split(/\s+/);
+    let meal: Record<string, string | null> | undefined;
+    for (let i = 0; i < words.length && !meal; i++) {
+      const query = words.slice(i).join(" ");
+      if (i > 0 && query.length < 4) break;
+      const res = await this.json(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(query)}`);
+      if (res.error) return { error: res.error };
+      meal = ((res.value as { meals?: Record<string, string | null>[] | null }).meals ?? [])[0];
+    }
     if (!meal) return {};
     const ingredients: string[] = [];
     for (let i = 1; i <= 20; i++) {

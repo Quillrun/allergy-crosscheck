@@ -62,9 +62,21 @@ test("save people, reject unknown allergies", async () => {
   assert.match(bad.structuredContent.speech, /can't check for kiwi/);
   await call("save_person", { name: "Maya", allergies: ["peanuts", "tree nuts"] });
   const leo = await call("save_person", { name: "Leo", allergies: ["dairy", "celery"], guest: true, until: "2999-12-31" });
-  assert.match(leo.structuredContent.speech, /guest Leo until [A-Z][a-z]+day 31 December/); // spoken, not ISO
+  assert.match(leo.structuredContent.speech, /guest Leo until [A-Z][a-z]+day,? 31 December 2999/); // spoken, not ISO; far off, so with the year
   const list = await call("list_people");
   assert.deepEqual(list.structuredContent.people.map((p: View) => p.name).sort(), ["Leo", "Maya"]);
+});
+
+test("'also allergic to' adds, and a name it can't read is refused, never saved empty", async () => {
+  await call("save_person", { name: "Mary", allergies: ["milk"] });
+  const more = await call("save_person", { name: "mary", allergies: ["egg"] });
+  assert.match(more.structuredContent.speech, /Added egg for Mary\. I'm checking for milk and egg\./);
+  const kiwi = await call("save_person", { name: "Mary", allergies: ["kiwi"] });
+  assert.match(kiwi.structuredContent.speech, /so I haven't changed Mary's list/);
+  const li = await call("save_person", { name: "Li", allergies: ["牛奶"] });
+  assert.equal(li.isError, true);
+  assert.match(li.structuredContent.speech, /can't check for 牛奶/);
+  await call("remove_person", { name: "Mary" });
 });
 
 test("an end date makes a guest, and a date in the past is refused", async () => {
@@ -86,6 +98,24 @@ test("check a dish by name: verdict per person, swaps, verdict line for the mode
   assert.ok(v.swaps.length >= 3);
   assert.match(r.content[0].text, /^VERDICT: UNSAFE/);
   assert.match(r.content[0].text, /Say to the user: Leo should avoid this/);
+});
+
+test("a dish not found by its full name falls back, and says which recipe it checked", async () => {
+  const r = await call("check_recipe", { dish: "spaghetti carbonara", for: ["Maya"] });
+  assert.equal(r.structuredContent.title, "Spaghetti alla Carbonara");
+  assert.match(r.structuredContent.speech, /I didn't find spaghetti carbonara exactly, so I checked Spaghetti alla Carbonara\./);
+});
+
+test("no recipe found: the dish name is still checked, the rest is unknown", async () => {
+  await call("save_person", { name: "Ana", allergies: ["shellfish"] });
+  const r = await call("check_recipe", { dish: "shrimp pad thai", for: ["Ana", "Maya"] });
+  assert.equal(r.structuredContent.overall, "unsafe");
+  assert.match(r.structuredContent.speech, /Ana should avoid this: it contains shellfish, in the shrimp/);
+  assert.match(r.structuredContent.speech, /I can't confirm this is OK for Maya/);
+  assert.match(r.structuredContent.speech, /Read me the ingredients and I'll check them\./);
+  const onlyAna = await call("check_recipe", { dish: "shrimp pad thai", for: ["Ana"] });
+  assert.doesNotMatch(onlyAna.structuredContent.speech, /Read me the ingredients/); // already "avoid": nothing more to learn
+  await call("remove_person", { name: "Ana" });
 });
 
 test("check only for named people, and say who is unknown", async () => {
@@ -125,6 +155,12 @@ test("database offline: cannot confirm, no crash", async () => {
   const r = await call("check_product", { name: "offline" });
   assert.equal(r.structuredContent.overall, "cannot_confirm");
   assert.ok(r.structuredContent.dataIssues[0].includes("couldn't be reached"));
+});
+
+test("a long shopping list is summarised when read out", async () => {
+  await call("add_to_shopping_list", { items: ["a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8"] });
+  assert.match((await call("get_shopping_list")).structuredContent.speech, /a5 and \d+ more\.$/);
+  for (const i of ["a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8"]) await call("remove_from_shopping_list", { item: i });
 });
 
 test("shopping list round trip", async () => {

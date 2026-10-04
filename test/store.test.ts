@@ -21,11 +21,14 @@ test("guests drop out after their last day", () => {
   assert.deepEqual(s.activePeople("2026-10-11").map((p) => p.name), ["Maya"]);
 });
 
-test("saving the same name updates instead of duplicating", () => {
+test("saving the same name adds allergies, keeps the first spelling, and replaces only when asked", () => {
   const s = new Store(tmp());
   s.savePerson({ name: "Maya", allergies: ["peanut"], guest: false });
-  s.savePerson({ name: "maya", allergies: ["sesame"], guest: false });
+  s.savePerson({ name: "MAYA", allergies: ["sesame"], guest: false });
   assert.equal(s.allPeople().length, 1);
+  assert.equal(s.allPeople()[0].name, "Maya");
+  assert.deepEqual(s.find("Maya")?.allergies, ["peanut", "sesame"]); // "Maya is also allergic to sesame" must not drop peanuts
+  s.savePerson({ name: "maya", allergies: ["sesame"], guest: false }, true);
   assert.deepEqual(s.find("Maya")?.allergies, ["sesame"]);
 });
 

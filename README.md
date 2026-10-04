@@ -28,6 +28,8 @@ Allergy Guard:
 | A listed allergen, in the tags **or** in the ingredient text | **Avoid** |
 | "May contain" | **Avoid** |
 | An ingredient that often hides allergens (sauce, stock, chocolate, lecithin…) | **Can't confirm** |
+| A recipe word it doesn't recognise ("garam masala", "zorblax") | **Can't confirm**: "I don't know what's in garam masala" |
+| A free-from claim ("egg-free mayonnaise") | **Can't confirm**: check the label |
 | Ingredient list missing, or not in English | **Can't confirm** |
 | Database offline or timing out | **Can't confirm** |
 | Product name matches several products | **Asks which one**, never guesses |
@@ -81,7 +83,7 @@ The Alexa+ MCP Toolkit currently serves US accounts. To connect this server to A
 The simulator in this repo stands in for steps 3 and 4.
 
 The screen follows the Alexa+ MCP design guide:
-- the whole verdict fits one Echo Show screen;
+- for a typical household, the whole verdict fits one Echo Show screen;
 - 16px minimum text, 48px touch targets, and 4.5:1 contrast in both themes;
 - it applies the host's theme, device class and safe-area insets;
 - no links out of the view.
@@ -104,7 +106,7 @@ Every tool result has a short `speech` line for voice, a `VERDICT:` line for the
 ## Tests
 
 ```bash
-npm test          # 42 tests: engine, store, MCP over Streamable HTTP, simulator verdict lock, no-tool guard, history trimming
+npm test          # 52 tests: engine, store, MCP over Streamable HTTP, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -125,7 +127,7 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, simulator guards | 42 automated tests (`npm test`) |
+| Engine, store, MCP over real HTTP, simulator guards | 52 automated tests (`npm test`) |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes |
 | Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |
@@ -136,6 +138,8 @@ The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`
 ## Limits, stated plainly
 
 - English ingredient text only. Products without it get "can't confirm".
-- The ingredient dictionary is broad, but it's a dictionary. An allergen under a name it doesn't know won't be flagged. That's why every positive answer ends with "check the label".
+- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". Across all 790 TheMealDB recipes, 2.6% of ingredient lines hit that rule; the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every answer ends with "check the label".
+- Product checks read the label's declared allergens, traces and English ingredient text; unrecognised words there don't block an answer, because the declaration is the legal record.
+- Saying someone is "also allergic to" something adds it; only "no longer allergic" replaces the list.
 - It isn't medical advice and isn't an emergency service.
 - Product data: [Open Food Facts](https://world.openfoodfacts.org), ODbL. Recipes: [TheMealDB](https://www.themealdb.com), using its free development key.

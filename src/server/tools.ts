@@ -7,7 +7,11 @@ import {
   ALLERGENS,
   checkIngredients,
   checkProduct,
+  evaluate,
+  normalize,
   resolveAllergies,
+  scanIngredient,
+  splitIngredients,
   suggestSwaps,
 } from "../../packages/allergen-guard/src/index.ts";
 import type { CheckResult, Person, Swap, Verdict } from "../../packages/allergen-guard/src/index.ts";
@@ -23,6 +27,7 @@ const WIDGET_HTML = readFileSync(new URL("../../public/widget.html", import.meta
 const ui = (invoking: string, invoked: string) => ({ ui: { resourceUri: WIDGET_URI, invoking, invoked }, "ui/resourceUri": WIDGET_URI });
 const RESULT_META = { ui: { resourceUri: WIDGET_URI }, "ui/resourceUri": WIDGET_URI };
 
+const READ_ME = " Read me the ingredients and I'll check them.";
 const DISCLAIMER = "Allergy Guard reads ingredient data that can be wrong or out of date. Always check the label. It is not medical advice and not an emergency service.";
 const VOICE_RULE =
   "Read the returned `speech` to the user as written. Never tell the user a food is safe, and never soften an 'unsafe' or 'cannot confirm' verdict.";
@@ -63,21 +68,22 @@ export function createServer(store: Store, sources: Sources): McpServer {
       description:
         "Save or update a household member or guest and their food allergies, e.g. 'Maya is allergic to peanuts' or 'the Johnsons' boy Leo is coming Saturday, he can't have sesame'. Guests can have an end date.",
       inputSchema: {
-        name: z.string().min(1).describe("Person's name"),
+        name: z.string().min(1).max(60).describe("Person's name"),
         allergies: z.array(z.string()).min(1).describe("Allergies in plain words: peanuts, tree nuts, dairy, egg, wheat, gluten, soy, sesame, fish, shellfish, celery, mustard, lupin, sulphites"),
         guest: z.boolean().optional().describe("True for a visitor rather than a household member"),
         until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Last day a guest's allergies apply (YYYY-MM-DD)"),
+        replace: z.boolean().optional().describe("True only when the user says an allergy no longer applies; the list then replaces what's saved. Otherwise new allergies are added"),
       },
       annotations: { idempotentHint: true },
       _meta: ui("Saving…", "Saved"),
     },
-    async ({ name, allergies, guest, until }) => {
+    async ({ name, allergies, guest, until, replace }) => {
       const { ids, unknown } = resolveAllergies(allergies);
       if (unknown.length) {
         return reply({
           kind: "message",
           title: "Allergy not recognised",
-          speech: `I can't check for ${unknown.join(" or ")} yet, so I haven't saved ${name}. I can track peanuts, tree nuts, milk, egg, wheat, gluten, soy, sesame, fish, shellfish, celery, mustard, lupin and sulphites.`,
+          speech: `I can't check for ${unknown.join(" or ")} yet, so I haven't ${store.find(name) ? `changed ${store.find(name)!.name}'s list` : `saved ${name}`}. I can track peanuts, tree nuts, milk, egg, wheat, gluten, soy, sesame, fish, shellfish, celery, mustard, lupin and sulphites.`,
           disclaimer: DISCLAIMER,
         }, true);
       }
@@ -90,12 +96,20 @@ export function createServer(store: Store, sources: Sources): McpServer {
         }, true);
       }
       // An end date only makes sense for a visitor.
-      const p = store.savePerson({ name: name.trim(), allergies: ids, guest: Boolean(guest || until), until });
+      const { saved: p, before } = store.savePerson({ name: name.trim(), allergies: ids, guest: Boolean(guest || until), until }, replace);
       const who = p.guest ? `guest ${p.name}${p.until ? ` until ${spokenDate(p.until)}` : ""}` : p.name;
+      const added = before ? ids.filter((a) => !before.allergies.includes(a)) : [];
+      const speech = !before
+        ? `Got it. I'll check everything for ${who}: ${spokenList(p.allergies)}.`
+        : replace
+          ? `Updated ${who}. I'll now check for ${spokenList(p.allergies)} only.`
+          : added.length
+            ? `Added ${spokenList(added)} for ${who}. I'm checking for ${spokenList(p.allergies)}.`
+            : `I already check ${spokenList(p.allergies)} for ${who}.`;
       return reply({
         kind: "people",
         title: "Saved",
-        speech: `Got it. I'll check everything for ${who}: ${spokenList(p.allergies)}.`,
+        speech,
         people: peopleRows(store.allPeople()),
         disclaimer: DISCLAIMER,
       });
@@ -179,7 +193,7 @@ export function createServer(store: Store, sources: Sources): McpServer {
     "check_recipe",
     {
       title: "Check a recipe",
-      description: `Check a recipe's ingredients against everyone's allergies (or only the people named in 'for'). Returns a verdict per person, the risky ingredients, and swaps that don't trip anyone else's allergy. ${VOICE_RULE}`,
+      description: `Check food against everyone's allergies (or only the people named in 'for'): a dish ('lasagne'), a single food or ingredient ('hummus', 'a banana', 'oyster sauce'), or a list of ingredients. Returns a verdict per person, the risky ingredients, and swaps that don't trip anyone else's allergy. ${VOICE_RULE}`,
       inputSchema: {
         ingredients: z.union([z.array(z.string()), z.string()]).optional().describe("Ingredient lines, or the ingredient list as text. If the user lists ingredients, always pass them here, even when they also name the dish"),
         dish: z.string().optional().describe("Only when the user gives no ingredients: a dish name to look up, e.g. 'lasagne'"),
@@ -192,32 +206,47 @@ export function createServer(store: Store, sources: Sources): McpServer {
     async ({ ingredients, dish, recipe_name, for: names }) => {
       const { people, missing } = pick(store, names);
       let source: View["source"];
+      let note = "";
+      let nameLine: string | undefined;
+      const unknown: string[] = [];
       if (!ingredients && dish) {
+        // The dish name is checked too: "shrimp pad thai" names its shellfish even if the recipe found doesn't.
+        nameLine = `${dish} (the dish name)`;
         const { recipe, error } = await sources.recipe(dish);
-        if (!recipe) {
-          return reply({
-            kind: "message",
-            title: "Recipe not found",
-            speech: error ? `I couldn't look up ${dish}: ${error}. Read me the ingredients instead.` : `I couldn't find a recipe for ${dish}. Read me the ingredients instead.`,
-            disclaimer: DISCLAIMER,
-          }, true);
+        if (recipe) {
+          ingredients = recipe.ingredients;
+          recipe_name = recipe_name ?? recipe.name;
+          source = { label: "TheMealDB" };
+          if (normalize(recipe.name) !== normalize(dish)) note = ` I didn't find ${dish} exactly, so I checked ${recipe.name}.`;
+        } else {
+          ingredients = [];
+          recipe_name = recipe_name ?? dish;
+          unknown.push(error ? `I couldn't look up ${dish} (${error}), so its ingredients are unknown.` : `I couldn't find a recipe for ${dish}, so its ingredients are unknown.`);
+          note = READ_ME;
         }
-        ingredients = recipe.ingredients;
-        recipe_name = recipe_name ?? recipe.name;
-        source = { label: "TheMealDB" };
       }
-      const result = checkIngredients(ingredients ?? [], people);
-      const swaps = suggestSwaps(result.lines, people);
+      let result = checkIngredients(splitIngredients(ingredients ?? []), people);
+      if (nameLine && dish) {
+        // The name only adds what it names outright; its other words ("tonight's") aren't ingredients.
+        const lines = [...result.lines, { text: nameLine, hits: scanIngredient(dish) }];
+        result = { ...evaluate(lines.flatMap((l) => l.hits), people, unknown.length ? unknown : result.dataIssues), lines };
+      }
+      if (note === READ_ME && result.people.every((p) => p.verdict === "unsafe")) note = ""; // nothing more to learn
+      const swaps = suggestSwaps(result.lines.filter((l) => l.text !== nameLine), people);
       return reply({
         kind: "recipe_check",
         title: recipe_name ? `${recipe_name}` : "Recipe check",
         overall: result.overall,
-        speech: withMissing(result, missing) + (swaps.length ? " I've put swaps on the screen." : ""),
+        speech: withMissing(result, missing) + note + (swaps.length ? " I've put swaps on the screen." : ""),
         people: verdictRows(result, store),
-        items: result.lines.map((l) => ({
-          text: l.text,
-          flags: l.hits.filter((h) => people.some((p) => p.allergies.includes(h.allergen))).map((h) => ({ allergen: ALLERGENS[h.allergen].label, kind: h.kind })),
-        })),
+        items: result.lines
+          .map((l) => ({
+            text: l.text,
+            flags: l.hits
+              .filter((h) => people.some((p) => p.allergies.includes(h.allergen)))
+              .map((h) => (h.unknown ? { allergen: "Not recognised", kind: "unknown" } : { allergen: ALLERGENS[h.allergen].label, kind: h.kind })),
+          }))
+          .filter((i) => i.text !== nameLine || i.flags.length), // the name only shows when it flags something
         swaps,
         dataIssues: result.dataIssues,
         source,
@@ -230,7 +259,7 @@ export function createServer(store: Store, sources: Sources): McpServer {
     "check_product",
     {
       title: "Check a product",
-      description: `Check a packaged food against everyone's allergies, by barcode or by name. If a name matches several products, this returns the choices instead of guessing; ask the user which one, then call again with its barcode. ${VOICE_RULE}`,
+      description: `Check one specific packaged product against everyone's allergies, by barcode or by its product or brand name ('Nutella', 'Heinz ketchup'). For a plain food or ingredient with no brand ('hummus', 'a banana'), use check_recipe with ingredients instead. If a name matches several products, this returns the choices instead of guessing; ask the user which one, then call again with its barcode. ${VOICE_RULE}`,
       inputSchema: {
         barcode: z.string().optional().describe("The barcode (EAN/UPC digits), e.g. from a choice returned earlier"),
         name: z.string().optional().describe("Product name, e.g. 'Nutella' or 'Kellogg's granola'"),
@@ -286,7 +315,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
     { title: "Shopping list", description: "Read the household shopping list.", annotations: { readOnlyHint: true }, _meta: ui("Reading the list…", "Shopping list") },
     async () => {
       const list = store.shopping();
-      return reply({ kind: "shopping", title: "Shopping list", speech: list.length ? `On the list: ${joinWords(list.map((i) => i.item))}.` : "The shopping list is empty.", shopping: list, disclaimer: DISCLAIMER });
+      const names = list.map((i) => i.item);
+      const spoken = names.length > 6 ? [...names.slice(0, 5), `${names.length - 5} more`] : names;
+      return reply({ kind: "shopping", title: "Shopping list", speech: list.length ? `On the list: ${joinWords(spoken)}.` : "The shopping list is empty.", shopping: list, disclaimer: DISCLAIMER });
     },
   );
 
@@ -377,7 +408,9 @@ function reply(view: View, isError = false) {
 // "2026-10-10" -> "Saturday 10 October": dates are heard, not read.
 const spokenDate = (iso: string) => {
   const [y, m, d] = iso.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const date = new Date(y, m - 1, d);
+  const soon = date.getTime() - Date.now() < 300 * 86_400_000; // within the coming months, the weekday says enough
+  return date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", ...(soon ? {} : { year: "numeric" }) });
 };
 
 const spokenList = (ids: Profile["allergies"]) => joinWords(ids.map((a) => ALLERGENS[a].spoken));

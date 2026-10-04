@@ -31,10 +31,15 @@ export class Store {
     return this.state.people.find((p) => same(p.name, name));
   }
 
-  savePerson(profile: Profile): Profile {
-    this.state.people = [...this.state.people.filter((p) => !same(p.name, profile.name)), profile];
+  /** Saves someone. By default new allergies are added to what's saved; `replace` swaps the list. The first spelling of a name is kept. */
+  savePerson(profile: Profile, replace = false): { saved: Profile; before?: Profile } {
+    const before = this.find(profile.name);
+    const saved: Profile = before
+      ? { ...profile, name: before.name, allergies: replace ? profile.allergies : [...new Set([...before.allergies, ...profile.allergies])] }
+      : profile;
+    this.state.people = [...this.state.people.filter((p) => !same(p.name, profile.name)), saved];
     this.flush();
-    return profile;
+    return { saved, before };
   }
 
   removePerson(name: string): boolean {

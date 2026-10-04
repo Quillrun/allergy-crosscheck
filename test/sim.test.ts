@@ -19,6 +19,10 @@ const fakeLlm = createServer(async (req, res) => {
   const asked = body.messages.find((m: { role: string }) => m.role === "user").content as string;
   const message = /pesto/.test(asked)
     ? { role: "assistant", content: "Pesto is fine for Maya." }
+    : /thanks/i.test(asked)
+    ? { role: "assistant", content: "You're welcome!" }
+    : /bye/i.test(asked)
+    ? { role: "assistant", content: "Bye, stay safe!" }
     : /dinner/.test(asked)
     ? { role: "assistant", content: "Which dish is dinner?" }
     : sawTool
@@ -73,6 +77,16 @@ test("long history is trimmed at a user turn, never between a tool call and its 
   assert.ok(history.length <= 40);
   assert.equal(history[0].role, "user");
   assert.ok(history.some((m) => m.role === "tool"));
+});
+
+test("small talk without a tool is spoken as is", async () => {
+  const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Thanks!" }) });
+  assert.equal((await res.json()).speech, "You're welcome!");
+});
+
+test("a sign-off like 'stay safe' isn't treated as a verdict", async () => {
+  const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Bye!" }) });
+  assert.equal((await res.json()).speech, "Bye, stay safe!");
 });
 
 test("simulator pages are served", async () => {

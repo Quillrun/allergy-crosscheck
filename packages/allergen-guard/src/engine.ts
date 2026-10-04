@@ -3,13 +3,14 @@
 //   cannot_confirm      — the data is missing, ambiguous, or an ingredient often hides the allergen
 //   no_listed_allergens — nothing found; the caller still has to check the label
 
-import { ALLERGENS, ALL_ALLERGENS, OFF_ALLERGEN_TAGS, TERMS, normalize } from "./catalog.ts";
+import { ALLERGENS, ALL_ALLERGENS, FILLER_WORDS, OFF_ALLERGEN_TAGS, PLAIN_FOODS, TERMS, normalize, resolveAllergies } from "./catalog.ts";
 import type { AllergenId, Term } from "./catalog.ts";
 
 export type Verdict = "unsafe" | "cannot_confirm" | "no_listed_allergens";
 export type HitKind = "contains" | "may_contain" | "possible";
 
-export type Hit = { allergen: AllergenId; kind: HitKind; source: string; term: string };
+/** `unknown`: a possible hit because the engine doesn't recognise the word, not because the word is known to hide it. */
+export type Hit = { allergen: AllergenId; kind: HitKind; source: string; term: string; unknown?: boolean };
 export type Person = { name: string; allergies: AllergenId[] };
 export type PersonResult = { name: string; verdict: Verdict; reasons: string[]; speech: string };
 export type CheckResult = {
@@ -45,8 +46,29 @@ export function scanIngredient(line: string, kind: "contains" | "may_contain" = 
     const possible = c.entry.possible === "all" ? ALL_ALLERGENS : (c.entry.possible ?? []);
     for (const a of possible) hits.push({ allergen: a, kind: "possible", source: line.trim(), term: c.term });
   }
-  return dedupe(hits);
+  // "egg-free mayonnaise", "dairy free butter": a free-from claim can't be verified here, so "check the label", not "contains".
+  const freeFrom = new Set(resolveAllergies([...text.matchAll(/([a-z]+) free\b/g)].map((m) => m[1])).ids);
+  return dedupe(hits.map((h) => (h.kind === "contains" && freeFrom.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));
 }
+
+const KNOWN = new Set([...PLAIN_FOODS, ...FILLER_WORDS].map((w) => normalize(w)));
+const FILLER = new Set(FILLER_WORDS.map((w) => normalize(w)));
+const PHRASES = TERMS.flatMap((t) => [...t.terms, ...(t.unless ?? [])])
+  .map((t) => normalize(t))
+  .sort((a, b) => b.length - a.length) // "sour cream" before "cream"
+  .map((t) => wordRe(t));
+const known = (w: string) => /^\d/.test(w) || KNOWN.has(w) || KNOWN.has(w.replace(/es$/, "")) || KNOWN.has(w.replace(/s$/, "")) || KNOWN.has(w.replace(/ies$/, "y"));
+
+/** Words in an ingredient line that are neither plain foods, allergen terms nor filler ("2 tbsp korma paste" -> ["korma", "paste"]). */
+export function unrecognised(line: string): string[] {
+  // Words covered by a catalogue phrase ("tikka masala", "coconut milk") are accounted for; a stray part of one ("masala") is not.
+  let text = ` ${normalize(line)} `;
+  for (const re of PHRASES) text = text.replace(new RegExp(re.source, "g"), "  ");
+  return text.split(" ").filter((w) => w && !known(w));
+}
+
+/** The food a line names, without quantities and preparation words ("2 tbsp garam masala" -> "garam masala"). */
+const foodName = (line: string) => normalize(line).split(" ").filter((w) => w && !/^\d/.test(w) && !FILLER.has(w)).join(" ");
 
 /** Split recipe text into ingredient lines (quantities stay: they don't affect matching). */
 export function splitIngredients(input: string | string[]): string[] {
@@ -55,7 +77,13 @@ export function splitIngredients(input: string | string[]): string[] {
 }
 
 export function checkIngredients(input: string | string[], people: Person[]): CheckResult & { lines: { text: string; hits: Hit[] }[] } {
-  const lines = splitIngredients(input).map((text) => ({ text, hits: scanIngredient(text) }));
+  const lines = splitIngredients(input).map((text) => {
+    const hits = scanIngredient(text);
+    const odd = unrecognised(text);
+    // A word the engine doesn't know could be anything: it blocks "none listed" for everyone.
+    if (odd.length) for (const a of ALL_ALLERGENS) hits.push({ allergen: a, kind: "possible", source: text.trim(), term: foodName(text), unknown: true });
+    return { text, hits };
+  });
   const dataIssues = lines.length === 0 ? ["No ingredients were given, so nothing could be checked."] : [];
   const result = evaluate(lines.flatMap((l) => l.hits), people, dataIssues);
   return { ...result, lines };
@@ -120,7 +148,7 @@ export function evaluate(hits: Hit[], people: Person[], dataIssues: string[] = [
     const reasons: string[] = [
       ...[...new Set(contains.map((h) => h.allergen))].map((a) => `Contains ${ALLERGENS[a].spoken}: ${unique(contains.filter((h) => h.allergen === a).map((h) => h.source)).join(", ")}`),
       ...mayContain.map((h) => `May contain ${ALLERGENS[h.allergen].spoken}`),
-      ...possible.map((h) => `${cap(h.term)} can contain ${ALLERGENS[h.allergen].spoken}`),
+      ...possible.map((h) => (h.unknown ? `I don't know what's in "${h.term}"` : `${cap(h.term)} can contain ${ALLERGENS[h.allergen].spoken}`)),
       ...(contains.length || mayContain.length || possible.length ? [] : dataIssues),
     ];
     let verdict: Verdict = "no_listed_allergens";
@@ -149,8 +177,14 @@ function speak(p: Person, verdict: Verdict, contains: Hit[], may: Hit[], possibl
     return `${p.name} should avoid this: ${parts.join(", and ")}.`;
   }
   if (verdict === "cannot_confirm") {
-    const why = possible.length
-      ? `${join(unique(possible.map((h) => h.term)).slice(0, 2))} can contain ${list(possible)}`
+    const hiding = possible.filter((h) => !h.unknown);
+    const odd = unique(possible.filter((h) => h.unknown).map((h) => h.term)).slice(0, 2);
+    const parts = [
+      ...(hiding.length ? [`${join(unique(hiding.map((h) => h.term)).slice(0, 2))} can contain ${list(hiding)}`] : []),
+      ...(odd.length ? [`I don't know what's in ${join(odd)}`] : []),
+    ];
+    const why = parts.length
+      ? parts.join(", and ")
       : (issues[0] ?? "the data is incomplete").replace(/\.$/, "").replace(/^./, (c) => c.toLowerCase());
     return `I can't confirm this is OK for ${p.name}: ${why}. Treat it as unsafe and check the label.`;
   }
