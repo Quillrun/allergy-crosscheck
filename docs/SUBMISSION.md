@@ -19,7 +19,7 @@ The swaps go onto a shopping list.
 The core rule is fail-closed. When data is missing, ambiguous, not in English, or the lookup fails, the answer is "I can't confirm it's OK, treat it as unsafe". So is any recipe word the engine doesn't recognise ("I don't know what's in garam masala"). Even a clean result ends with "check the label".
 
 ## Why
-Food allergies are a high-stakes decision made several times a day, often with flour on your hands. The open data behind most allergy apps is volunteer-entered. The main Nutella record lists only nuts as an allergen, with milk at most a "may contain" trace, while its own ingredient list contains skimmed milk powder and soy lecithin. Another Nutella record has no ingredient data at all. A voice assistant that answers confidently from data like that is dangerous. One that knows when it doesn't know is useful.
+Food allergies are a high-stakes decision made several times a day, often with flour on your hands. The open data behind most allergy apps is volunteer-entered. In Open Food Facts, one chocolate hazelnut spread has an empty allergen list and no ingredients, and a hot cocoa mix lists soy as its only allergen while its ingredients include nonfat dry milk, whey and caseinate. A voice assistant that answers confidently from data like that is dangerous. One that knows when it doesn't know is useful.
 
 ## How it's built
 - Self-hosted MCP server in TypeScript using the MCP TypeScript SDK 1.32. It negotiates MCP spec **2025-11-25** over **Streamable HTTP** (stateless) and exposes 9 tools.
@@ -49,7 +49,7 @@ Food allergies are a high-stakes decision made several times a day, often with f
 - The verdict lock and no-tool guard are simulator-side. On real Alexa+ the defence is the server's `VERDICT:` line and exact speech sentence, plus the tool descriptions, because add-ons can't script what Alexa says. I've asked Amazon for a verbatim hook in the friction log.
 
 ## Video
-<YouTube or Vimeo URL>. The file is `docs/video/allergy-guard-demo.mp4` (2:56). Captions are in `allergy-guard-demo.srt`; upload them with the video.
+<YouTube or Vimeo URL>. The file is `docs/video/allergy-guard-demo.mp4` (2:55). Captions are in `allergy-guard-demo.srt`; upload them with the video.
 
 ## Try it (judges)
 `npm install && npm start`, then open http://127.0.0.1:8787/. The demo buttons call the MCP tools directly and need no model or API key. To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`.

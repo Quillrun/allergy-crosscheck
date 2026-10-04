@@ -12,14 +12,14 @@ It is built around one rule: **when the data is missing, ambiguous or the lookup
 | A recipe check: verdict per person, the risky lines, swaps checked against everyone | Missing product data: "can't confirm", never "allergen-free" |
 |---|---|
 | ![Lasagne check](docs/screenshots/lasagne-check.png) | ![Can't confirm](docs/screenshots/cannot-confirm.png) |
-| **Several products share a name: it asks** | **Allergen tags say nuts; the ingredient text adds milk** |
-| ![Which product](docs/screenshots/which-product.png) | ![Product check](docs/screenshots/product-check.png) |
+| **A guest saved until Saturday: they drop off after the visit** | **Allergen tags say soy; the ingredient text adds milk** |
+| ![Household](docs/screenshots/household.png) | ![Product check](docs/screenshots/product-check.png) |
 
 Screens from the recorded demo run: a local model driving the server, with live data.
 
 ## Why fail-closed matters here
 
-Open Food Facts, the open food database this uses, says its data comes with "no assurances that the data is accurate, complete, or reliable". Real records prove it. The main Nutella record lists only *nuts* as an allergen, with milk at most a "may contain" trace, while its own ingredient list contains *skimmed milk powder* and *soya lecithin*. A second Nutella record has no allergen or ingredient data at all. A naive checker would call that one allergen-free.
+Open Food Facts, the open food database this uses, says its data comes with "no assurances that the data is accurate, complete, or reliable". Real records prove it. One chocolate hazelnut spread (barcode 0868030000236) has an empty allergen list and no ingredient list, so a checker that trusts the tags would call it allergen-free. A hot cocoa mix (0050700000220) lists soy as its only allergen, with milk only as a "may contain", while its ingredients include nonfat dry milk, whey and sodium caseinate.
 
 Allergy Guard:
 
