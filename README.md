@@ -11,7 +11,7 @@ It is built around one rule: **when the data is missing, ambiguous or the lookup
 
 ## Why fail-closed matters here
 
-Open Food Facts, the open food database this uses, says its data comes with "no assurances that the data is accurate, complete, or reliable". Real records prove it. The main Nutella record lists only *nuts* as an allergen, while its own ingredient list contains *skimmed milk powder* and *soya lecithin*. A second Nutella record has no allergen or ingredient data at all. A naive checker would call that one allergen-free.
+Open Food Facts, the open food database this uses, says its data comes with "no assurances that the data is accurate, complete, or reliable". Real records prove it. The main Nutella record lists only *nuts* as an allergen, with milk at most a "may contain" trace, while its own ingredient list contains *skimmed milk powder* and *soya lecithin*. A second Nutella record has no allergen or ingredient data at all. A naive checker would call that one allergen-free.
 
 Allergy Guard:
 
