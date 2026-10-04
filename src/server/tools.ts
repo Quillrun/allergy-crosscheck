@@ -12,6 +12,7 @@ import {
 } from "../../packages/allergen-guard/src/index.ts";
 import type { CheckResult, Person, Swap, Verdict } from "../../packages/allergen-guard/src/index.ts";
 import type { Sources } from "./sources.ts";
+import { localDate } from "./store.ts";
 import type { Profile, Store } from "./store.ts";
 
 export const WIDGET_URI = "ui://allergy-guard/verdict.html";
@@ -80,8 +81,17 @@ export function createServer(store: Store, sources: Sources): McpServer {
           disclaimer: DISCLAIMER,
         }, true);
       }
-      const p = store.savePerson({ name: name.trim(), allergies: ids, guest: guest ?? false, until });
-      const who = p.guest ? `guest ${p.name}${p.until ? ` until ${p.until}` : ""}` : p.name;
+      if (until && until < localDate()) {
+        return reply({
+          kind: "message",
+          title: "That date has passed",
+          speech: `${spokenDate(until)} has already passed, so I haven't saved ${name}. Tell me the last day they'll be eating with you.`,
+          disclaimer: DISCLAIMER,
+        }, true);
+      }
+      // An end date only makes sense for a visitor.
+      const p = store.savePerson({ name: name.trim(), allergies: ids, guest: Boolean(guest || until), until });
+      const who = p.guest ? `guest ${p.name}${p.until ? ` until ${spokenDate(p.until)}` : ""}` : p.name;
       return reply({
         kind: "people",
         title: "Saved",
@@ -363,6 +373,12 @@ function reply(view: View, isError = false) {
   if (view.swaps?.length) lines.push(`Swaps: ${view.swaps.map((s) => `${s.replace} -> ${s.options.join(" / ")}`).join("; ")}`);
   return { content: [{ type: "text" as const, text: lines.filter(Boolean).join("\n") }], structuredContent: view as unknown as Record<string, unknown>, isError, _meta: RESULT_META };
 }
+
+// "2026-10-10" -> "Saturday 10 October": dates are heard, not read.
+const spokenDate = (iso: string) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+};
 
 const spokenList = (ids: Profile["allergies"]) => joinWords(ids.map((a) => ALLERGENS[a].spoken));
 const joinWords = (xs: string[], last = "and") => (xs.length <= 1 ? (xs[0] ?? "") : `${xs.slice(0, -1).join(", ")} ${last} ${xs[xs.length - 1]}`);

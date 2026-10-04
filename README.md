@@ -96,11 +96,11 @@ Every tool result has a short `speech` line for voice, a `VERDICT:` line for the
 ## Tests
 
 ```bash
-npm test          # 39 tests: engine, store, MCP over Streamable HTTP, simulator verdict lock, no-tool guard, history trimming
+npm test          # 42 tests: engine, store, MCP over Streamable HTTP, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
-The engine suite has a list of dangerous ingredients that must never come back as "nothing listed": peanut butter, pesto, ghee, soy sauce, Worcestershire, lupin flour and 41 more. It also has look-alikes that must not be flagged: butter beans, coconut milk, nutmeg, oyster mushrooms, eggplant. The MCP suite runs over real HTTP with the SDK client and confirms the negotiated protocol version is `2025-11-25`.
+The engine suite has 54 ingredient–allergen pairs that must never come back as "nothing listed", among them peanut butter, pesto, ghee, soy sauce, Worcestershire sauce, lupin flour and amaretto. It also has look-alikes that must not be flagged: butter beans, coconut milk, nutmeg, oyster mushrooms, eggplant. The MCP suite runs over real HTTP with the SDK client and confirms the negotiated protocol version is `2025-11-25`.
 
 ## Layout
 
@@ -112,6 +112,18 @@ public/widget.html         MCP Apps view (the Echo Show screen)
 public/simulator.html      Echo Show-style simulator and MCP Apps host
 test/                      integration tests
 ```
+
+## What was tested, and where
+
+| | |
+|---|---|
+| Engine, store, MCP over real HTTP, simulator guards | 42 automated tests (`npm test`) |
+| The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
+| The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes |
+| Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |
+| Amazon's Local Inspector | **Not run.** It installs from the Developer Console; the steps are under "Alexa+" above |
+
+The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`). On real Alexa+, add-ons can't script what Alexa says. There, the defence is in the server: every result leads with a `VERDICT:` line and the exact sentence to say, and the tool descriptions tell the model to repeat it. Asking Amazon for a verbatim-speech hook is entry 2 in the [friction log](docs/FRICTION_LOG.md).
 
 ## Limits, stated plainly
 

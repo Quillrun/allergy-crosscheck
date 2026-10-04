@@ -20,7 +20,7 @@ export class Store {
 
   /** Household members, plus guests whose visit hasn't ended. */
   activePeople(today = localDate()): Profile[] {
-    return this.state.people.filter((p) => !p.guest || !p.until || p.until >= today);
+    return this.state.people.filter((p) => !p.until || p.until >= today);
   }
 
   allPeople(): Profile[] {

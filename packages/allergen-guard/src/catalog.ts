@@ -145,6 +145,8 @@ export const TERMS: Term[] = [
   { terms: ["nut"], contains: ["tree_nut"], possible: ["peanut"], unless: ["pine nut", "brazil nut", "monkey nut"] },
   { terms: ["pesto"], contains: ["tree_nut", "milk"], possible: ["peanut"] },
   { terms: ["nougat"], contains: [], possible: ["tree_nut", "peanut", "egg", "milk"] },
+  { terms: ["amaretti", "macaron", "orgeat", "romesco", "baklava", "dukkah"], contains: ["tree_nut"], possible: ["egg", "wheat", "gluten", "sesame"] },
+  { terms: ["amaretto", "frangelico", "nocino", "biscotti", "mole", "nut oil"], contains: [], possible: ["tree_nut", "peanut"] },
   // milk
   { terms: ["milk", "buttermilk", "milk powder"], contains: ["milk"], unless: PLANT_MILKS },
   { terms: ["butter", "ghee"], contains: ["milk"], unless: NOT_DAIRY_BUTTER },
@@ -170,7 +172,9 @@ export const TERMS: Term[] = [
     possible: ["egg"],
     unless: NOT_WHEAT_PASTA,
   },
-  { terms: ["bread", "breadcrumb", "panko", "pita", "pitta", "naan", "bagel", "crouton", "cracker", "pizza", "tortilla", "wonton", "dumpling", "ramen"], contains: ["wheat", "gluten"], possible: ["milk", "egg", "soy", "sesame"], unless: ["corn tortilla", "gluten free bread", "rice cracker"] },
+  { terms: ["bread", "breadcrumb", "panko", "pita", "pitta", "naan", "bagel", "crouton", "cracker", "pizza", "tortilla", "wonton", "dumpling", "ramen"], contains: ["wheat", "gluten"], possible: ["milk", "egg", "soy", "sesame"], unless: ["corn tortilla", "gluten free bread", "rice cracker", "rye bread", "pumpernickel"] },
+  // Rye is gluten, not wheat, but most rye breads are part wheat flour.
+  { terms: ["rye bread", "pumpernickel"], contains: ["gluten"], possible: ["wheat", "milk", "egg", "soy", "sesame"] },
   { terms: ["cake", "cookie", "biscuit", "pastry", "puff pastry", "filo", "phyllo", "croissant", "pie crust", "brownie", "muffin", "waffle", "pancake", "doughnut", "donut", "scone"], contains: ["wheat", "gluten"], possible: BAKED },
   { terms: ["soba"], contains: [], possible: ["wheat", "gluten"] },
   { terms: ["noodle"], contains: [], possible: ["wheat", "gluten", "egg"], unless: ["rice noodle", "glass noodle", "rice vermicelli"] },
@@ -218,6 +222,7 @@ export const TERMS: Term[] = [
       "curry paste", "curry powder", "dressing", "marinade", "stuffing", "protein powder", "ready meal"],
     contains: [],
     possible: "all",
+    unless: ["fish sauce", "soy sauce"], // defined products with their own entries
   },
 ];
 

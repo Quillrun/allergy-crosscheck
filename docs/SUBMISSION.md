@@ -32,13 +32,21 @@ Food allergies are a high-stakes decision made several times a day, often with f
   Every tool result carries `_meta.ui.resourceUri`, because Alexa+ reads it from the response, and each tool has `invoking`/`invoked` status lines.
 - An open-source engine, `allergen-guard`, with zero dependencies and an MIT licence. It covers the EU 14 and US Big 9 allergens, with wheat separate from gluten, plus an ingredient dictionary with exclusions (peanut butter isn't dairy; oyster mushrooms aren't shellfish). Product checks read allergen tags, traces, the English ingredient text and the ingredient taxonomy together.
 - A simulated Alexa+ experience: any OpenAI-compatible LLM drives the server through a real MCP client. The browser does voice in and out and acts as the MCP Apps host. A **verdict lock** makes the spoken answer after a check the tool's own sentence, so the model can't soften it. A **no-tool guard** stops the model answering allergy questions from memory: without a tool call it may ask, never assert. Tested end to end on a local Qwen3.5 9B model.
-- 39 automated tests:
-  - 47 dangerous ingredients that must never pass;
+- 42 automated tests:
+  - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
   - end-to-end MCP over HTTP;
   - a test where a fake model tries to say "totally safe" and is overridden;
   - a test where a fake model answers from memory without a tool and is replaced.
 - Built with Claude Code as the coding agent.
+
+## What was and wasn't tested
+- **Tested:**
+  - 42 automated tests;
+  - the full demo conversation, end to end in the simulator on a local Qwen3.5 9B model with live data;
+  - the screen in headless Chrome, in both themes.
+- **Not tested:** a real Alexa+ (the Toolkit is US-only) and Amazon's Local Inspector (it installs through the Developer Console).
+- The verdict lock and no-tool guard are simulator-side. On real Alexa+ the defence is the server's `VERDICT:` line and exact speech sentence, plus the tool descriptions, because add-ons can't script what Alexa says. I've asked Amazon for a verbatim hook in the friction log.
 
 ## Try it (judges)
 `npm install && npm start`, then open http://127.0.0.1:8787/. The demo buttons call the MCP tools directly and need no model or API key. To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`.
@@ -77,7 +85,7 @@ All of it: the repository's first commit is 4 October 2026, after the submission
   - three verdicts, none of which is "safe";
   - product checks that read Open Food Facts allergen tags, traces and ingredient text together;
   - swaps filtered against everyone's allergies.
-- **Why:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 15 tests of its own, including a list of dangerous ingredients that must never pass.
+- **Why:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 17 tests of its own, including 54 ingredient–allergen pairs that must never pass.
 
 ## Built with
 TypeScript, Node.js, MCP TypeScript SDK, MCP Apps, Open Food Facts API, TheMealDB API, Web Speech API, Qwen3.5 9B via MLX (local model for the simulator), Claude Code

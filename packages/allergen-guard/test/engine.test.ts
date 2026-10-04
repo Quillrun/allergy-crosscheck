@@ -19,6 +19,7 @@ const MUST_NOT_PASS: [string, AllergenId][] = [
   ["king prawns", "crustacean"], ["shellfish stock", "mollusc"], ["oyster sauce", "mollusc"],
   ["1 Stick Celery", "celery"], ["chicken stock", "celery"], ["dijon", "mustard"], ["lupin flour", "lupin"], ["red wine", "sulphites"],
   ["curry paste", "peanut"], ["dark chocolate", "milk"], ["granola", "tree_nut"], ["BBQ sauce", "mustard"],
+  ["amaretto", "tree_nut"], ["amaretti biscuits", "tree_nut"], ["macarons", "tree_nut"], ["baklava", "tree_nut"], ["romesco sauce", "tree_nut"], ["rye bread", "wheat"], ["rye bread", "gluten"],
 ];
 
 test("dangerous ingredients never come back as 'no listed allergens'", () => {
@@ -128,4 +129,20 @@ test("scanIngredient keeps the source line for explanations", () => {
   const hits = scanIngredient("2 tbsp tahini");
   assert.equal(hits[0].source, "2 tbsp tahini");
   assert.equal(hits[0].allergen, "sesame");
+});
+
+test("people who would hear the same sentence hear it once", () => {
+  const people: Person[] = [
+    { name: "Maya", allergies: ["peanut"] },
+    { name: "Leo", allergies: ["milk"] },
+  ];
+  const r = checkProduct({ code: "1", product_name: "Mystery" }, people);
+  assert.equal(r.overall, "cannot_confirm");
+  assert.equal(r.speech, "I can't confirm this is OK for Maya and Leo: the ingredient list is missing from the product data. Treat it as unsafe and check the label.");
+  assert.match(r.people[1].speech, /^I can't confirm this is OK for Leo:/);
+});
+
+test("defined sauces don't get the generic 'sauce can hide anything' warning", () => {
+  const people: Person[] = [{ name: "Zed", allergies: ["milk", "celery", "peanut"] }];
+  assert.equal(checkIngredients(["2 tbsp fish sauce", "1 tbsp soy sauce"], people).overall, "no_listed_allergens");
 });

@@ -111,6 +111,7 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
 
 /** Turn hits into a verdict per person. Any data issue blocks a "no listed allergens" answer. */
 export function evaluate(hits: Hit[], people: Person[], dataIssues: string[] = []): CheckResult {
+  const templates = new Map<string, string>(); // name -> speech with NAME in place of the name
   const results = people.map((p): PersonResult => {
     const mine = hits.filter((h) => p.allergies.includes(h.allergen));
     const contains = mine.filter((h) => h.kind === "contains");
@@ -125,13 +126,15 @@ export function evaluate(hits: Hit[], people: Person[], dataIssues: string[] = [
     let verdict: Verdict = "no_listed_allergens";
     if (contains.length || mayContain.length) verdict = "unsafe";
     else if (possible.length || dataIssues.length) verdict = "cannot_confirm";
-    return { name: p.name, verdict, reasons: unique(reasons), speech: speak(p, verdict, contains, mayContain, possible, dataIssues) };
+    const template = speak({ ...p, name: NAME }, verdict, contains, mayContain, possible, dataIssues);
+    templates.set(p.name, template);
+    return { name: p.name, verdict, reasons: unique(reasons), speech: template.replace(NAME, p.name) };
   });
   const overall = results.reduce<Verdict>((v, r) => worst(v, r.verdict), "no_listed_allergens");
   const ordered = [...results].sort((a, b) => RANK[b.verdict] - RANK[a.verdict]);
   const speech = people.length === 0
     ? "Nobody's allergies are saved yet, so I have nothing to check against. Tell me who's eating and what they're allergic to."
-    : ordered.map((r) => r.speech).join(" ");
+    : merged(ordered, templates);
   return { overall: people.length === 0 ? "cannot_confirm" : overall, people: results, hits, dataIssues, speech };
 }
 
@@ -152,6 +155,17 @@ function speak(p: Person, verdict: Verdict, contains: Hit[], may: Hit[], possibl
     return `I can't confirm this is OK for ${p.name}: ${why}. Treat it as unsafe and check the label.`;
   }
   return `I didn't find ${join(p.allergies.map((a) => ALLERGENS[a].spoken))} listed for ${p.name}, but data can be wrong, so check the label.`;
+}
+
+// People who would hear the same sentence share it: "…OK for Maya and Leo: …", said once.
+const NAME = "\u0000";
+function merged(ordered: PersonResult[], templates: Map<string, string>): string {
+  const groups = new Map<string, string[]>();
+  for (const r of ordered) {
+    const t = templates.get(r.name) ?? r.speech;
+    groups.set(t, [...(groups.get(t) ?? []), r.name]);
+  }
+  return [...groups].map(([t, names]) => t.replace(NAME, join(names))).join(" ");
 }
 
 const unique = <T,>(xs: T[]) => [...new Set(xs)];

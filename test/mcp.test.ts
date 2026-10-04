@@ -62,9 +62,18 @@ test("save people, reject unknown allergies", async () => {
   assert.match(bad.structuredContent.speech, /can't check for kiwi/);
   await call("save_person", { name: "Maya", allergies: ["peanuts", "tree nuts"] });
   const leo = await call("save_person", { name: "Leo", allergies: ["dairy", "celery"], guest: true, until: "2999-12-31" });
-  assert.match(leo.structuredContent.speech, /guest Leo until 2999-12-31/);
+  assert.match(leo.structuredContent.speech, /guest Leo until [A-Z][a-z]+day 31 December/); // spoken, not ISO
   const list = await call("list_people");
   assert.deepEqual(list.structuredContent.people.map((p: View) => p.name).sort(), ["Leo", "Maya"]);
+});
+
+test("an end date makes a guest, and a date in the past is refused", async () => {
+  const past = await call("save_person", { name: "Old", allergies: ["milk"], until: "2020-01-01" });
+  assert.equal(past.isError, true);
+  assert.match(past.structuredContent.speech, /already passed, so I haven't saved Old/);
+  const visitor = await call("save_person", { name: "Visitor", allergies: ["milk"], until: "2999-01-01" });
+  assert.equal(visitor.structuredContent.people.find((p: { name: string }) => p.name === "Visitor").guest, true);
+  await call("remove_person", { name: "Visitor" });
 });
 
 test("check a dish by name: verdict per person, swaps, verdict line for the model", async () => {
