@@ -34,7 +34,15 @@ test("lists nine tools, each linked to the MCP Apps screen", async () => {
   assert.deepEqual(tools.map((t) => t.name).sort(), [
     "add_to_shopping_list", "check_product", "check_recipe", "find_recipe", "get_shopping_list", "list_people", "remove_from_shopping_list", "remove_person", "save_person",
   ]);
-  for (const t of tools) assert.equal((t._meta as any)?.ui?.resourceUri, "ui://allergy-guard/verdict.html", t.name);
+  for (const t of tools) {
+    assert.equal((t._meta as any)?.ui?.resourceUri, "ui://allergy-guard/verdict.html", t.name);
+    assert.ok((t._meta as any)?.ui?.invoking && (t._meta as any)?.ui?.invoked, t.name);
+  }
+});
+
+test("every tool result links the screen too (Alexa+ reads resourceUri from the response)", async () => {
+  const res = (await client.callTool({ name: "list_people", arguments: {} })) as { _meta?: any };
+  assert.equal(res._meta?.ui?.resourceUri, "ui://allergy-guard/verdict.html");
 });
 
 test("serves the screen as an MCP Apps resource", async () => {
@@ -82,6 +90,13 @@ test("a product name with several matches asks instead of guessing", async () =>
   assert.equal(r.structuredContent.kind, "needs_choice");
   assert.equal(r.structuredContent.candidates.length, 2);
   assert.equal(r.structuredContent.overall, undefined);
+  assert.match(r.structuredContent.speech, /Which one: Nutella by Ferrero or Nutella\? Or read me the barcode\./);
+});
+
+test("choices that sound the same aren't read out", async () => {
+  const r = await call("check_product", { name: "spread" });
+  assert.equal(r.structuredContent.kind, "needs_choice");
+  assert.match(r.structuredContent.speech, /Pick one on the screen, or read me the barcode\.$/);
 });
 
 test("product by barcode: reads the ingredient text, not just the tags", async () => {
@@ -107,8 +122,10 @@ test("shopping list round trip", async () => {
   await call("add_to_shopping_list", { items: ["fennel", "coconut cream"], note: "swaps for Lasagne" });
   const list = await call("get_shopping_list");
   assert.deepEqual(list.structuredContent.shopping.map((i: View) => i.item), ["fennel", "coconut cream"]);
-  await call("remove_from_shopping_list", { item: "fennel" });
+  assert.equal((await call("remove_from_shopping_list", { item: "fennel" })).isError, false);
   assert.equal((await call("get_shopping_list")).structuredContent.shopping.length, 1);
+  assert.equal((await call("remove_from_shopping_list", { item: "fennel" })).isError, true);
+  assert.equal((await call("remove_person", { name: "Nobody" })).isError, true);
 });
 
 test("rejects requests for unexpected hosts (DNS rebinding guard)", async () => {

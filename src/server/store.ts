@@ -19,7 +19,7 @@ export class Store {
   }
 
   /** Household members, plus guests whose visit hasn't ended. */
-  activePeople(today = new Date().toISOString().slice(0, 10)): Profile[] {
+  activePeople(today = localDate()): Profile[] {
     return this.state.people.filter((p) => !p.guest || !p.until || p.until >= today);
   }
 
@@ -83,3 +83,6 @@ function load(path: string): State {
 }
 
 const same = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/** YYYY-MM-DD in the server's time zone: a guest "until Saturday" means the household's Saturday, not UTC's. */
+export const localDate = (d = new Date()): string => d.toLocaleDateString("en-CA");

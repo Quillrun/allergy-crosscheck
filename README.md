@@ -26,7 +26,7 @@ Allergy Guard:
 | Nobody's allergies saved, or an unknown name in "for" | Says so |
 | Nothing found | "I didn't find *X* listed… check the label" |
 
-In the simulator, a **verdict lock** applies: after a check, the spoken answer is the tool's own sentence, so the model can't soften "avoid" into "should be fine". There's a test for exactly that (`test/sim.test.ts`).
+In the simulator, a **verdict lock** applies: after a check, the spoken answer is the tool's own sentence, so the model can't soften "avoid" into "should be fine". A **no-tool guard** covers the other way a model goes wrong: answering from memory. Without a tool call, the model may ask a question but not assert anything. It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
 
 ## Run it
 
@@ -43,7 +43,7 @@ To talk to it, point it at any OpenAI-compatible endpoint with tool calling:
 
 ```bash
 LLM_BASE_URL=https://api.openai.com/v1 LLM_MODEL=gpt-4.1-mini LLM_API_KEY=... npm start
-# or a local model: LLM_BASE_URL=http://127.0.0.1:11434/v1 LLM_MODEL=qwen3:14b npm start
+# or a local model: LLM_BASE_URL=http://127.0.0.1:8080/v1 LLM_MODEL=mlx-community/Qwen3.5-9B-4bit npm start
 ```
 
 | Variable | Default | |
@@ -65,11 +65,20 @@ npx @modelcontextprotocol/inspector   # transport: Streamable HTTP, URL: http://
 
 The Alexa+ MCP Toolkit currently serves US accounts. To connect this server to Alexa+:
 
-1. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://127.0.0.1:8787`, and add the tunnel host to `ALLOWED_HOSTS`.
-2. Scaffold an add-on with `alexa-ai new mcp` pointing at `https://<host>/mcp`, then `alexa-ai deploy`.
-3. Test in the Alexa+ web simulator.
+1. Run Amazon's Local Inspector against it (installed from the Developer Console): `addon-local-inspector http://127.0.0.1:8787/mcp`. It writes a certification verdict to `/tmp/alexaplus-addon-local-inspector-live/`.
+2. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://127.0.0.1:8787`, and add the tunnel host to `ALLOWED_HOSTS`.
+3. Scaffold an add-on with `alexa-ai new mcp` pointing at `https://<host>/mcp`, then `alexa-ai deploy`.
+4. Test in the Alexa+ web simulator.
 
-The simulator in this repo stands in for steps 2 and 3.
+The simulator in this repo stands in for steps 3 and 4.
+
+The screen follows the Alexa+ MCP design guide:
+- the whole verdict fits one Echo Show screen;
+- 16px minimum text, 48px touch targets, and 4.5:1 contrast in both themes;
+- it applies the host's theme, device class and safe-area insets;
+- no links out of the view.
+
+Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result repeats `resourceUri`. Not-found results set `isError`.
 
 ## Tools
 
@@ -87,7 +96,7 @@ Every tool result has a short `speech` line for voice, a `VERDICT:` line for the
 ## Tests
 
 ```bash
-npm test          # 34 tests: engine, store, MCP over Streamable HTTP, simulator verdict lock
+npm test          # 39 tests: engine, store, MCP over Streamable HTTP, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 

@@ -26,6 +26,8 @@ checkProduct(openFoodFactsProduct, people); // reads tags AND ingredient text; m
 
 Covers the EU's 14 regulated allergens and the US Big 9, with wheat kept separate from gluten. Product checks read Open Food Facts records and don't trust the allergen tags alone, because real records omit allergens their own ingredient list contains.
 
+Node 22.6 or newer runs the TypeScript source directly; there's no build step. `npm test` runs the suite. It includes a list of dangerous ingredients that must never come back as "nothing listed", and look-alikes that must not be flagged (butter beans, coconut milk, nutmeg).
+
 Not medical advice. Always check the label.
 
 MIT licensed.

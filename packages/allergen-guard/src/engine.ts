@@ -117,7 +117,7 @@ export function evaluate(hits: Hit[], people: Person[], dataIssues: string[] = [
     const mayContain = mine.filter((h) => h.kind === "may_contain" && !contains.some((c) => c.allergen === h.allergen));
     const possible = mine.filter((h) => h.kind === "possible");
     const reasons: string[] = [
-      ...contains.map((h) => `Contains ${ALLERGENS[h.allergen].spoken} (${h.source})`),
+      ...[...new Set(contains.map((h) => h.allergen))].map((a) => `Contains ${ALLERGENS[a].spoken}: ${unique(contains.filter((h) => h.allergen === a).map((h) => h.source)).join(", ")}`),
       ...mayContain.map((h) => `May contain ${ALLERGENS[h.allergen].spoken}`),
       ...possible.map((h) => `${cap(h.term)} can contain ${ALLERGENS[h.allergen].spoken}`),
       ...(contains.length || mayContain.length || possible.length ? [] : dataIssues),

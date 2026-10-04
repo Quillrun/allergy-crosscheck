@@ -27,6 +27,9 @@ export const fakeFetch: Fetcher = (async (input: string | URL | Request) => {
   if (url.includes("search.openfoodfacts.org") && url.includes("q=Nutella")) {
     return json({ hits: [{ code: "3017624010701", product_name: "Nutella", brands: ["Ferrero"] }, { code: "0098008952506", product_name: "Nutella", brands: ["Nutella"] }] });
   }
+  if (url.includes("search.openfoodfacts.org") && url.includes("q=spread")) {
+    return json({ hits: [{ code: "1", product_name: "Spread", brands: ["Acme"] }, { code: "2", product_name: "spread", brands: ["Acme"] }] });
+  }
   if (url.includes("search.openfoodfacts.org") && url.includes("q=offline")) throw new TypeError("fetch failed");
   if (url.includes("search.openfoodfacts.org")) return json({ hits: [] });
   if (url.includes("themealdb.com") && url.includes("s=lasagne")) {

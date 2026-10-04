@@ -25,18 +25,20 @@ Food allergies are a high-stakes decision made several times a day, often with f
 - Self-hosted MCP server in TypeScript using the MCP TypeScript SDK 1.32. It negotiates MCP spec **2025-11-25** over **Streamable HTTP** (stateless) and exposes 9 tools.
 - An **MCP Apps** view (`text/html;profile=mcp-app`, MCP Apps 2026-01-26) as the Echo Show screen, with tap-to-choose that calls back into the server via `tools/call`.
 - An open-source engine, `allergen-guard`, with zero dependencies and an MIT licence. It covers the EU 14 and US Big 9 allergens, with wheat separate from gluten, plus an ingredient dictionary with exclusions (peanut butter isn't dairy; oyster mushrooms aren't shellfish). Product checks read allergen tags, traces, the English ingredient text and the ingredient taxonomy together.
-- A simulated Alexa+ experience: any OpenAI-compatible LLM drives the server through a real MCP client. The browser does voice in and out and acts as the MCP Apps host. A **verdict lock** makes the spoken answer after a check the tool's own sentence, so the model can't soften it.
-- 34 automated tests:
+- A simulated Alexa+ experience: any OpenAI-compatible LLM drives the server through a real MCP client. The browser does voice in and out and acts as the MCP Apps host. A **verdict lock** makes the spoken answer after a check the tool's own sentence, so the model can't soften it. A **no-tool guard** stops the model answering allergy questions from memory: without a tool call it may ask, never assert. Tested end to end on a local Qwen3.5 9B model.
+- 39 automated tests:
   - 47 dangerous ingredients that must never pass;
   - look-alikes that must not be flagged;
   - end-to-end MCP over HTTP;
-  - a test where a fake model tries to say "totally safe" and is overridden.
+  - a test where a fake model tries to say "totally safe" and is overridden;
+  - a test where a fake model answers from memory without a tool and is replaced.
 - Built with Claude Code as the coding agent.
 
 ## Challenges
 - Open data that contradicts itself. The answer was never to trust allergen tags alone and to scan ingredient text too.
 - Plant-based names that contain dairy words ("coconut yoghurt"). Swaps declare their own allergens explicitly instead of being re-parsed.
 - Voice has to be short, but it can't lose the reason. Every verdict says who, what, and where it came from.
+- A real model, unlike a scripted one, said "Got it, I'll add Leo" without saving him, and answered a pesto question from memory. That led to the no-tool guard. It also made up shopping-list swaps until the turn history kept the tool results.
 
 ## What's next
 - Barcode scanning from the Alexa app's camera.

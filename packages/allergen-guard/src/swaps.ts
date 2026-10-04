@@ -90,7 +90,7 @@ export function suggestSwaps(lines: { text: string; hits: Hit[] }[], people: Per
     swaps.push({
       replace: line.text,
       because: `${allergens.join(" and ")} for ${who.join(" and ")}`,
-      options: options.length ? [...new Set(options)] : ["Leave it out, or find a version whose label is free of it"],
+      options: options.length ? [...new Set(options)] : ["Leave it out (no known swap)"],
     });
   }
   return swaps;

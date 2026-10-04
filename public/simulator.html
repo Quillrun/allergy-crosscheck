@@ -130,7 +130,7 @@
     const res = await fetch("/sim/turn", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ history, text }) });
     const body = await res.json();
     if (!res.ok) { said.textContent = body.error; add("sys", body.error); return; }
-    history = body.history.slice(-12);
+    history = body.history;
     body.views.forEach(show);
     speak(body.speech);
   }
@@ -152,7 +152,7 @@
   }
 
   // --- scripted demo (each button is one MCP tool call)
-  const saturday = (() => { const d = new Date(); d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7)); return d.toISOString().slice(0, 10); })();
+  const saturday = (() => { const d = new Date(); d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7)); return d.toLocaleDateString("en-CA"); })();
   const steps = [
     ["Save Maya", "peanuts, tree nuts", () => tool("save_person", { name: "Maya", allergies: ["peanuts", "tree nuts"] })],
     ["Save guest Leo", `dairy, celery · until ${saturday}`, () => tool("save_person", { name: "Leo", allergies: ["dairy", "celery"], guest: true, until: saturday })],

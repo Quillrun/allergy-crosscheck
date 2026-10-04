@@ -6,7 +6,7 @@ import type { OffProduct } from "../../packages/allergen-guard/src/index.ts";
 
 export type Fetcher = typeof fetch;
 export type Candidate = { barcode: string; name: string; brand?: string };
-export type Recipe = { name: string; ingredients: string[]; source: string };
+export type Recipe = { name: string; ingredients: string[] };
 
 const USER_AGENT = "AllergyGuard/0.1 (+https://github.com/quillrun)";
 const PRODUCT_FIELDS = "code,product_name,brands,allergens_tags,traces_tags,ingredients_tags,ingredients_text_en,ingredients_text";
@@ -51,7 +51,7 @@ export class Sources {
       const measure = (meal[`strMeasure${i}`] ?? "").trim();
       if (ing) ingredients.push(measure ? `${measure} ${ing}` : ing);
     }
-    return { recipe: { name: meal.strMeal ?? name, ingredients, source: `https://www.themealdb.com/meal/${meal.idMeal}` } };
+    return { recipe: { name: meal.strMeal ?? name, ingredients } };
   }
 
   private async json(url: string): Promise<{ value?: unknown; error?: string }> {
