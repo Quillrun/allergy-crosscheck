@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Allergy Guard · Scan</title>
+<style>
+  :root { --bg: #0a0d11; --panel: #141a21; --line: #232b34; --text: #eef1f4; --muted: #95a0ab; --accent: #59d6ff; --ok: #b7f0c9; --bad: #ff7a7e; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.4 -apple-system, system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 520px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 14px; min-height: 100vh; }
+  h1 { font-size: 22px; margin: 4px 0 0; }
+  .sub { color: var(--muted); margin: 0; }
+  .cam { position: relative; border-radius: 18px; overflow: hidden; background: #000; aspect-ratio: 3 / 4; border: 1px solid var(--line); }
+  video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .aim { position: absolute; left: 10%; right: 10%; top: 38%; height: 24%; border: 3px solid var(--accent); border-radius: 14px; box-shadow: 0 0 0 9999px #0007; transition: border-color .2s; }
+  .cam.hit .aim { border-color: var(--ok); }
+  .cam .msg { position: absolute; inset: auto 0 0 0; padding: 12px 16px; background: #000a; color: var(--muted); font-size: 15px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; }
+  .card[hidden] { display: none; }
+  .found .label { color: var(--muted); font-size: 15px; }
+  .found .name { font-size: 24px; font-weight: 700; margin: 2px 0 4px; }
+  .found .code { color: var(--muted); font-family: ui-monospace, Menlo, monospace; font-size: 15px; }
+  .found .ask { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: #0f2a36; color: #d8f4ff; }
+  .err { color: var(--bad); }
+  form { display: flex; gap: 10px; }
+  input { flex: 1; min-height: 48px; font-size: 18px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: #0f1419; color: var(--text); }
+  button { min-height: 48px; padding: 0 18px; font-size: 17px; font-weight: 600; border-radius: 12px; border: 0; background: var(--accent); color: #04121a; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .foot { color: var(--muted); font-size: 14px; margin-top: auto; }
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <h1>Scan a product</h1>
+    <p class="sub">Point the camera at the barcode. Then ask Alexa about it.</p>
+  </div>
+  <div class="cam" id="cam">
+    <video id="video" playsinline muted autoplay></video>
+    <div class="aim"></div>
+    <div class="msg" id="msg">Starting the camera…</div>
+  </div>
+  <div class="card found" id="found" hidden aria-live="polite">
+    <div class="label">Scanned</div>
+    <div class="name" id="name"></div>
+    <div class="code" id="code"></div>
+    <div class="ask">Now ask Alexa: “Can we have what I just scanned?”</div>
+  </div>
+  <div class="card err" id="error" hidden aria-live="assertive"></div>
+  <form id="manual" autocomplete="off">
+    <input id="digits" inputmode="numeric" pattern="[0-9 ]*" placeholder="Or type the barcode digits" aria-label="Barcode digits">
+    <button type="submit">Send</button>
+  </form>
+  <button class="ghost" id="again" hidden>Scan another</button>
+  <p class="foot">Allergy Guard reads ingredient data that can be wrong or out of date. Always check the label.</p>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const video = $("video"), msg = $("msg"), cam = $("cam");
+  const FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e"];
+  let detector, scanning = false, last = "", streak = 0;
+
+  async function getDetector() {
+    if ("BarcodeDetector" in window) {
+      const supported = await BarcodeDetector.getSupportedFormats();
+      if (FORMATS.some((f) => supported.includes(f))) return new BarcodeDetector({ formats: FORMATS.filter((f) => supported.includes(f)) });
+    }
+    // Safari and others: the same API, decoded in WebAssembly, served by this server.
+    await new Promise((ok, fail) => { const s = document.createElement("script"); s.src = "/vendor/barcode-detector.js"; s.onload = ok; s.onerror = fail; document.head.append(s); });
+    BarcodeDetectionAPI.setZXingModuleOverrides({ locateFile: (path) => `/vendor/${path}` });
+    return new BarcodeDetectionAPI.BarcodeDetector({ formats: FORMATS });
+  }
+
+  async function start() {
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      msg.textContent = "The camera needs a secure (https) page. Type the digits below instead.";
+      return;
+    }
+    try {
+      detector ??= await getDetector();
+      video.srcObject ??= await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 } }, audio: false });
+      await video.play();
+      msg.textContent = "Looking for a barcode…";
+      scanning = true;
+      loop();
+    } catch (err) {
+      msg.textContent = "I couldn't open the camera. Type the digits below instead.";
+    }
+  }
+
+  async function loop() {
+    if (!scanning) return;
+    try {
+      const codes = video.readyState >= 2 ? await detector.detect(video) : [];
+      const code = codes.find((c) => /^\d{8,14}$/.test(c.rawValue))?.rawValue;
+      // Two matching reads in a row before sending: one blurry frame can misread a digit.
+      streak = code && code === last ? streak + 1 : code ? 1 : 0;
+      last = code || "";
+      if (streak >= 2) { scanning = false; cam.classList.add("hit"); navigator.vibrate?.(60); return send(code); }
+    } catch {}
+    setTimeout(loop, 150);
+  }
+
+  async function send(barcode) {
+    $("error").hidden = true;
+    msg.textContent = "Got it. Looking it up…";
+    try {
+      const res = await fetch("/scan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ barcode }) });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error);
+      $("name").textContent = body.name || "A product without a name in the data";
+      $("code").textContent = body.barcode;
+      $("found").hidden = false;
+      msg.textContent = "Sent to Alexa.";
+    } catch (err) {
+      $("error").textContent = err.message || "That didn't work. Try again.";
+      $("error").hidden = false;
+      msg.textContent = "Looking for a barcode…";
+    }
+    $("again").hidden = false;
+  }
+
+  $("manual").addEventListener("submit", (e) => { e.preventDefault(); const d = $("digits").value.replace(/\D/g, ""); if (d) { scanning = false; send(d); } });
+  $("again").addEventListener("click", () => { $("found").hidden = true; $("again").hidden = true; cam.classList.remove("hit"); last = ""; streak = 0; start(); });
+  start();
+</script>
+</body>
+</html>

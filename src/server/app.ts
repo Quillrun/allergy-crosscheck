@@ -1,4 +1,4 @@
-// HTTP: the MCP endpoint (Streamable HTTP, stateless) plus the Alexa+ simulator.
+// HTTP: the MCP endpoint (Streamable HTTP, stateless), the Alexa+ simulator, and the phone scan page.
 
 import { readFileSync } from "node:fs";
 import { createServer as createHttpServer } from "node:http";
@@ -15,6 +15,19 @@ import { createServer } from "./tools.ts";
 export type AppOptions = { store: Store; sources: Sources; llm?: Llm; allowedHosts?: string[] };
 
 const page = (file: string) => readFileSync(new URL(`../../public/${file}`, import.meta.url), "utf8");
+// Barcode decoding for browsers without a native BarcodeDetector (Safari): served from here, never a CDN.
+const VENDOR: Record<string, [string, string]> = {
+  "/vendor/barcode-detector.js": ["../../node_modules/barcode-detector/dist/iife/ponyfill.js", "text/javascript; charset=utf-8"],
+  "/vendor/zxing_reader.wasm": ["../../node_modules/zxing-wasm/dist/reader/zxing_reader.wasm", "application/wasm"],
+};
+
+/** A GTIN (EAN-8, UPC-A, EAN-13, GTIN-14) with a valid check digit. */
+export function validBarcode(code: string): boolean {
+  if (!/^(\d{8}|\d{12,14})$/.test(code)) return false;
+  const d = [...code].map(Number);
+  const sum = d.slice(0, -1).reverse().reduce((n, x, i) => n + x * (i % 2 === 0 ? 3 : 1), 0);
+  return (10 - (sum % 10)) % 10 === d[d.length - 1];
+}
 
 export function createApp(opts: AppOptions): Server {
   const allowed = new Set(["localhost", "127.0.0.1", "[::1]", ...(opts.allowedHosts ?? [])]);
@@ -42,6 +55,19 @@ export function createApp(opts: AppOptions): Server {
       }
       if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/simulator")) return html(res, page("simulator.html"));
       if (req.method === "GET" && url.pathname === "/widget.html") return html(res, page("widget.html"));
+      if (req.method === "GET" && url.pathname === "/scan") return html(res, page("scan.html"));
+      if (req.method === "GET" && VENDOR[url.pathname]) {
+        const [file, type] = VENDOR[url.pathname];
+        res.writeHead(200, { "Content-Type": type, "Cache-Control": "max-age=86400" });
+        return res.end(readFileSync(new URL(file, import.meta.url)));
+      }
+      if (req.method === "POST" && url.pathname === "/scan") {
+        const { barcode } = (await readJson(req)) as { barcode?: string };
+        const code = String(barcode ?? "").replace(/\D/g, "");
+        if (!validBarcode(code)) return send(res, 400, { error: "That isn't a valid barcode. Try again, or type the digits." });
+        const { product } = await opts.sources.product(code);
+        return send(res, 200, opts.store.saveScan(code, product?.product_name || undefined));
+      }
       if (req.method === "GET" && url.pathname === "/health") return send(res, 200, { ok: true, llm: Boolean(opts.llm) });
 
       if (req.method === "POST" && url.pathname === "/sim/tool") {

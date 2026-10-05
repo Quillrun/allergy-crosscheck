@@ -1,4 +1,4 @@
-// Household state: who eats here, what they're allergic to, and the shopping list.
+// Household state: who eats here, what they're allergic to, the shopping list, and the last barcode scanned on a phone.
 // One JSON file per self-hosted household, written atomically.
 
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
@@ -7,7 +7,11 @@ import type { AllergenId } from "../../packages/allergen-guard/src/index.ts";
 
 export type Profile = { name: string; allergies: AllergenId[]; guest: boolean; until?: string };
 export type ListItem = { item: string; note?: string; added: string };
-type State = { people: Profile[]; shopping: ListItem[] };
+export type Scan = { barcode: string; name?: string; at: string };
+type State = { people: Profile[]; shopping: ListItem[]; lastScan?: Scan };
+
+/** A scan only stands in for "what I just scanned" for this long. */
+export const SCAN_TTL_MS = 30 * 60 * 1000;
 
 export class Store {
   private path: string;
@@ -69,6 +73,18 @@ export class Store {
     return this.state.shopping.length < before;
   }
 
+  saveScan(barcode: string, name?: string, at = new Date()): Scan {
+    this.state.lastScan = { barcode, name, at: at.toISOString() };
+    this.flush();
+    return this.state.lastScan;
+  }
+
+  /** The last scan, if it is recent enough to be what someone means by "what I just scanned". */
+  recentScan(now = new Date()): Scan | undefined {
+    const s = this.state.lastScan;
+    return s && now.getTime() - Date.parse(s.at) <= SCAN_TTL_MS ? s : undefined;
+  }
+
   private flush() {
     mkdirSync(dirname(this.path), { recursive: true });
     const tmp = `${this.path}.tmp`;
@@ -80,7 +96,7 @@ export class Store {
 function load(path: string): State {
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8")) as Partial<State>;
-    return { people: parsed.people ?? [], shopping: parsed.shopping ?? [] };
+    return { people: parsed.people ?? [], shopping: parsed.shopping ?? [], lastScan: parsed.lastScan };
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") return { people: [], shopping: [] };
     throw new Error(`Household file ${path} is unreadable; refusing to start with an empty household. ${String(err)}`);

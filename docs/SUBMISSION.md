@@ -12,7 +12,7 @@ Tell Alexa who's allergic to what. It checks recipes and products for everyone a
 A household tells Alexa who is allergic to what, guests included, with an end date for visitors. Allergy Guard then checks:
 
 - **Recipes**: a dish name, or ingredients read out. It shows a verdict per person on the Echo Show screen, highlights the risky ingredients, and suggests swaps. Each swap is checked against everyone's allergies, so a fix for one person never trips another.
-- **Packaged foods** by name or barcode, from Open Food Facts. If a name matches several products, it asks which one instead of guessing.
+- **Packaged foods**, from Open Food Facts. Scan the barcode on the phone scan page and ask "Can Maya have what I just scanned?", or say the name or the barcode. If a name matches several products, it asks which one instead of guessing. With no recent scan, it asks for one.
 
 The swaps go onto a shopping list.
 
@@ -32,7 +32,8 @@ Food allergies are a high-stakes decision made several times a day, often with f
   Every tool result carries `_meta.ui.resourceUri`, because Alexa+ reads it from the response, and each tool has `invoking`/`invoked` status lines.
 - An open-source engine, `allergen-guard`, with zero dependencies and an MIT licence. It covers the EU 14 and US Big 9 allergens, with wheat separate from gluten, plus an ingredient dictionary with exclusions (peanut butter isn't dairy; oyster mushrooms aren't shellfish). Product checks read allergen tags, traces, the English ingredient text and the ingredient taxonomy together.
 - A simulated Alexa+ experience: any OpenAI-compatible LLM drives the server through a real MCP client. The browser does voice in and out and acts as the MCP Apps host. A **verdict lock** makes the spoken answer after a check the tool's own sentence, so the model can't soften it. A **no-tool guard** stops the model answering allergy questions from memory: without a tool call it may ask, never assert. Tested end to end on a local Qwen3.5 9B model.
-- 52 automated tests:
+- A phone scan page: the camera reads the barcode (the browser's BarcodeDetector, or a WebAssembly decoder for Safari, served by the server itself, never a CDN), and the server keeps the scan for 30 minutes as "what I just scanned".
+- 58 automated tests:
   - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
   - end-to-end MCP over HTTP;
@@ -42,7 +43,8 @@ Food allergies are a high-stakes decision made several times a day, often with f
 
 ## What was and wasn't tested
 - **Tested:**
-  - 52 automated tests;
+  - 58 automated tests;
+  - the scan page in headless Chrome with a camera feed of a barcode, then "what I just scanned" through the real model;
   - the full demo conversation, end to end in the simulator on a local Qwen3.5 9B model with live data;
   - the screen in headless Chrome, in both themes.
 - **Not tested:** a real Alexa+ (the Toolkit is US-only) and Amazon's Local Inspector (it installs through the Developer Console).
@@ -67,7 +69,7 @@ All of it: the repository's first commit is 4 October 2026, after the submission
 - A real model, unlike a scripted one, said "Got it, I'll add Leo" without saving him, and answered a pesto question from memory. That led to the no-tool guard. It also made up shopping-list swaps until the turn history kept the tool results.
 
 ## What's next
-- Barcode scanning from the Alexa app's camera.
+- Scanning from the Echo Show's own camera, if add-ons get camera input.
 - Ingredient text in more languages: Open Food Facts carries them, and the engine needs dictionaries.
 - Deploying through the Alexa+ MCP Toolkit once available on a supported account.
 - Allergist-reviewed dictionary entries.

@@ -259,21 +259,29 @@ export function createServer(store: Store, sources: Sources): McpServer {
     "check_product",
     {
       title: "Check a product",
-      description: `Check one specific packaged product against everyone's allergies, by barcode or by its product or brand name ('Nutella', 'Heinz ketchup'). For a plain food or ingredient with no brand ('hummus', 'a banana'), use check_recipe with ingredients instead. If a name matches several products, this returns the choices instead of guessing; ask the user which one, then call again with its barcode. ${VOICE_RULE}`,
+      description: `Check one specific packaged product against everyone's allergies: the one the user just scanned on their phone (set scanned), by barcode, or by its product or brand name ('Nutella', 'Heinz ketchup'). For a plain food or ingredient with no brand ('hummus', 'a banana'), use check_recipe with ingredients instead. If a name matches several products, this returns the choices instead of guessing; ask the user which one, then call again with its barcode. ${VOICE_RULE}`,
       inputSchema: {
         barcode: z.string().optional().describe("The barcode (EAN/UPC digits), e.g. from a choice returned earlier"),
         name: z.string().optional().describe("Product name, e.g. 'Nutella' or 'Kellogg's granola'"),
+        scanned: z.boolean().optional().describe("true when the user means the product they just scanned with the Allergy Guard scan page ('what I just scanned', 'this one I scanned')"),
         for: z.array(z.string()).optional().describe("Only check for these people; default is everyone currently saved"),
       },
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: ui("Checking the product…", "Product checked"),
     },
-    async ({ barcode, name, for: names }) => {
+    async ({ barcode, name, scanned, for: names }) => {
       const { people, missing } = pick(store, names);
       let code = barcode?.trim();
+      if (scanned && !code) {
+        const scan = store.recentScan();
+        if (!scan) {
+          return reply({ kind: "message", title: "Nothing scanned", speech: "I don't have a recent scan. Scan the barcode on your phone, or tell me the product's name.", disclaimer: DISCLAIMER }, true);
+        }
+        code = scan.barcode;
+      }
       if (!code) {
         if (!name?.trim()) {
-          return reply({ kind: "message", title: "Which product?", speech: "Tell me the product's name, or read me the barcode.", disclaimer: DISCLAIMER }, true);
+          return reply({ kind: "message", title: "Which product?", speech: "Scan its barcode on your phone, or tell me the product's name.", disclaimer: DISCLAIMER }, true);
         }
         const found = await sources.searchProducts(name);
         if (found.error || !found.candidates) {

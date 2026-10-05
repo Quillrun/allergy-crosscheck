@@ -6,6 +6,7 @@ It is built around one rule: **when the data is missing, ambiguous or the lookup
 
 - **Self-hosted MCP server**, MCP spec **2025-11-25**, **Streamable HTTP** (stateless), 9 tools.
 - **MCP Apps view** (`ui://allergy-guard/verdict.html`, `text/html;profile=mcp-app`) for Echo Show: verdict banner, per-person results, flagged ingredients, swaps, tap-to-choose products.
+- **Phone scan page** (`/scan`): scan a barcode with the camera, then ask "Can Maya have what I just scanned?". Nobody reads out 13 digits. It uses the browser's BarcodeDetector, with a WebAssembly fallback for Safari served by the server itself; typed digits work too.
 - **Alexa+ simulator**: an LLM drives the server through a real MCP client, with browser voice in and out, and renders the MCP Apps view the way an Echo Show would.
 - **Open-source engine** in [`packages/allergen-guard`](packages/allergen-guard): zero dependencies, MIT.
 
@@ -82,6 +83,8 @@ The Alexa+ MCP Toolkit currently serves US accounts. To connect this server to A
 
 The simulator in this repo stands in for steps 3 and 4.
 
+The same HTTPS host serves the phone scan page at `https://<host>/scan`; browsers only open the camera on https pages (or localhost).
+
 The screen follows the Alexa+ MCP design guide:
 - for a typical household, the whole verdict fits one Echo Show screen;
 - 16px minimum text, 48px touch targets, and 4.5:1 contrast in both themes;
@@ -97,7 +100,7 @@ Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines
 | `save_person` | Save a household member or guest (with an optional last day) and their allergies; unknown allergies are rejected, not dropped |
 | `remove_person`, `list_people` | Manage who is checked |
 | `check_recipe` | Ingredients, or a dish name looked up on TheMealDB; verdict per person, flagged lines, household-aware swaps |
-| `check_product` | By barcode or name (Open Food Facts); several matches → choices |
+| `check_product` | The product just scanned on the phone, or by barcode or name (Open Food Facts); several matches → choices; no recent scan → asks for one |
 | `find_recipe` | Look up a dish's ingredient list |
 | `add_to_shopping_list`, `get_shopping_list`, `remove_from_shopping_list` | Shopping list for the swaps |
 
@@ -106,7 +109,7 @@ Every tool result has a short `speech` line for voice, a `VERDICT:` line for the
 ## Tests
 
 ```bash
-npm test          # 52 tests: engine, store, MCP over Streamable HTTP, simulator verdict lock, no-tool guard, history trimming
+npm test          # 58 tests: engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -120,6 +123,7 @@ src/server/                MCP server: tools, MCP Apps resource, HTTP, household
 src/sim/agent.ts           simulated Alexa+ turn (LLM + MCP client + verdict lock)
 public/widget.html         MCP Apps view (the Echo Show screen)
 public/simulator.html      Echo Show-style simulator and MCP Apps host
+public/scan.html           phone scan page (camera barcode → "what I just scanned")
 test/                      integration tests
 ```
 
@@ -127,7 +131,8 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, simulator guards | 52 automated tests (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 58 automated tests (`npm test`) |
+| The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes |
 | Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |

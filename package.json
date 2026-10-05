@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.0",
+    "barcode-detector": "^3.2.2",
     "zod": "^3.25.76"
   },
   "devDependencies": {
