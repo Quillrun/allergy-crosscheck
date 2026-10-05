@@ -51,7 +51,7 @@ Food allergies are a high-stakes decision made several times a day, often with f
 - The verdict lock and no-tool guard are simulator-side. On real Alexa+ the defence is the server's `VERDICT:` line and exact speech sentence, plus the tool descriptions, because add-ons can't script what Alexa says. I've asked Amazon for a verbatim hook in the friction log.
 
 ## Video
-<YouTube or Vimeo URL>. The file is `docs/video/allergy-guard-demo.mp4` (2:56). Captions are in `allergy-guard-demo.srt`; upload them with the video.
+<YouTube or Vimeo URL>. The file is `docs/video/allergy-guard-demo.mp4` (2:51). Captions are in `allergy-guard-demo.srt`; upload them with the video.
 
 Put this line near the top of the YouTube description (the Higgs licence requires a visible credit):
 > This audio was created with Boson AI's Higgs Audio — https://www.boson.ai/higgs-audio

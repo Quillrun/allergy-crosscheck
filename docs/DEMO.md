@@ -7,6 +7,7 @@ The submitted video is a real run, not a mock-up:
 - Credit, as the licence asks: "This audio was created with Boson AI's Higgs Audio — https://www.boson.ai/higgs-audio".
 - Alexa's lines are exactly what the run returned. Every clip was checked against its script with Whisper.
 - Products are shown by their generic names from the records.
+- The phone scans were recorded with Chrome's fake camera showing an image of each product's real barcode; the scan page decoded them live.
 
 ## Script
 
@@ -18,8 +19,10 @@ The submitted video is a real run, not a mock-up:
 | Voice turn | You: "Alexa, save Maya. She's allergic to peanuts and tree nuts." Alexa confirms. |
 | Voice turn | You: "Leo from next door is coming on Saturday. He can't have dairy or celery." Alexa: "…guest Leo until Saturday 10 October: milk and celery." |
 | Voice turn: the lasagne verdict, zooming on the cards | You: "Check tonight's lasagne for Saturday." Alexa: "Leo should avoid this: it contains celery and milk…" Narrator: avoid for Leo with the exact ingredients, nothing listed for Maya and still no "safe"; no dairy-free cheese swap, because it's often cashew-based and Maya can't have tree nuts. |
-| Voice turn: the spread by barcode (0868030000236) | Alexa: "I can't confirm this is OK for Maya and Leo: the ingredient list is missing from the product data…" Narrator: missing data never becomes "no allergens". |
-| Voice turn: a hot cocoa mix by barcode (0050700000220) | Alexa: avoid for Leo (milk, in the whey, caseinate and lactose), can't confirm for Maya. Narrator: the record lists soy as its only allergen and milk only as a "may contain"; the ingredient text adds the milk. |
+| Phone scan: the spread's barcode, on the scan page | Narrator: "Nobody reads out barcodes. Scan it on your phone, then just ask." |
+| Voice turn | You: "Can Maya and Leo have what I just scanned?" Alexa: "I can't confirm this is OK for Maya and Leo: the ingredient list is missing from the product data…" Narrator: missing data never becomes "no allergens". |
+| Phone scan: a hot cocoa mix | (the scan page finds it) |
+| Voice turn | You: "And this one I just scanned?" Alexa: avoid for Leo (milk, in the whey, caseinate and lactose), can't confirm for Maya. Narrator: the record lists soy as its only allergen and milk only as a "may contain"; the ingredient text adds the milk. |
 | Slide: keeping the model honest | The verdict lock and the no-tool guard, found by testing on a real model. |
 | Slide: how it's built | MCP server (spec 2025-11-25, Streamable HTTP), MCP Apps screen built to the Alexa+ design guide, open-source engine, and its tests. |
 
