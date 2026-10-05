@@ -49,7 +49,10 @@ Food allergies are a high-stakes decision made several times a day, often with f
 - The verdict lock and no-tool guard are simulator-side. On real Alexa+ the defence is the server's `VERDICT:` line and exact speech sentence, plus the tool descriptions, because add-ons can't script what Alexa says. I've asked Amazon for a verbatim hook in the friction log.
 
 ## Video
-<YouTube or Vimeo URL>. The file is `docs/video/allergy-guard-demo.mp4` (2:55). Captions are in `allergy-guard-demo.srt`; upload them with the video.
+<YouTube or Vimeo URL>. The file is `docs/video/allergy-guard-demo.mp4` (2:56). Captions are in `allergy-guard-demo.srt`; upload them with the video.
+
+Put this line near the top of the YouTube description (the Higgs licence requires a visible credit):
+> This audio was created with Boson AI's Higgs Audio — https://www.boson.ai/higgs-audio
 
 ## Try it (judges)
 `npm install && npm start`, then open http://127.0.0.1:8787/. The demo buttons call the MCP tools directly and need no model or API key. To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`.
