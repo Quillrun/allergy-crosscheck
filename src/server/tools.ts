@@ -28,7 +28,7 @@ const ui = (invoking: string, invoked: string) => ({ ui: { resourceUri: WIDGET_U
 const RESULT_META = { ui: { resourceUri: WIDGET_URI }, "ui/resourceUri": WIDGET_URI };
 
 const READ_ME = " Read me the ingredients and I'll check them.";
-const DISCLAIMER = "Allergy Guard reads ingredient data that can be wrong or out of date. Always check the label. It is not medical advice and not an emergency service.";
+const DISCLAIMER = "Data can be wrong: always check the label. Not medical advice or an emergency service.";
 const VOICE_RULE =
   "Read the returned `speech` to the user as written. Never tell the user a food is safe, and never soften an 'unsafe' or 'cannot confirm' verdict.";
 
@@ -232,7 +232,7 @@ export function createServer(store: Store, sources: Sources): McpServer {
         result = { ...evaluate(lines.flatMap((l) => l.hits), people, unknown.length ? unknown : result.dataIssues), lines };
       }
       if (note === READ_ME && result.people.every((p) => p.verdict === "unsafe")) note = ""; // nothing more to learn
-      const swaps = suggestSwaps(result.lines.filter((l) => l.text !== nameLine), people);
+      const swaps = suggestSwaps(result.lines.filter((l) => l.text !== nameLine), people, store.activePeople());
       return reply({
         kind: "recipe_check",
         title: recipe_name ? `${recipe_name}` : "Recipe check",
@@ -361,11 +361,26 @@ function productReply(label: string, result: CheckResult, people: Person[], stor
   });
 }
 
+// One row per distinct set of flags, so a long ingredient list still fits one Echo Show screen:
+// "nonfat dry milk, whey, lactose" is one Milk row, not three. Rows that contain an allergen come first.
 function groupHits(result: CheckResult, people: Person[]): View["items"] {
   const relevant = result.hits.filter((h) => people.some((p) => p.allergies.includes(h.allergen)));
   const bySource = new Map<string, { allergen: string; kind: string }[]>();
   for (const h of relevant) bySource.set(h.source, [...(bySource.get(h.source) ?? []), { allergen: ALLERGENS[h.allergen].label, kind: h.kind }]);
-  return [...bySource].map(([text, flags]) => ({ text, flags }));
+  const rows = new Map<string, { texts: string[]; flags: { allergen: string; kind: string }[] }>();
+  for (const [source, flags] of bySource) {
+    const unique = [...new Map(flags.map((f) => [`${f.kind}:${f.allergen}`, f])).values()];
+    const key = unique.map((f) => `${f.kind}:${f.allergen}`).sort().join("|");
+    const row = rows.get(key) ?? { texts: [], flags: unique };
+    row.texts.push(source === "may contain" ? "Allergen warning on the label" : source);
+    rows.set(key, row);
+  }
+  const rank = (r: { flags: { kind: string }[] }) => (r.flags.some((f) => f.kind === "contains") ? 0 : r.flags.some((f) => f.kind === "may_contain") ? 1 : 2);
+  const short = (t: string) => t.replace(/\s*\([^)]*\)/g, "").trim();
+  return [...rows.values()].sort((a, b) => rank(a) - rank(b)).map((r) => {
+    const names = [...new Set(r.texts.map(short))];
+    return { text: names.slice(0, 2).join(", ") + (names.length > 2 ? ` +${names.length - 2} more` : ""), flags: r.flags };
+  });
 }
 
 /** Resolve "for" names to saved people. Unknown names are reported, never silently skipped. */

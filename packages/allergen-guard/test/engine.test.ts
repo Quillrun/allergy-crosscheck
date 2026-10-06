@@ -70,6 +70,7 @@ test("lasagne: per-person verdicts and a household-aware swap list", () => {
   const mozzarella = swaps.find((s) => s.replace.includes("Mozzarella"));
   // Dairy-free cheese is often cashew-based; Maya can't have tree nuts, so it must not be offered.
   assert.ok(mozzarella?.options.every((o) => !/dairy-free cheese/.test(o)));
+  assert.deepEqual(mozzarella?.options, ["Leave it out (no swap fits everyone)"]);
 });
 
 test("swaps never introduce another person's allergen", () => {
@@ -79,6 +80,26 @@ test("swaps never introduce another person's allergen", () => {
   assert.ok(!options.includes("oat milk"), "oat milk has gluten");
   assert.ok(!options.includes("soya milk"), "soya milk has soy");
   assert.ok(options.includes("rice milk"));
+});
+
+test("a check for one person never offers a swap that trips someone else in the household", () => {
+  const leo = person("Leo", "milk"), maya = person("Maya", "tree_nut");
+  const lines = checkIngredients(["125g mozzarella"], [leo]).lines;
+  // Dairy-free cheese is often cashew-based: fine for Leo alone, not in a house with Maya.
+  assert.ok(suggestSwaps(lines, [leo])[0].options.some((o) => /dairy-free cheese/.test(o)));
+  assert.deepEqual(suggestSwaps(lines, [leo], [leo, maya])[0].options, ["Leave it out (no swap fits everyone)"]);
+});
+
+test("swaps are never relatives or hidden sources of the allergen they replace", () => {
+  const optionsFor = (line: string, ...people: Person[]) => suggestSwaps(checkIngredients([line], people).lines, people)[0].options;
+  // Fennel shares celery's plant family, horseradish and wasabi share mustard's: known cross-reactions.
+  const celery = optionsFor("1 stick celery", person("Leo", "celery"));
+  assert.ok(celery.every((o) => !/fennel|celeriac|parsley|lovage|carrot|dill|anise/i.test(o)), celery.join(", "));
+  const mustard = optionsFor("1 tsp mustard", person("Ana", "mustard"));
+  assert.ok(mustard.every((o) => !/horseradish|wasabi|rapeseed|canola/i.test(o)), mustard.join(", "));
+  // Anything sold as gluten-free may contain nut or lupin flour, so it isn't offered when someone can't have them.
+  assert.deepEqual(optionsFor("200g plain flour", person("Bea", "gluten"), person("Tom", "tree_nut")), ["rice flour"]);
+  assert.deepEqual(optionsFor("200g plain flour", person("Bea", "gluten")), ["rice flour", "certified gluten-free flour blend (check its label)"]);
 });
 
 test("product: allergen tags are not trusted alone (real Nutella record omits milk and soy)", () => {

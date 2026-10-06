@@ -27,16 +27,20 @@
   .cannot_confirm { background: var(--confirm-bg); border: 2px solid var(--confirm); } .cannot_confirm .label { color: var(--confirm); }
   .no_listed_allergens { background: var(--none-bg); border: 2px solid var(--none); } .no_listed_allergens .label { color: var(--none); }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  /* A recipe check: the swaps card gets the widest column, the short people card the narrowest. */
+  .grid.recipe { grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 5fr); }
+  @media (max-width: 720px) { .grid.recipe { grid-template-columns: 1fr; } }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
   .card h2 { font-size: 16px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
-  .person { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); }
+  .person { display: grid; grid-template-columns: 1fr auto; column-gap: 8px; align-items: start; padding: 6px 0; border-top: 1px solid var(--line); }
+  .person .why { grid-column: 1 / -1; }
   .person:first-of-type { border-top: 0; }
   .person .name { font-weight: 650; font-size: 20px; }
   .person .why { color: var(--muted); font-size: 16px; }
   .pill { font-size: 16px; font-weight: 700; border-radius: 16px; padding: 2px 12px; white-space: nowrap; align-self: flex-start; }
   .pill.unsafe { color: var(--unsafe); border-width: 1px; } .pill.cannot_confirm { color: var(--confirm); border-width: 1px; } .pill.no_listed_allergens { color: var(--none); border-width: 1px; }
   ul { margin: 0; padding: 0; list-style: none; }
-  li { padding: 4px 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  li { padding: 3px 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   li:first-child { border-top: 0; }
   .flagged { font-weight: 650; }
   .chip { background: var(--chip); border-radius: 8px; padding: 2px 8px; font-size: 16px; color: var(--muted); }
@@ -132,7 +136,7 @@
         // On a recipe the "Watch out for" card names the ingredients, so a person's row keeps only the allergen.
         const reasons = v.kind === "recipe_check" ? (p.reasons ?? []).map((r) => r.split(":")[0]) : p.reasons ?? [];
         const why = v.overall ? [...new Set(reasons)].map(esc).join("<br>") : esc((p.allergies ?? []).join(", "));
-        return `<div class="person"><div><div class="name">${esc(p.name)}</div><div class="why">${why}</div></div>${right}</div>`;
+        return `<div class="person"><div class="name">${esc(p.name)}</div>${right}<div class="why">${why}</div></div>`;
       }).join("");
       cards.push(`<section class="card"><h2>${v.overall ? "Who's eating" : "Household"}</h2>${rows}</section>`);
     }
@@ -143,7 +147,10 @@
       const shown = v.overall ? flagged : v.items.slice(0, 8);
       const rest = v.items.length - shown.length;
       const rows = shown.map((i) => {
-        const chips = dedupe(i.flags ?? []).map((f) => `<span class="chip ${f.kind}">${f.kind === "possible" ? "may hide " : f.kind === "may_contain" ? "may contain " : ""}${esc(f.allergen)}</span>`).join("");
+        // One chip per kind ("may hide Peanuts, Milk"), so a row's flags take one line.
+        const byKind = new Map();
+        for (const f of dedupe(i.flags ?? [])) byKind.set(f.kind, [...(byKind.get(f.kind) ?? []), f.allergen]);
+        const chips = [...byKind].map(([kind, names]) => `<span class="chip ${kind}">${kind === "possible" ? "may hide " : kind === "may_contain" ? "may contain " : ""}${names.map(esc).join(", ")}</span>`).join("");
         return `<li><span class="${i.flags?.length ? "flagged" : ""}">${esc(i.text)}</span>${chips}</li>`;
       });
       if (rest > 0) rows.push(`<li class="more">${v.overall ? `${shown.length ? "+ " : ""}${rest} ${shown.length ? "other " : ""}ingredient${rest === 1 ? "" : "s"}: nothing listed for these allergies` : `and ${rest} more`}</li>`);
@@ -163,7 +170,7 @@
       cards.push(`<section class="card"><h2>Shopping list</h2><ul>${rows}</ul></section>`);
     }
     if (!v.overall && !cards.length) parts.push(`<div class="card">${esc(v.speech)}</div>`);
-    parts.push(`<div class="grid">${cards.join("")}</div>`);
+    parts.push(`<div class="grid${cards.length === 3 && v.swaps?.length ? " recipe" : ""}">${cards.join("")}</div>`);
     // Data issues already shown on every person's row aren't repeated underneath.
     const issues = (v.dataIssues ?? []).filter((d) => !(v.people?.length && v.people.every((p) => (p.reasons ?? []).includes(d))));
     if (issues.length) parts.push(`<div class="issues">${issues.map(esc).join("<br>")}</div>`);

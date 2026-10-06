@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Allergy Guard · Alexa+ simulator</title>
 <style>
@@ -164,8 +165,9 @@
       if (!lastSwaps) return add("sys", "Check a recipe first.");
       tool("add_to_shopping_list", { items: lastSwaps.swaps.map((s) => s.options[0]).filter((o) => !/^Leave it out/.test(o)), note: `swaps for ${lastSwaps.title}` });
     }],
-    ["Check Nutella", "several products: asks which", () => tool("check_product", { name: "Nutella" })],
-    ["Check Nutella by barcode", "3017624010701", () => tool("check_product", { barcode: "3017624010701" })],
+    ["Check a spread by barcode", "0868030000236 · no ingredient list", () => tool("check_product", { barcode: "0868030000236" })],
+    ["Check a cocoa mix by barcode", "0050700000220 · tags miss the milk", () => tool("check_product", { barcode: "0050700000220" })],
+    ["Check a product by name", "several matches: asks which", () => tool("check_product", { name: "hot cocoa mix" })],
     ["Check pesto ingredients", "basil, pine nuts, parmesan…", () => tool("check_recipe", { recipe_name: "Pesto", ingredients: ["basil", "pine nuts", "parmesan", "olive oil", "garlic"] })],
     ["Who's saved", "", () => tool("list_people", {})],
   ];

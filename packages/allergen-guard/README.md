@@ -19,7 +19,7 @@ const people = [
 const r = checkIngredients(["1 stick celery", "400ml creme fraiche", "basil"], people);
 r.overall;  // "unsafe"
 r.speech;   // "Leo should avoid this: it contains celery and milk, in the celery and creme fraiche. ..."
-suggestSwaps(r.lines, people); // swaps that don't introduce anyone else's allergen
+suggestSwaps(r.lines, people, household); // swaps for the people checked; options also avoid everyone in household (default: people)
 
 checkProduct(openFoodFactsProduct, people); // reads tags AND ingredient text; missing data → cannot_confirm
 ```

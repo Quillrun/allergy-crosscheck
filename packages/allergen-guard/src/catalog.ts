@@ -165,6 +165,8 @@ const NOT_WHEAT_FLOUR = [
 ];
 const NOT_WHEAT_PASTA = ["rice pasta", "gluten free pasta", "chickpea pasta", "lentil pasta", "corn pasta", "rice lasagne", "gluten free lasagne"];
 const BAKED: AllergenId[] = ["milk", "egg", "tree_nut", "peanut", "soy"];
+// What a product sold as gluten-free may still contain: binders, nut and legume flours (lupin is common in gluten-free baking).
+export const GLUTEN_FREE_MAY_CONTAIN: AllergenId[] = ["milk", "egg", "soy", "tree_nut", "peanut", "sesame", "lupin"];
 
 export const TERMS: Term[] = [
   // peanut
@@ -216,7 +218,7 @@ export const TERMS: Term[] = [
   { terms: ["noodle"], contains: [], possible: ["wheat", "gluten", "egg"], unless: ["rice noodle", "glass noodle", "rice vermicelli"] },
   { terms: ["soy sauce", "teriyaki"], contains: ["soy", "wheat", "gluten"] },
   { terms: ["barley", "rye", "oat", "oatmeal", "malt", "malt vinegar", "malt extract", "brewer s yeast", "beer", "ale", "lager", "triticale", "bran"], contains: ["gluten"] },
-  { terms: ["gluten free"], contains: [], possible: ["milk", "egg", "soy", "tree_nut", "peanut", "sesame"] },
+  { terms: ["gluten free"], contains: [], possible: GLUTEN_FREE_MAY_CONTAIN },
   // soy
   { terms: ["soy", "soya", "soybean", "soja", "tofu", "bean curd", "tempeh", "edamame", "miso", "shoyu", "tamari", "natto", "textured vegetable protein", "tvp"], contains: ["soy"] },
   { terms: ["lecithin", "vegetable protein"], contains: [], possible: ["soy"] },

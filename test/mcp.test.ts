@@ -143,6 +143,12 @@ test("product by barcode: reads the ingredient text, not just the tags", async (
   const leo = r.structuredContent.people.find((p: View) => p.name === "Leo");
   assert.equal(leo.verdict, "unsafe");
   assert.equal(r.structuredContent.source.label, "Open Food Facts");
+  // The screen merges ingredients with the same flags into one row, definite allergens first.
+  const items: View[] = r.structuredContent.items;
+  const sig = (i: View) => i.flags.map((f: View) => `${f.kind}:${f.allergen}`).sort().join("|");
+  assert.equal(new Set(items.map(sig)).size, items.length);
+  assert.ok(items[0].flags.some((f: View) => f.kind === "contains"));
+  assert.ok(items.some((i) => i.text === "Allergen warning on the label"));
 });
 
 test("a product with no ingredient data cannot be confirmed", async () => {
@@ -164,12 +170,12 @@ test("a long shopping list is summarised when read out", async () => {
 });
 
 test("shopping list round trip", async () => {
-  await call("add_to_shopping_list", { items: ["fennel", "coconut cream"], note: "swaps for Lasagne" });
+  await call("add_to_shopping_list", { items: ["leek", "coconut cream"], note: "swaps for Lasagne" });
   const list = await call("get_shopping_list");
-  assert.deepEqual(list.structuredContent.shopping.map((i: View) => i.item), ["fennel", "coconut cream"]);
-  assert.equal((await call("remove_from_shopping_list", { item: "fennel" })).isError, false);
+  assert.deepEqual(list.structuredContent.shopping.map((i: View) => i.item), ["leek", "coconut cream"]);
+  assert.equal((await call("remove_from_shopping_list", { item: "leek" })).isError, false);
   assert.equal((await call("get_shopping_list")).structuredContent.shopping.length, 1);
-  assert.equal((await call("remove_from_shopping_list", { item: "fennel" })).isError, true);
+  assert.equal((await call("remove_from_shopping_list", { item: "leek" })).isError, true);
   assert.equal((await call("remove_person", { name: "Nobody" })).isError, true);
 });
 
