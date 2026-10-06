@@ -47,7 +47,7 @@ Each entry is something that happened while building Allergy Guard. Format: task
 - **Expected:** a public npm package, so it can run in CI like the MCP Inspector (`npx @modelcontextprotocol/inspector`).
 - **Actual:** npm returns 404, and installation goes through a Developer Console login. Searching npm for "alexa-ai" instead returns an unscoped `alexa-ai` package from an unrelated third party (a WhatsApp bot), which someone could install by mistake.
 - **Severity:** medium. It adds a manual step and a supply-chain trap.
-- **Workaround:** tested with my own integration tests, which drive the server through the MCP TypeScript SDK client over real HTTP (52 tests in all).
+- **Workaround:** tested with my own integration tests, which drive the server through the MCP TypeScript SDK client over real HTTP (58 tests in all).
 - **Suggestion:** publish the inspector and the `alexa-ai` CLI publicly under the `@alexa-ai` scope. Put the exact `npm i -g @alexa-ai/...` command in the docs, so nobody guesses an unscoped name.
 
 ## 5. Where `_meta.ui` goes: tool definition or tool result?
