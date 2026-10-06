@@ -10,11 +10,11 @@ It is built around one rule: **when the data is missing, ambiguous or the lookup
 - **Alexa+ simulator**: an LLM drives the server through a real MCP client, with browser voice in and out, and renders the MCP Apps view the way an Echo Show would.
 - **Open-source engine** in [`packages/allergen-guard`](packages/allergen-guard): zero dependencies, MIT.
 
-| A recipe check: verdict per person, the risky lines, swaps checked against everyone | Missing product data: "can't confirm", never "allergen-free" |
+| Missing product data: "can't confirm", never "allergen-free" | A recipe check: verdict per person, the risky lines, swaps checked against everyone |
 |---|---|
-| ![Lasagne check](docs/screenshots/lasagne-check.png) | ![Can't confirm](docs/screenshots/cannot-confirm.png) |
-| **A guest saved until Saturday: they drop off after the visit** | **Allergen tags say soy; the ingredient text adds milk** |
-| ![Household](docs/screenshots/household.png) | ![Product check](docs/screenshots/product-check.png) |
+| ![Can't confirm](docs/screenshots/cannot-confirm.png) | ![Lasagne check](docs/screenshots/lasagne-check.png) |
+| **Allergen tags say soy; the ingredient text adds milk** | **A guest saved until Saturday: they drop off after the visit** |
+| ![Product check](docs/screenshots/product-check.png) | ![Household](docs/screenshots/household.png) |
 
 Screens from the recorded demo run: a local model driving the server, with live data.
 
@@ -48,7 +48,7 @@ npm install
 npm start                     # MCP: http://127.0.0.1:8787/mcp   Simulator: http://127.0.0.1:8787/
 ```
 
-Open the simulator and use the **demo script** buttons. They need no LLM. Each button is one MCP tool call.
+Open the simulator and use the **demo script** buttons. They need no LLM. Each button is one MCP tool call, and they reproduce the video's checks: the spread with no ingredient list ("Can't confirm") and the cocoa mix whose tags miss the milk ("Avoid" for Leo).
 
 To talk to it, point it at any OpenAI-compatible endpoint with tool calling:
 
@@ -86,12 +86,35 @@ The simulator in this repo stands in for steps 3 and 4.
 The same HTTPS host serves the phone scan page at `https://<host>/scan`; browsers only open the camera on https pages (or localhost).
 
 The screen follows the Alexa+ MCP design guide:
-- for a typical household, the whole verdict fits one Echo Show screen;
+- every demo screen fits one Echo Show 8 screen (measured at 944×590 in headless Chrome): long product lists are grouped by allergen, with "+N more";
 - 16px minimum text, 48px touch targets, and 4.5:1 contrast in both themes;
 - it applies the host's theme, device class and safe-area insets;
 - no links out of the view.
 
 Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result repeats `resourceUri`. Not-found results set `isError`.
+
+### What Alexa+ receives
+
+Captured from a live server with the MCP SDK client (`check_product` on the cocoa mix, Maya and Leo saved). The negotiated protocol version is `2025-11-25`; there are 9 tools.
+
+The tool definition's `_meta`:
+
+```json
+{ "ui": { "resourceUri": "ui://allergy-guard/verdict.html", "invoking": "Checking the product…", "invoked": "Product checked" },
+  "ui/resourceUri": "ui://allergy-guard/verdict.html" }
+```
+
+The tool result, trimmed (`structuredContent` also carries each person's reasons and the grouped ingredient rows for the screen):
+
+```json
+{
+  "content": [{ "type": "text", "text": "VERDICT: UNSAFE\nSay to the user: Leo should avoid this: it contains milk, in the whey, caseinate and lactose. I can't confirm this is OK for Maya: vegetable oil and flavouring can contain peanuts and tree nuts. Treat it as unsafe and check the label." }],
+  "structuredContent": { "kind": "product_check", "title": "Hot Cocoa Drink Mix", "overall": "unsafe",
+    "people": [{ "name": "Maya", "verdict": "cannot_confirm" }, { "name": "Leo", "verdict": "unsafe" }], "…": "…" },
+  "_meta": { "ui": { "resourceUri": "ui://allergy-guard/verdict.html" }, "ui/resourceUri": "ui://allergy-guard/verdict.html" },
+  "isError": false
+}
+```
 
 ## Tools
 
@@ -109,11 +132,11 @@ Every tool result has a short `speech` line for voice, a `VERDICT:` line for the
 ## Tests
 
 ```bash
-npm test          # 58 tests: engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
+npm test          # 60 tests: engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
-The engine suite has 54 ingredient–allergen pairs that must never come back as "nothing listed", among them peanut butter, pesto, ghee, soy sauce, Worcestershire sauce, lupin flour and amaretto. It also has look-alikes that must not be flagged: butter beans, coconut milk, nutmeg, oyster mushrooms, eggplant. The MCP suite runs over real HTTP with the SDK client and confirms the negotiated protocol version is `2025-11-25`.
+The engine suite has 54 ingredient–allergen pairs that must never come back as "nothing listed", among them peanut butter, pesto, ghee, soy sauce, Worcestershire sauce, lupin flour and amaretto. It also has look-alikes that must not be flagged: butter beans, coconut milk, nutmeg, oyster mushrooms, eggplant. Swaps are tested too: never a plant relative of what they replace (no fennel for celery, no horseradish for mustard), and never anything that trips someone else in the household. The MCP suite runs over real HTTP with the SDK client and confirms the negotiated protocol version is `2025-11-25`.
 
 ## Layout
 
@@ -131,10 +154,10 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, phone scan, simulator guards | 58 automated tests (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 60 automated tests (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
-| The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes |
+| The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes; every demo button's screen measured to fit at 944×590 |
 | Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |
 | Amazon's Local Inspector | **Not run.** It installs from the Developer Console; the steps are under "Alexa+" above |
 
