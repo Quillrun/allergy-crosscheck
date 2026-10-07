@@ -6,7 +6,7 @@ Field by field, in the order of the Devpost form. Facts match the repo as built.
 Allergy Crosscheck
 
 ## Elevator pitch (200 characters max)
-An Alexa+ add-on that checks recipes and scanned food for everyone at the table, and never says "safe". When the data can't back an answer, it says "I can't confirm".
+An Alexa+ add-on that cross-checks recipes and scanned food for everyone at the table, guests included. It never says "safe": when the data can't back an answer, it says "I can't confirm".
 
 ## Thumbnail
 `docs/video/gallery/thumbnail.png` (3:2).
@@ -16,12 +16,12 @@ An Alexa+ add-on that checks recipes and scanned food for everyone at the table,
 ### Inspiration
 Two real records from Open Food Facts, the open database behind many allergy apps. A chocolate hazelnut spread has an empty allergen list and no ingredient list, so a checker that trusts the list would call it allergen-free. A hot cocoa mix lists soy as its only allergen, while its ingredients include nonfat dry milk, whey and caseinate. A voice assistant that answers confidently from data like that is dangerous. One that knows when it doesn't know is useful.
 
-The stakes are high. About 33 million people in the US have at least one food allergy, including 1 in 13 children, and about 40% of children with food allergies have more than one. Every 10 seconds, a reaction sends someone in the US to an emergency room ([FARE](https://www.foodallergy.org/resources/facts-and-statistics)). At home, the real question is whether a dish is OK for everyone at the table tonight.
+The stakes are high. About 33 million people in the US have at least one food allergy, including 1 in 13 children ([FARE](https://www.foodallergy.org/resources/facts-and-statistics)). In national surveys, 42% of US children with a food allergy had been to an emergency room for it at least once ([Gupta 2018](https://pubmed.ncbi.nlm.nih.gov/30455345/)), and 51% of adults with one had had a severe reaction ([Gupta 2019](https://pubmed.ncbi.nlm.nih.gov/30646188/)). Two situations stand out: in a Dutch study of unexpected reactions, 44% came from pre-packaged products and 23% from meals eaten away from home, at friends' or relatives' homes, at school or in restaurants (preliminary results, [Michelsen-Huisman 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC4412422/)). "May contain" labels don't settle it either: 46% of the food-allergy shoppers surveyed were unsure or wrongly believed those labels are required by law ([Marchisotto 2017](https://pubmed.ncbi.nlm.nih.gov/27818137/)). At home, the real question is whether a dish is OK for everyone at the table tonight.
 
 Alexa+ already remembers a family's allergies. Amazon says it understands "your family's dietary preferences, allergies, and weekly traditions" ([Amazon](https://aboutamazon.com/news/devices/amazon-2025-devices-alexa-event-live-updates)). But remembering an allergy isn't the same as checking food for it.
 
 ### What it does
-Allergy Crosscheck checks recipes and scanned products against everyone at your table, guests included. It treats missing data as unsafe: it says "I can't confirm" instead of "allergen-free".
+Allergy Crosscheck checks recipes and scanned products against everyone at your table, guests included, and cross-checks a product's allergen list against its ingredient text. It treats missing data as unsafe: it says "I can't confirm" instead of "allergen-free".
 
 Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have dairy or celery, is coming on Saturday. "Check tonight's lasagne" gives each of them a verdict on the Echo Show, names the risky ingredients, and suggests swaps checked against both of them, so a fix for Leo never trips Maya.
 
@@ -31,6 +31,11 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 - **Fail-closed:** there are three answers: "Avoid", "Can't confirm" and "None listed, check the label". Never "safe". Missing, ambiguous or non-English data gives "Can't confirm". So does a recipe word it doesn't recognise ("I don't know what's in garam masala") and a failed lookup.
 
 ### How I built it
+- **More than an API wrapper.** Amazon names a "basic MCP wrapper around an existing API" as the obvious Alexa+ idea. This is built on the creative ones on its list:
+  - **state across sessions:** the household and dated guests are kept between conversations, and guests drop off after their visit;
+  - **orchestration across services:** one spoken question looks the dish up on TheMealDB, checks every person, and suggests swaps checked against everyone; the next puts them on the shopping list;
+  - **MCP Apps:** an Echo Show screen with a verdict per person and tap-to-choose that calls back into the server;
+  - **a cross-check, not a lookup:** a product's allergen tags, traces and ingredient text are read together, which is how it finds the milk that the cocoa mix's tags leave out.
 - **Self-hosted MCP server** in TypeScript with the MCP TypeScript SDK 1.32. It uses MCP spec **2025-11-25** over **Streamable HTTP**, is stateless, and has 9 tools. Every result leads with a `VERDICT:` line and the exact sentence to say, plus `structuredContent` for the screen.
 - **MCP Apps screen** for the Echo Show (`text/html;profile=mcp-app`), built to the Alexa+ MCP design guide:
   - each verdict fits one screen at Echo Show 8 size;
@@ -40,11 +45,11 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   Tapping a choice calls back into the server with `tools/call`. `_meta.ui.resourceUri` is on every tool definition and every result.
 - **Open-source engine, `allergen-guard`**, MIT, with zero dependencies. It covers the EU 14 and US Big 9 allergens, with wheat separate from gluten, and has an ingredient dictionary with exclusions (peanut butter isn't dairy; oyster mushrooms aren't shellfish). Swaps declare their own allergens and are never a plant relative of what they replace.
 - **Phone scan page:** the camera reads the barcode with the browser's BarcodeDetector, or a WebAssembly decoder for Safari that the server serves itself. The server keeps the scan for 30 minutes as "what I just scanned".
-- **Simulated Alexa+**, because the Alexa+ MCP Toolkit is US-only and I'm outside the US. An LLM drives the server through a real MCP client, and the browser handles voice and hosts the MCP Apps screen. The simulator has two guards:
+- **Simulated Alexa+**, because the Alexa+ MCP Toolkit is US-only and I'm outside the US. An LLM drives the server through a real MCP client, and the browser handles voice and hosts the MCP Apps screen. The simulator adds two guards, as a test harness rather than part of the add-on:
   - a **verdict lock**: after a check, the spoken answer is the tool's own sentence;
   - a **no-tool guard**: without a tool call, the model may ask but never assert.
 
-  On a real Alexa+, add-ons can't script speech, so the server's `VERDICT:` line and exact sentence carry the same rule.
+  On a real Alexa+, add-ons can't script speech. What ships is the server's side: every result starts with a `VERDICT:` line and the exact sentence to say. A verbatim hint for safety answers is the top feature request below.
 - **60 automated tests**, including:
   - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
@@ -189,7 +194,7 @@ Paste `docs/FRICTION_LOG.md`: five entries, in the format the rules ask for.
 ```
 This audio was created with Boson AI's Higgs Audio — https://www.boson.ai/higgs-audio
 
-Allergy Crosscheck is an Alexa+ add-on, shown in a simulator, that checks recipes and scanned food for everyone at the table, and never says "safe". When the data can't back an answer, it says "I can't confirm".
+Allergy Crosscheck is an Alexa+ add-on, shown in a simulator, that cross-checks recipes and scanned food for everyone at the table, guests included. It never says "safe": when the data can't back an answer, it says "I can't confirm".
 
 Built for Amazon's Build, Ship, Shape hackathon (Alexa+ track): a self-hosted MCP server (spec 2025-11-25, Streamable HTTP), an MCP Apps screen for the Echo Show, and an open-source allergen engine. The voices are synthetic. Product data: Open Food Facts (ODbL). Recipes: TheMealDB.
 
