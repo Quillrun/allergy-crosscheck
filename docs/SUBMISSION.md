@@ -3,7 +3,7 @@
 Field by field, in the order of the Devpost form. Facts match the repo as built. `<…>` marks what is still open. Nothing here is submitted, uploaded or published until AUTHOR does it.
 
 ## Project name
-Allergy Guard
+Allergy Crosscheck
 
 ## Elevator pitch (200 characters max)
 An Alexa+ add-on that checks recipes and scanned food for everyone at the table, and never says "safe". When the data can't back an answer, it says "I can't confirm".
@@ -21,7 +21,7 @@ The stakes are high. About 33 million people in the US have at least one food al
 Alexa+ already remembers a family's allergies. Amazon says it understands "your family's dietary preferences, allergies, and weekly traditions" ([Amazon](https://aboutamazon.com/news/devices/amazon-2025-devices-alexa-event-live-updates)). But remembering an allergy isn't the same as checking food for it.
 
 ### What it does
-Allergy Guard checks recipes and scanned products against everyone at your table, guests included. It treats missing data as unsafe: it says "I can't confirm" instead of "allergen-free".
+Allergy Crosscheck checks recipes and scanned products against everyone at your table, guests included. It treats missing data as unsafe: it says "I can't confirm" instead of "allergen-free".
 
 Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have dairy or celery, is coming on Saturday. "Check tonight's lasagne" gives each of them a verdict on the Echo Show, names the risky ingredients, and suggests swaps checked against both of them, so a fix for Leo never trips Maya.
 
@@ -81,7 +81,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 - Swaps need the same care as dishes. An early swap table offered fennel for celery, which is a plant relative and a known cross-reaction. Swaps are now tested against that.
 - On a voice device the screen has to read at a glance. Grouping a product's 13 flagged ingredients into 4 rows mattered more than any colour.
 
-### What's next for Allergy Guard
+### What's next for Allergy Crosscheck
 - Deploying through the Alexa+ MCP Toolkit once it's available to my account.
 - Scanning with the Echo Show's own camera, if add-ons get camera input.
 - Ingredient text in more languages: Open Food Facts carries it, and the engine needs dictionaries.
@@ -94,7 +94,7 @@ alexa+, model-context-protocol, mcp-apps, typescript, node.js, open-food-facts, 
 - Code repository: <GitHub URL, once AUTHOR decides private or public>
 
 ## Video demo link
-<YouTube URL, after the upload>. The file is `docs/video/allergy-guard-demo.mp4` (2:54), with captions in `docs/video/allergy-guard-demo.srt`.
+<YouTube URL, after the upload>. The file is `docs/video/allergy-crosscheck-demo.mp4` (2:54), with captions in `docs/video/allergy-crosscheck-demo.srt`.
 
 ## Image gallery (upload in this order)
 Files are in `docs/video/gallery/`, padded to 3:2.
@@ -154,7 +154,7 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
 **Open Food Facts API and TheMealDB API**
 - **Used for:** product data by barcode or name, and recipes by dish name.
 - **Worked well:** both are free to develop against. Open Food Facts needs no key, and TheMealDB has a free development key.
-- **Needs work:** Open Food Facts data is volunteer-entered and sometimes contradicts itself. That's why Allergy Guard reads the allergen tags and the ingredient text together, and fails closed.
+- **Needs work:** Open Food Facts data is volunteer-entered and sometimes contradicts itself. That's why Allergy Crosscheck reads the allergen tags and the ingredient text together, and fails closed.
 
 ### Feature requests (optional)
 - **Critical:** let developer accounts in any country use the web simulator for development-stage add-ons. It's the only end-to-end test path, and it was closed to me.
@@ -168,7 +168,7 @@ Paste `docs/FRICTION_LOG.md`: five entries, in the format the rules ask for.
 
 ### Open Source mini-challenge
 - **Contribution URL:** <the public `allergen-guard` repository>
-- **Project repository URL:** <the Allergy Guard repository>
+- **Project repository URL:** <the Allergy Crosscheck repository>
 - **GitHub username:** <AUTHOR's>
 - **What:** a zero-dependency TypeScript library for fail-closed allergen checks on recipes and packaged foods, covering the EU 14 and US Big 9 allergens.
 - **How:**
@@ -179,8 +179,8 @@ Paste `docs/FRICTION_LOG.md`: five entries, in the format the rules ask for.
 - **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 23 tests of its own, including 54 ingredient–allergen pairs that must never pass.
 
 ## YouTube upload (not part of the Devpost form)
-- **File:** `docs/video/allergy-guard-demo.mp4` (2:54), with captions in `docs/video/allergy-guard-demo.srt` (English).
-- **Title:** Allergy Guard: an Alexa+ add-on that never says "safe" (hackathon demo)
+- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:54), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
+- **Title:** Allergy Crosscheck: an Alexa+ add-on that never says "safe" (hackathon demo)
 - **Visibility:** Public. The rules say "publicly visible", and Unlisted may not count. This is AUTHOR's call.
 - **Altered or synthetic content:** yes. The voices are AI-generated and realistic.
 - **Made for kids:** no. **Category:** Science & Technology.
@@ -189,7 +189,7 @@ Paste `docs/FRICTION_LOG.md`: five entries, in the format the rules ask for.
 ```
 This audio was created with Boson AI's Higgs Audio — https://www.boson.ai/higgs-audio
 
-Allergy Guard is an Alexa+ add-on, shown in a simulator, that checks recipes and scanned food for everyone at the table, and never says "safe". When the data can't back an answer, it says "I can't confirm".
+Allergy Crosscheck is an Alexa+ add-on, shown in a simulator, that checks recipes and scanned food for everyone at the table, and never says "safe". When the data can't back an answer, it says "I can't confirm".
 
 Built for Amazon's Build, Ship, Shape hackathon (Alexa+ track): a self-hosted MCP server (spec 2025-11-25, Streamable HTTP), an MCP Apps screen for the Echo Show, and an open-source allergen engine. The voices are synthetic. Product data: Open Food Facts (ODbL). Recipes: TheMealDB.
 

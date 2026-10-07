@@ -14,7 +14,7 @@ The submitted video (2:54, recorded 7 October 2026) is a real run, not a mock-up
 | On screen | Audio |
 |---|---|
 | A product record: chocolate hazelnut spread, allergens none listed, ingredients missing | "This is a real product record from Open Food Facts: a chocolate hazelnut spread, with an empty allergen list. A checker that only trusts that list would call it allergen-free." |
-| Title card | "Allergy Guard is an Alexa+ add-on with one rule: it never tells you a food is safe." |
+| Title card | "Allergy Crosscheck is an Alexa+ add-on with one rule: it never tells you a food is safe." |
 | Simulator, idle | "This is a simulated Alexa+ on an Echo Show, driven by a local AI model through my MCP server." |
 | Voice turn | You: "Alexa, save Maya. She's allergic to peanuts and tree nuts." Alexa confirms. |
 | Voice turn | You: "Leo from next door is coming on Saturday. He can't have dairy or celery." Alexa: "…guest Leo until Saturday 10 October: milk and celery." |

@@ -1,7 +1,7 @@
 {
-  "name": "allergy-guard",
+  "name": "allergy-crosscheck",
   "version": "0.1.0",
-  "description": "Allergy Guard: a fail-closed allergy checker for Alexa+ (MCP server + MCP Apps screen)",
+  "description": "Allergy Crosscheck: a fail-closed allergy checker for Alexa+ (MCP server + MCP Apps screen)",
   "scripts": {
     "start": "node --experimental-strip-types --no-warnings=ExperimentalWarning src/server/main.ts",
     "test": "node --experimental-strip-types --no-warnings=ExperimentalWarning --test \"test/*.test.ts\" \"packages/allergen-guard/test/*.test.ts\"",

@@ -26,7 +26,7 @@ after(async () => {
 
 test("negotiates MCP 2025-11-25 over Streamable HTTP", () => {
   assert.equal(transport.protocolVersion, "2025-11-25");
-  assert.equal(client.getServerVersion()?.name, "allergy-guard");
+  assert.equal(client.getServerVersion()?.name, "allergy-crosscheck");
 });
 
 test("lists nine tools, each linked to the MCP Apps screen", async () => {
@@ -35,18 +35,18 @@ test("lists nine tools, each linked to the MCP Apps screen", async () => {
     "add_to_shopping_list", "check_product", "check_recipe", "find_recipe", "get_shopping_list", "list_people", "remove_from_shopping_list", "remove_person", "save_person",
   ]);
   for (const t of tools) {
-    assert.equal((t._meta as any)?.ui?.resourceUri, "ui://allergy-guard/verdict.html", t.name);
+    assert.equal((t._meta as any)?.ui?.resourceUri, "ui://allergy-crosscheck/verdict.html", t.name);
     assert.ok((t._meta as any)?.ui?.invoking && (t._meta as any)?.ui?.invoked, t.name);
   }
 });
 
 test("every tool result links the screen too (Alexa+ reads resourceUri from the response)", async () => {
   const res = (await client.callTool({ name: "list_people", arguments: {} })) as { _meta?: any };
-  assert.equal(res._meta?.ui?.resourceUri, "ui://allergy-guard/verdict.html");
+  assert.equal(res._meta?.ui?.resourceUri, "ui://allergy-crosscheck/verdict.html");
 });
 
 test("serves the screen as an MCP Apps resource", async () => {
-  const res = await client.readResource({ uri: "ui://allergy-guard/verdict.html" });
+  const res = await client.readResource({ uri: "ui://allergy-crosscheck/verdict.html" });
   assert.equal(res.contents[0].mimeType, "text/html;profile=mcp-app");
   assert.match(String((res.contents[0] as { text: string }).text), /ui\/initialize/);
 });

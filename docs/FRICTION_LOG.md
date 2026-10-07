@@ -1,6 +1,6 @@
 # Friction log
 
-Each entry is something that happened while building Allergy Guard. Format: task, steps, expected vs actual, severity, workaround, suggestion.
+Each entry is something that happened while building Allergy Crosscheck. Format: task, steps, expected vs actual, severity, workaround, suggestion.
 
 ## 1. Testing on a real Alexa+ from outside the US
 

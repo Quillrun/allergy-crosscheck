@@ -19,7 +19,7 @@ import type { Sources } from "./sources.ts";
 import { localDate } from "./store.ts";
 import type { Profile, Store } from "./store.ts";
 
-export const WIDGET_URI = "ui://allergy-guard/verdict.html";
+export const WIDGET_URI = "ui://allergy-crosscheck/verdict.html";
 export const WIDGET_MIME = "text/html;profile=mcp-app";
 const WIDGET_HTML = readFileSync(new URL("../../public/widget.html", import.meta.url), "utf8");
 // MCP Apps link on each tool definition, plus Alexa+'s invoking/invoked status lines.
@@ -50,14 +50,14 @@ export type View = {
 
 export function createServer(store: Store, sources: Sources): McpServer {
   const server = new McpServer(
-    { name: "allergy-guard", title: "Allergy Guard", version: "0.1.0" },
-    { instructions: `Allergy Guard keeps a household's food allergies and checks recipes and products against them. ${VOICE_RULE}` },
+    { name: "allergy-crosscheck", title: "Allergy Crosscheck", version: "0.1.0" },
+    { instructions: `Allergy Crosscheck keeps a household's food allergies and checks recipes and products against them. ${VOICE_RULE}` },
   );
 
   server.registerResource(
     "verdict-screen",
     WIDGET_URI,
-    { title: "Allergy Guard screen", description: "Verdict card for Echo Show and other MCP Apps hosts", mimeType: WIDGET_MIME },
+    { title: "Allergy Crosscheck screen", description: "Verdict card for Echo Show and other MCP Apps hosts", mimeType: WIDGET_MIME },
     async () => ({ contents: [{ uri: WIDGET_URI, mimeType: WIDGET_MIME, text: WIDGET_HTML }] }),
   );
 
@@ -263,7 +263,7 @@ export function createServer(store: Store, sources: Sources): McpServer {
       inputSchema: {
         barcode: z.string().optional().describe("The barcode (EAN/UPC digits), e.g. from a choice returned earlier"),
         name: z.string().optional().describe("Product name, e.g. 'Nutella' or 'Kellogg's granola'"),
-        scanned: z.boolean().optional().describe("true when the user means the product they just scanned with the Allergy Guard scan page ('what I just scanned', 'this one I scanned')"),
+        scanned: z.boolean().optional().describe("true when the user means the product they just scanned with the Allergy Crosscheck scan page ('what I just scanned', 'this one I scanned')"),
         for: z.array(z.string()).optional().describe("Only check for these people; default is everyone currently saved"),
       },
       annotations: { readOnlyHint: true, openWorldHint: true },

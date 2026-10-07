@@ -43,7 +43,7 @@ export const fakeFetch: Fetcher = (async (input: string | URL | Request) => {
 }) as Fetcher;
 
 export async function startApp(llm?: Llm) {
-  const dir = mkdtempSync(join(tmpdir(), "allergy-guard-"));
+  const dir = mkdtempSync(join(tmpdir(), "allergy-crosscheck-"));
   const store = new Store(join(dir, "household.json"));
   const http = createApp({ store, sources: new Sources(fakeFetch, 2000), llm });
   await new Promise<void>((r) => http.listen(0, "127.0.0.1", r));

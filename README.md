@@ -1,11 +1,11 @@
-# Allergy Guard for Alexa+
+# Allergy Crosscheck for Alexa+
 
-A household tells Alexa who is allergic to what, guests included. Allergy Guard then checks recipes and packaged foods against everyone at the table, explains the risk on an Echo Show screen, suggests swaps that don't trip anyone else's allergy, and puts them on the shopping list.
+A household tells Alexa who is allergic to what, guests included. Allergy Crosscheck then checks recipes and packaged foods against everyone at the table, explains the risk on an Echo Show screen, suggests swaps that don't trip anyone else's allergy, and puts them on the shopping list.
 
 It is built around one rule: **when the data is missing, ambiguous or the lookup fails, the answer is "I can't confirm it's OK — treat it as unsafe", never a confident yes.** It never tells anyone a food is "safe".
 
 - **Self-hosted MCP server**, MCP spec **2025-11-25**, **Streamable HTTP** (stateless), 9 tools.
-- **MCP Apps view** (`ui://allergy-guard/verdict.html`, `text/html;profile=mcp-app`) for Echo Show: verdict banner, per-person results, flagged ingredients, swaps, tap-to-choose products.
+- **MCP Apps view** (`ui://allergy-crosscheck/verdict.html`, `text/html;profile=mcp-app`) for Echo Show: verdict banner, per-person results, flagged ingredients, swaps, tap-to-choose products.
 - **Phone scan page** (`/scan`): scan a barcode with the camera, then ask "Can Maya have what I just scanned?". Nobody reads out 13 digits. It uses the browser's BarcodeDetector, with a WebAssembly fallback for Safari served by the server itself; typed digits work too.
 - **Alexa+ simulator**: an LLM drives the server through a real MCP client, with browser voice in and out, and renders the MCP Apps view the way an Echo Show would.
 - **Open-source engine** in [`packages/allergen-guard`](packages/allergen-guard): zero dependencies, MIT.
@@ -22,7 +22,7 @@ Screens from the recorded demo run: a local model driving the server, with live 
 
 Open Food Facts, the open food database this uses, says its data comes with "no assurances that the data is accurate, complete, or reliable". Real records prove it. One chocolate hazelnut spread (barcode 0868030000236) has an empty allergen list and no ingredient list, so a checker that trusts the tags would call it allergen-free. A hot cocoa mix (0050700000220) lists soy as its only allergen, with milk only as a "may contain", while its ingredients include nonfat dry milk, whey and sodium caseinate.
 
-Allergy Guard:
+Allergy Crosscheck:
 
 | Situation | Answer |
 |---|---|
@@ -100,8 +100,8 @@ Captured from a live server with the MCP SDK client (`check_product` on the coco
 The tool definition's `_meta`:
 
 ```json
-{ "ui": { "resourceUri": "ui://allergy-guard/verdict.html", "invoking": "Checking the product…", "invoked": "Product checked" },
-  "ui/resourceUri": "ui://allergy-guard/verdict.html" }
+{ "ui": { "resourceUri": "ui://allergy-crosscheck/verdict.html", "invoking": "Checking the product…", "invoked": "Product checked" },
+  "ui/resourceUri": "ui://allergy-crosscheck/verdict.html" }
 ```
 
 The tool result, trimmed (`structuredContent` also carries each person's reasons and the grouped ingredient rows for the screen):
@@ -111,7 +111,7 @@ The tool result, trimmed (`structuredContent` also carries each person's reasons
   "content": [{ "type": "text", "text": "VERDICT: UNSAFE\nSay to the user: Leo should avoid this: it contains milk, in the whey, caseinate and lactose. I can't confirm this is OK for Maya: vegetable oil and flavouring can contain peanuts and tree nuts. Treat it as unsafe and check the label." }],
   "structuredContent": { "kind": "product_check", "title": "Hot Cocoa Drink Mix", "overall": "unsafe",
     "people": [{ "name": "Maya", "verdict": "cannot_confirm" }, { "name": "Leo", "verdict": "unsafe" }], "…": "…" },
-  "_meta": { "ui": { "resourceUri": "ui://allergy-guard/verdict.html" }, "ui/resourceUri": "ui://allergy-guard/verdict.html" },
+  "_meta": { "ui": { "resourceUri": "ui://allergy-crosscheck/verdict.html" }, "ui/resourceUri": "ui://allergy-crosscheck/verdict.html" },
   "isError": false
 }
 ```
