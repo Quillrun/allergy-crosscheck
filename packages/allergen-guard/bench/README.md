@@ -23,6 +23,17 @@ The run also counted products whose English ingredient text has an allergen that
 
 Many other hits couldn't be judged from the excerpt. Over-cautious hits never turn an allergen into "none listed", but they make the count unreliable.
 
+## What the run fixed
+
+The engine never recognised some words found in the data. Each of these now has a test:
+- "gluten" on its own;
+- "milkfat" and "butterfat";
+- "crustaceans" (for example, "crustaceans flavouring");
+- "cereals containing gluten";
+- "E322" (lecithin, which may be soy).
+
+The first two mattered most. A recipe line of just "gluten" or "milkfat" used to come back "none listed".
+
 ## Method
 
 - **`off_rows.py`:** streams the parquet export by row group. For each record it builds the same fields the server requests from the Open Food Facts API:

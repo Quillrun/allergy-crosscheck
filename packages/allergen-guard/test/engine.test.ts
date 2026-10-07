@@ -102,15 +102,15 @@ test("swaps are never relatives or hidden sources of the allergen they replace",
   assert.deepEqual(optionsFor("200g plain flour", person("Bea", "gluten")), ["rice flour", "certified gluten-free flour blend (check its label)"]);
 });
 
-test("product: allergen tags are not trusted alone (real Nutella record omits milk and soy)", () => {
-  const nutella = {
+test("product: allergen tags are not trusted alone (real chocolate hazelnut spread record omits milk and soy)", () => {
+  const spread = {
     code: "3017624010701",
-    product_name: "Nutella",
+    product_name: "chocolate hazelnut spread",
     allergens_tags: ["en:nuts"],
     traces_tags: [],
     ingredients_text_en: "sugar, palm oil, hazelnuts (13%), skimmed milk powder (8.7%), fat reduced cocoa (7.4%), emulsifier: lecithins (soya), vanillin",
   };
-  const r = checkProduct(nutella, [person("Leo", "milk"), person("Sam", "soy")]);
+  const r = checkProduct(spread, [person("Leo", "milk"), person("Sam", "soy")]);
   assert.equal(r.people.find((p) => p.name === "Leo")?.verdict, "unsafe");
   assert.equal(r.people.find((p) => p.name === "Sam")?.verdict, "unsafe");
 });
@@ -123,7 +123,7 @@ test("product: 'may contain' is unsafe", () => {
 
 test("product: missing or non-English ingredients cannot be confirmed", () => {
   const people = [person("Maya", "peanut")];
-  assert.equal(checkProduct({ product_name: "Nutella" }, people).overall, "cannot_confirm");
+  assert.equal(checkProduct({ product_name: "chocolate hazelnut spread" }, people).overall, "cannot_confirm");
   const french = checkProduct({ product_name: "Biscuit", allergens_tags: [], ingredients_text: "farine de blé, sucre" }, people);
   assert.equal(french.overall, "cannot_confirm");
   assert.match(french.speech, /isn't available in English/);
@@ -192,6 +192,15 @@ test("a word it doesn't recognise means 'can't confirm', never 'none listed'", (
   assert.match(r.speech, /I don't know what's in garam masala/);
   // plain recipes stay plain
   assert.equal(checkIngredients(["1 tblsp Olive Oil", "1 finely chopped Onion", "500g Minced Beef", "800g Chopped Tomatoes", "Topping Basil Leaves", "1 banana"], maya).overall, "no_listed_allergens");
+});
+
+test("words found missing by a run over Open Food Facts are caught", () => {
+  // bench/: products listing these allergens whose ingredient words the engine didn't recognise
+  for (const [word, a] of [["gluten", "gluten"], ["milkfat", "milk"], ["butterfat", "milk"],
+    ["cereals containing gluten", "gluten"], ["natural crustaceans flavouring", "crustacean"]] as [string, AllergenId][])
+    assert.equal(verdict(word, a), "unsafe", word);
+  assert.equal(verdict("emulsifier (e322)", "soy"), "cannot_confirm");
+  assert.equal(verdict("gluten free oats", "gluten"), "cannot_confirm");
 });
 
 test("a free-from claim is 'check the label', not 'contains'", () => {

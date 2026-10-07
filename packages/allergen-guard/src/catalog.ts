@@ -184,8 +184,8 @@ export const TERMS: Term[] = [
   { terms: ["amaretti", "macaron", "orgeat", "romesco", "baklava", "dukkah"], contains: ["tree_nut"], possible: ["egg", "wheat", "gluten", "sesame"] },
   { terms: ["amaretto", "frangelico", "nocino", "biscotti", "mole", "nut oil"], contains: [], possible: ["tree_nut", "peanut"] },
   // milk
-  { terms: ["milk", "buttermilk", "milk powder"], contains: ["milk"], unless: PLANT_MILKS },
-  { terms: ["butter", "ghee"], contains: ["milk"], unless: NOT_DAIRY_BUTTER },
+  { terms: ["milk", "buttermilk", "milk powder", "milkfat"], contains: ["milk"], unless: PLANT_MILKS },
+  { terms: ["butter", "ghee", "butterfat"], contains: ["milk"], unless: NOT_DAIRY_BUTTER },
   { terms: ["cream", "sour cream", "creme fraiche", "half and half"], contains: ["milk"], unless: ["cream of tartar", "coconut cream", "ice cream", "cream soda", "cream crackers"] },
   {
     terms: ["cheese", "parmesan", "parmigiano", "pecorino", "mozzarella", "cheddar", "ricotta", "feta", "mascarpone", "gouda", "brie",
@@ -202,6 +202,7 @@ export const TERMS: Term[] = [
   { terms: ["mayonnaise", "mayo", "aioli"], contains: ["egg"], possible: ["mustard"] },
   // wheat and gluten
   { terms: ["wheat", "semolina", "durum", "spelt", "kamut", "farro", "einkorn", "emmer", "couscous", "bulgur", "bulgar", "freekeh", "seitan", "graham"], contains: ["wheat", "gluten"] },
+  { terms: ["gluten", "cereals containing gluten"], contains: ["gluten"], possible: ["wheat"] },
   { terms: ["flour"], contains: ["wheat", "gluten"], unless: NOT_WHEAT_FLOUR },
   {
     terms: ["pasta", "spaghetti", "macaroni", "penne", "fusilli", "linguine", "tagliatelle", "fettuccine", "lasagne", "lasagna", "ravioli",
@@ -221,7 +222,7 @@ export const TERMS: Term[] = [
   { terms: ["gluten free"], contains: [], possible: GLUTEN_FREE_MAY_CONTAIN },
   // soy
   { terms: ["soy", "soya", "soybean", "soja", "tofu", "bean curd", "tempeh", "edamame", "miso", "shoyu", "tamari", "natto", "textured vegetable protein", "tvp"], contains: ["soy"] },
-  { terms: ["lecithin", "vegetable protein"], contains: [], possible: ["soy"] },
+  { terms: ["lecithin", "e322", "vegetable protein"], contains: [], possible: ["soy"] },
   { terms: ["emulsifier"], contains: [], possible: ["soy", "egg"] },
   { terms: ["margarine", "vegetable spread"], contains: [], possible: ["milk", "soy"] },
   { terms: ["vegetable oil"], contains: [], possible: ["soy", "peanut"] },
@@ -238,7 +239,7 @@ export const TERMS: Term[] = [
   { terms: ["caesar dressing"], contains: ["fish"], possible: ["egg", "milk"] },
   { terms: ["dashi"], contains: [], possible: ["fish"] },
   // crustaceans and molluscs
-  { terms: ["shrimp", "prawn", "crab", "lobster", "crayfish", "crawfish", "langoustine", "krill", "scampi"], contains: ["crustacean"] },
+  { terms: ["shrimp", "prawn", "crab", "lobster", "crayfish", "crawfish", "langoustine", "krill", "scampi", "crustacean"], contains: ["crustacean"] },
   { terms: ["shellfish"], contains: ["crustacean", "mollusc"] },
   { terms: ["clam", "mussel", "oyster", "scallop", "squid", "calamari", "octopus", "snail", "escargot", "cuttlefish", "abalone", "whelk", "cockle", "conch"], contains: ["mollusc"], unless: ["oyster mushroom", "king oyster mushroom"] },
   // celery, mustard, lupin, sulphites
