@@ -1,9 +1,11 @@
 # Demo video
 
-The submitted video (2:54, recorded 7 October 2026) is a real run, not a mock-up:
+The submitted video (2:50, 3840×2160 at 60 fps, recorded 7 October 2026) is a real run, not a mock-up:
 - The simulator was recorded in headless Chrome while a local model (Qwen3.5 9B, MLX) drove the MCP server, with live Open Food Facts and TheMealDB data.
 - The waits for the model were cut.
-- The voices are local text-to-speech with Boson AI's Higgs Audio (Higgs TTS 3), used under its Creator Use Grant: one voice per role (Alexa, the narrator and you). The narrator and "you" were cloned from reference voices designed with Qwen3-TTS VoiceDesign (Apache-2.0), so no real person's voice is imitated.
+- Frames were captured losslessly at 2× device scale (Chrome DevTools screencast) and encoded once at the end, so the text stays sharp at 4K.
+- Alexa's lines are Amazon's own Alexa voice, rendered in the Alexa developer console (a private test skill, Test tab, Voice & Tone) from the exact text the run returned.
+- The narrator and the user are local text-to-speech with Boson AI's Higgs Audio (Higgs TTS 3), used under its Creator Use Grant, from reference voices made for this project, so no real person's voice is imitated.
 - Credit, as the licence asks: "This audio was created with Boson AI's Higgs Audio — https://www.boson.ai/higgs-audio".
 - Alexa's lines are exactly what the run returned. Every clip was checked against its script with Whisper.
 - Products are shown by their generic names from the records.
@@ -14,16 +16,16 @@ The submitted video (2:54, recorded 7 October 2026) is a real run, not a mock-up
 | On screen | Audio |
 |---|---|
 | A product record: chocolate hazelnut spread, allergens none listed, ingredients missing | "This is a real product record from Open Food Facts: a chocolate hazelnut spread, with an empty allergen list. A checker that only trusts that list would call it allergen-free." |
-| Title card | "Allergy Crosscheck is an Alexa+ add-on with one rule: it never tells you a food is safe." |
+| Title card | "Allergy Crosscheck is an Alexa+ add-on that checks food for everyone at the table, with one rule: it never tells you a food is safe." |
 | Simulator, idle | "This is a simulated Alexa+ on an Echo Show, driven by a local AI model through my MCP server." |
-| Voice turn | You: "Alexa, save Maya. She's allergic to peanuts and tree nuts." Alexa confirms. |
-| Voice turn | You: "Leo from next door is coming on Saturday. He can't have dairy or celery." Alexa: "…guest Leo until Saturday 10 October: milk and celery." |
-| Voice turn: the lasagne verdict, zooming on the cards | You: "Check tonight's lasagne for Saturday." Alexa: "Leo should avoid this: it contains celery and milk…" Narrator: avoid for Leo with the exact ingredients, nothing listed for Maya and still no "safe"; no dairy-free cheese swap, because it's often cashew-based and Maya can't have tree nuts. |
-| Phone scan: the spread's barcode, on the scan page | Narrator: "Nobody reads out barcodes. Scan it on your phone, then just ask." |
-| Voice turn | You: "Can Maya and Leo have what I just scanned?" Alexa: "I can't confirm this is OK for Maya and Leo: the ingredient list is missing from the product data…" Narrator: missing data never becomes "no allergens". |
+| Voice turn | User: "Alexa, save Maya. She's allergic to peanuts and tree nuts." Alexa confirms. |
+| Voice turn | User: "Leo from next door is coming on Saturday. He can't have dairy or celery." Alexa: "…guest Leo until Saturday 10 October: milk and celery." |
+| Voice turn: the lasagne verdict, zooming on the cards | User: "Check tonight's lasagne for Saturday." Alexa: "Leo should avoid this: it contains celery and milk…" Narrator: avoid for Leo with the exact ingredients, nothing listed for Maya and still no "safe"; no dairy-free cheese swap, because it's often cashew-based and Maya can't have tree nuts. |
+| Phone scan: the spread's barcode, on the scan page | Narrator: "You can read out a barcode, but it's tedious. Scan it on your phone instead, then just ask." |
+| Voice turn | User: "Can Maya and Leo have what I just scanned?" Alexa: "I can't confirm this is OK for Maya and Leo: the ingredient list is missing from the product data…" Narrator: missing data never becomes "no allergens". |
 | Phone scan: a hot cocoa mix | (the scan page finds it) |
-| Voice turn | You: "And this one I just scanned?" Alexa: avoid for Leo (milk, in the whey, caseinate and lactose), can't confirm for Maya. Narrator: the record lists soy as its only allergen and milk only as a "may contain"; the ingredient text adds the milk. |
-| Slide: keeping the model honest | The verdict lock and the no-tool guard, found by testing on a real model. Both run in the simulator; on a real Alexa+, every result leads with the exact sentence to say. |
+| Voice turn | User: "And this one I just scanned?" Alexa: avoid for Leo (milk, in the whey, caseinate and lactose), can't confirm for Maya. Narrator: the record lists soy as its only allergen and milk only as a "may contain"; the ingredient text adds the milk. |
+| Slide: test harness in my simulator | "Testing on a real model, I caught it claiming to save a guest it never saved. So every tool result starts with the verdict and the exact sentence to say, and my simulator holds the model to it, word for word." |
 | Slide: how it's built | MCP server (spec 2025-11-25, Streamable HTTP), MCP Apps screen built to the Alexa+ design guide, and the open-source engine, "with tests that try to trick it into saying safe". |
 
 ## Recording it yourself

@@ -6,7 +6,7 @@ It is built around one rule: **when the data is missing, ambiguous or the lookup
 
 - **Self-hosted MCP server**, MCP spec **2025-11-25**, **Streamable HTTP** (stateless), 9 tools.
 - **MCP Apps view** (`ui://allergy-crosscheck/verdict.html`, `text/html;profile=mcp-app`) for Echo Show: verdict banner, per-person results, flagged ingredients, swaps, tap-to-choose products.
-- **Phone scan page** (`/scan`): scan a barcode with the camera, then ask "Can Maya have what I just scanned?". Nobody reads out 13 digits. It uses the browser's BarcodeDetector, with a WebAssembly fallback for Safari served by the server itself; typed digits work too.
+- **Phone scan page** (`/scan`): scan a barcode with the camera, then ask "Can Maya have what I just scanned?". Reading out 13 digits works too, but scanning is quicker. It uses the browser's BarcodeDetector, with a WebAssembly fallback for Safari served by the server itself; typed digits work too.
 - **Alexa+ simulator**: an LLM drives the server through a real MCP client, with browser voice in and out, and renders the MCP Apps view the way an Echo Show would.
 - **Open-source engine** in [`packages/allergen-guard`](packages/allergen-guard): zero dependencies, MIT.
 
@@ -159,7 +159,7 @@ test/                      integration tests
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes; every demo button's screen measured to fit at 944×590 |
 | Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |
-| Amazon's Local Inspector | **Not run.** It installs from the Developer Console; the steps are under "Alexa+" above |
+| Amazon's Local Inspector | **Not run.** It installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4) |
 
 The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`). On real Alexa+, add-ons can't script what Alexa says. There, the defence is in the server: every result leads with a `VERDICT:` line and the exact sentence to say, and the tool descriptions tell the model to repeat it. Asking Amazon for a verbatim-speech hook is entry 2 in the [friction log](docs/FRICTION_LOG.md).
 

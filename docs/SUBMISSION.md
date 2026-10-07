@@ -65,7 +65,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   - every demo screen, measured at Echo Show 8 size in headless Chrome.
 - **Not tested:**
   - a real Alexa+, because the Toolkit is US-only;
-  - Amazon's Local Inspector, which installs through a Developer Console login. <update if it gets run>
+  - Amazon's Local Inspector. Even with a developer account, it installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4).
 
 ### Challenges I ran into
 - **Open data that contradicts itself.** The answer was never to trust allergen tags alone, and to scan the ingredient text too.
@@ -99,7 +99,7 @@ alexa+, model-context-protocol, mcp-apps, typescript, node.js, open-food-facts, 
 - Code repository: <GitHub URL, once AUTHOR decides private or public>
 
 ## Video demo link
-<YouTube URL, after the upload>. The file is `docs/video/allergy-crosscheck-demo.mp4` (2:54), with captions in `docs/video/allergy-crosscheck-demo.srt`.
+<YouTube URL, after the upload>. The file is `docs/video/allergy-crosscheck-demo.mp4` (2:50, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt`.
 
 ## Image gallery (upload in this order)
 Files are in `docs/video/gallery/`, padded to 3:2.
@@ -132,7 +132,7 @@ To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpo
 New: the repository's first commit is 4 October 2026, after the submission period opened on 31 August 2026.
 
 ### Product feedback (required)
-For each tool: what it was used for, what worked, what needs work, onboarding, and whether I'd build with it again. Each issue also has a full entry, with severity, in the friction log (`docs/FRICTION_LOG.md`, five entries).
+For each tool: what it was used for, what worked, what needs work, onboarding, and whether I'd build with it again. Each issue also has a full entry, with severity, in the friction log (`docs/FRICTION_LOG.md`, seven entries).
 
 **Alexa+ MCP Toolkit** (docs, MCP design guide, Local Inspector)
 - **Used for:** the screen and voice rules (design guide), where Alexa+ reads `_meta.ui`, and the certification path (Local Inspector).
@@ -141,7 +141,7 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
   - The Toolkit is US-only, so from outside the US I built a simulator instead of testing on a real Alexa+ (friction log 1).
   - There's no way to ask Alexa+ to speak a safety verdict verbatim: "You can't script what Alexa says" (2).
   - There's no automated way to test multi-turn conversations (3).
-  - The Local Inspector installs only through a Developer Console login, not public npm, and searching npm for `alexa-ai` finds an unrelated package (4).
+  - The Local Inspector isn't on public npm. It installs from a private registry that needs an AWS account, an IAM user and access to an Amazon role, and searching npm for `alexa-ai` finds an unrelated package (4).
   - The Alexa+ docs put `_meta.ui` in the tool call response, while the MCP Apps spec puts `resourceUri` on the tool definition. I did both (5).
 - **Onboarding (zero to hello world):** a local MCP server came quickly, because it's the open standard. Hello world on Alexa+ itself, a deployed add-on answering in the web simulator, wasn't reachable from outside the US.
 - **Would I build with it again?** <AUTHOR: yes or no, and why>
@@ -169,7 +169,7 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
 - **Important:** say which `_meta.ui` fields Alexa+ reads from `tools/list` and which from tool results. A server built only to the MCP Apps spec can pass every local test and still show no screen.
 
 ### Friction log (optional, up to a 10% bonus)
-Paste `docs/FRICTION_LOG.md`: five entries, in the format the rules ask for.
+Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
 
 ### Open Source mini-challenge
 - **Contribution URL:** <the public `allergen-guard` repository>
@@ -184,10 +184,10 @@ Paste `docs/FRICTION_LOG.md`: five entries, in the format the rules ask for.
 - **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 23 tests of its own, including 54 ingredient–allergen pairs that must never pass.
 
 ## YouTube upload (not part of the Devpost form)
-- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:54), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
+- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:50, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
 - **Title:** Allergy Crosscheck: an Alexa+ add-on that never says "safe" (hackathon demo)
 - **Visibility:** Public. The rules say "publicly visible", and Unlisted may not count. This is AUTHOR's call.
-- **Altered or synthetic content:** yes. The voices are AI-generated and realistic.
+- **Altered or synthetic content:** yes. The voices are synthetic: Alexa's lines are Amazon's Alexa voice from the developer console; the narrator and the user are AI-generated.
 - **Made for kids:** no. **Category:** Science & Technology.
 - **Description** (the first line is the credit the Higgs licence requires):
 
@@ -201,13 +201,13 @@ Built for Amazon's Build, Ship, Shape hackathon (Alexa+ track): a self-hosted MC
 Code: <repository URL>
 
 0:00 The problem: a record with an empty allergen list
-0:12 One rule: it never says "safe"
-0:27 Saving the household and a guest
-0:46 Checking tonight's lasagne for everyone
-1:23 Scan on a phone: missing data means "can't confirm"
-1:54 A cocoa mix whose tags miss the milk
-2:23 Keeping the model honest
-2:37 How it's built
+0:11 One rule: it never says "safe"
+0:28 Saving the household and a guest
+0:47 Checking tonight's lasagne for everyone
+1:21 Scan on a phone: missing data means "can't confirm"
+1:53 A cocoa mix whose tags miss the milk
+2:21 Keeping the model honest
+2:34 How it's built
 ```
 
 ## Repository access (not part of the Devpost form)
