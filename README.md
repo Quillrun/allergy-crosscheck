@@ -1,6 +1,6 @@
 # Allergy Crosscheck for Alexa+
 
-A household tells Alexa who is allergic to what, guests included. Allergy Crosscheck then checks recipes and packaged foods against everyone at the table, explains the risk on an Echo Show screen, suggests swaps that don't trip anyone else's allergy, and puts them on the shopping list.
+Allergy Crosscheck tells you who at the table can eat a dish or a product, and why. A household tells Alexa who is allergic to what, guests included. It then checks recipes and packaged foods against everyone at the table, explains the risk on an Echo Show screen, suggests swaps that don't trip anyone else's allergy, and puts them on the shopping list.
 
 It is built around one rule: **when the data is missing, ambiguous or the lookup fails, the answer is "I can't confirm it's OK — treat it as unsafe", never a confident yes.** It never tells anyone a food is "safe".
 
@@ -21,6 +21,8 @@ Screens from the recorded demo run: a local model driving the server, with live 
 ## Why fail-closed matters here
 
 Open Food Facts, the open food database this uses, says its data comes with "no assurances that the data is accurate, complete, or reliable". Real records prove it. One chocolate hazelnut spread (barcode 0868030000236) has an empty allergen list and no ingredient list, so a checker that trusts the tags would call it allergen-free. A hot cocoa mix (0050700000220) lists soy as its only allergen, with milk only as a "may contain", while its ingredients include nonfat dry milk, whey and sodium caseinate.
+
+Across all 4,784,317 Open Food Facts records (snapshot of 7 October 2026), 72.3% list no allergens, no "may contain" and have no ingredient list, and so do 53.2% of the products scanned in the Open Food Facts app. This engine says "can't confirm" for each. See [`packages/allergen-guard/bench/README.md`](packages/allergen-guard/bench/README.md).
 
 Allergy Crosscheck:
 
@@ -132,7 +134,7 @@ Every tool result has a short `speech` line for voice, a `VERDICT:` line for the
 ## Tests
 
 ```bash
-npm test          # 60 tests: engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
+npm test          # 61 tests: engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -154,7 +156,7 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, phone scan, simulator guards | 60 automated tests (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 61 automated tests (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes; every demo button's screen measured to fit at 944×590 |
@@ -170,4 +172,4 @@ The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`
 - Product checks read the label's declared allergens, traces and English ingredient text; unrecognised words there don't block an answer, because the declaration is the legal record.
 - Saying someone is "also allergic to" something adds it; only "no longer allergic" replaces the list.
 - It isn't medical advice and isn't an emergency service.
-- Product data: [Open Food Facts](https://world.openfoodfacts.org), ODbL. Recipes: [TheMealDB](https://www.themealdb.com), using its free development key.
+- Data: Open Food Facts (ODbL). Product data: [Open Food Facts](https://world.openfoodfacts.org), ODbL. Recipes: [TheMealDB](https://www.themealdb.com), using its free development key.
