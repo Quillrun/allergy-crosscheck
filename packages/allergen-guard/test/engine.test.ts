@@ -478,3 +478,26 @@ test("scan: Latin (INCI) names read like the English ones", () => {
 test("scan: glycine (the amino acid) is not soy", () => {
   assert.deepEqual(scanIngredient("glycine"), []);
 });
+
+const NOT_ENGLISH = "Part of the ingredient list isn't in English, so I can't read it.";
+const englishOnly = (text: string, a: AllergenId = "milk") => checkProduct({ product_name: "X", allergens_tags: [], traces_tags: [], ingredients_text_en: text }, [person("Maya", a)]);
+
+test("foreign allergen words in the English text: can't confirm, not 'none listed'", () => {
+  // "leche" is also a milk term, so use someone with another allergy to see the issue decide the verdict
+  const r = englishOnly("leche, azucar, sal", "peanut");
+  assert.equal(r.overall, "cannot_confirm");
+  assert.deepEqual(r.dataIssues, [NOT_ENGLISH]);
+  assert.deepEqual(englishOnly("milk, sugar").dataIssues, []);
+});
+
+test("foreign words don't hide a found allergen", () => {
+  const r = englishOnly("Weizenmehl, sugar, milk");
+  assert.equal(r.overall, "unsafe");
+  assert.ok(r.hits.some((h) => h.allergen === "milk" && h.kind === "contains"));
+  assert.deepEqual(r.dataIssues, [NOT_ENGLISH]);
+});
+
+test("'latte' and 'cafe latte' are English, not a foreign-text flag", () => {
+  assert.deepEqual(englishOnly("eggs, latte").dataIssues, []);
+  assert.deepEqual(englishOnly("cafe latte").dataIssues, []);
+});

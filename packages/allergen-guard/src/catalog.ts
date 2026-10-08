@@ -145,6 +145,15 @@ export function normalize(text: string): string {
 }
 
 /**
+ * Allergen words from other languages that are not English words. English ingredient text
+ * containing one of these is partly untranslated, so a clean scan of it can't be trusted.
+ * Left out on purpose: "ei", "ble", "mani", "latte" (English words or too short to be safe).
+ */
+export const FOREIGN_ALLERGEN_WORDS: ReadonlySet<string> = new Set(
+  "trigo, hvete, hvetemel, weizen, weizenmehl, tarwe, harina, farine, lait, leche, melk, milch, huevo, huevos, eier, oeuf, oeufs, uovo, soja, soia, cacahuete, cacahuetes, erdnuss, almendra, almendras, avellana, avellanas, noisette, noisettes, haselnuss, haselnusse, nocciole, sesamo, ajonjoli, apio, selleri, sellerie, moutarde, senf, mostaza, sulfitos, solfiti, pescado, poisson, fisk, pesce".split(",").map((w) => normalize(w)),
+);
+
+/**
  * One dictionary entry. `contains` means the ingredient is that allergen;
  * `possible` means it often hides one (sauces, stocks, chocolate) and must
  * never be waved through. `unless` lists phrases that cancel the match

@@ -3,7 +3,7 @@
 //   cannot_confirm      — the data is missing, ambiguous, or an ingredient often hides the allergen
 //   no_listed_allergens — nothing found; the caller still has to check the label
 
-import { ALLERGENS, ALL_ALLERGENS, FILLER_WORDS, FREE_FROM_LABELS, GENERIC_CATEGORIES, OFF_ALLERGEN_TAGS, PLAIN_FOODS, TERMS, normalize, resolveAllergies } from "./catalog.ts";
+import { ALLERGENS, ALL_ALLERGENS, FILLER_WORDS, FOREIGN_ALLERGEN_WORDS, FREE_FROM_LABELS, GENERIC_CATEGORIES, OFF_ALLERGEN_TAGS, PLAIN_FOODS, TERMS, normalize, resolveAllergies } from "./catalog.ts";
 import type { AllergenId, Term } from "./catalog.ts";
 
 export type Verdict = "unsafe" | "cannot_confirm" | "no_listed_allergens";
@@ -190,6 +190,8 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
         : "The ingredient list is missing from the product data.",
     );
   } else if (!english && labelTags.some((t) => !t.startsWith("en:"))) {
+    dataIssues.push("Part of the ingredient list isn't in English, so I can't read it.");
+  } else if (english && normalize(english).split(" ").some((w) => FOREIGN_ALLERGEN_WORDS.has(w))) {
     dataIssues.push("Part of the ingredient list isn't in English, so I can't read it.");
   }
   return evaluate(dedupe(hits), people, dataIssues);
