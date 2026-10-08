@@ -9,7 +9,7 @@ export type Candidate = { barcode: string; name: string; brand?: string };
 export type Recipe = { name: string; ingredients: string[] };
 
 const USER_AGENT = "AllergyCrosscheck/0.1 (+https://github.com/quillrun)";
-const PRODUCT_FIELDS = "code,product_name,brands,allergens_tags,traces_tags,ingredients_tags,ingredients_text_en,ingredients_text";
+const PRODUCT_FIELDS = "code,product_name,brands,allergens_tags,traces_tags,ingredients_tags,ingredients_original_tags,ingredients_text_en,ingredients_text,labels_tags";
 
 export class Sources {
   private fetcher: Fetcher;

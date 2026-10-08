@@ -3,7 +3,7 @@
 //   cannot_confirm      — the data is missing, ambiguous, or an ingredient often hides the allergen
 //   no_listed_allergens — nothing found; the caller still has to check the label
 
-import { ALLERGENS, ALL_ALLERGENS, FILLER_WORDS, OFF_ALLERGEN_TAGS, PLAIN_FOODS, TERMS, normalize, resolveAllergies } from "./catalog.ts";
+import { ALLERGENS, ALL_ALLERGENS, FILLER_WORDS, FREE_FROM_LABELS, GENERIC_CATEGORIES, OFF_ALLERGEN_TAGS, PLAIN_FOODS, TERMS, normalize, resolveAllergies } from "./catalog.ts";
 import type { AllergenId, Term } from "./catalog.ts";
 
 export type Verdict = "unsafe" | "cannot_confirm" | "no_listed_allergens";
@@ -46,8 +46,11 @@ export function scanIngredient(line: string, kind: "contains" | "may_contain" = 
     const possible = c.entry.possible === "all" ? ALL_ALLERGENS : (c.entry.possible ?? []);
     for (const a of possible) hits.push({ allergen: a, kind: "possible", source: line.trim(), term: c.term });
   }
-  // "egg-free mayonnaise", "dairy free butter": a free-from claim can't be verified here, so "check the label", not "contains".
-  const freeFrom = new Set(resolveAllergies([...text.matchAll(/([a-z]+) free\b/g)].map((m) => m[1])).ids);
+  // "egg-free mayonnaise", "free from milk": a free-from claim can't be verified here, so "check the label", not "contains".
+  // "lactose free milk" is still milk.
+  // Also "not from milk", "not derived from milk", and the same word in other languages ("sans gluten", "ohne ei").
+  const claimed = [...text.matchAll(/\b(?:([a-z]+) free|free (?:from|of) ([a-z]+)|not (?:derived |made )?from ([a-z]+)|(?:sans|sin|senza|ohne|uten|zonder) ([a-z]+))\b/g)].map((m) => m[1] ?? m[2] ?? m[3] ?? m[4]).filter((w) => w !== "lactose");
+  const freeFrom = new Set(resolveAllergies(claimed).ids);
   return dedupe(hits.map((h) => (h.kind === "contains" && freeFrom.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));
 }
 
@@ -76,6 +79,46 @@ export function splitIngredients(input: string | string[]): string[] {
   return parts.map((p) => p.replace(/^[\s\-*•]+/, "").trim()).filter(Boolean);
 }
 
+// "may contain traces of nuts", "made in a factory that also handles milk": a warning, not an ingredient.
+const PRECAUTION = new RegExp(
+  [
+    "may (?:also )?contain", "contains traces of", "traces of", "may be present",
+    "(?:made|produced|manufactured|packed|processed|prepared) (?:in|at) (?:an? |the |our )?(?:\\w+ ){0,2}(?:factory|facility|site|kitchen|environment) that (?:also )?(?:handles|uses|processes)",
+    "made on (?:shared )?equipment",
+    "\\b(?:plant|factory|facility|site|line|lines|equipment|premises|bakery|kitchen|environment) (?:that|which|where) (?:also )?(?:processes|handles|uses|manufactures|packs|produces|makes)",
+    "(?:in|on) the same (?:facility|equipment|line|lines|premises)", "shared (?:equipment|facility|line)", "may also use", "contains one or more of",
+    "kan inneholde", "kan inneh[aå]lla", "kan indeholde", "mo[zż]e zawiera[cć]", "mo[zž]e obsahovat", "m[oô][zž]e obsahova[tť]", "gali b[uū]ti", "pode conter",
+    "(?:l[ií]neas?|planta|f[aá]brica) que (?:tambi[eé]n )?(?:procesa|procesan|elabora|elaboran|utiliza|utilizan)", "fabriqu[ée] dans un atelier qui",
+    "peut contenir", "traces [ée]ventuelles", "traces de", "kann spuren", "spuren von", "kann\\b(?=[^.]*\\benthalten)",
+    "pu[òo] contenere", "tracce di", "puede contener", "trazas de", "kan sporen", "sporen van",
+  ].join("|"),
+  "gi",
+);
+
+/** Split label text into the ingredients and the precautionary statements ("may contain …") in it. */
+function splitPrecautions(text: string): { ingredients: string; warnings: string[] } {
+  const warnings: string[] = [];
+  let ingredients = "";
+  let at = 0;
+  for (const m of text.matchAll(PRECAUTION)) {
+    if (m.index < at) continue;
+    let base = 0;
+    for (const c of text.slice(0, m.index)) base += c === "(" ? 1 : c === ")" ? -1 : 0;
+    let depth = base;
+    let end = text.length, next = end;
+    for (let i = m.index; i < text.length; i++) {
+      const c = text[i];
+      if (c === "(") depth++;
+      else if (c === ")" && --depth < base) { end = next = i; break; }
+      else if (c === "." && depth <= base && !(/\d/.test(text[i - 1] ?? "") && /\d/.test(text[i + 1] ?? ""))) { end = i; next = i + 1; break; }
+    }
+    ingredients += end === next ? `${text.slice(at, m.index)} ` : `${text.slice(at, m.index).replace(/[\s.]+$/, "")}, `;
+    warnings.push(text.slice(m.index, end));
+    at = next;
+  }
+  return { ingredients: ingredients + text.slice(at), warnings };
+}
+
 export function checkIngredients(input: string | string[], people: Person[]): CheckResult & { lines: { text: string; hits: Hit[] }[] } {
   const lines = splitIngredients(input).map((text) => {
     const hits = scanIngredient(text);
@@ -97,8 +140,11 @@ export type OffProduct = {
   allergens_tags?: string[];
   traces_tags?: string[];
   ingredients_tags?: string[];
+  /** The label's own ingredients; `ingredients_tags` adds their parent categories. */
+  ingredients_original_tags?: string[];
   ingredients_text_en?: string;
   ingredients_text?: string;
+  labels_tags?: string[];
 };
 
 /**
@@ -124,15 +170,27 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
     else ALL_ALLERGENS.forEach((a) => hits.push({ allergen: a, kind: "possible", source: "may contain", term: tag }));
   }
   const english = (product.ingredients_text_en ?? "").trim();
-  const taxonomy = (product.ingredients_tags ?? []).filter((t) => t.startsWith("en:")).map((t) => t.slice(3).replace(/-/g, " "));
-  if (english) splitIngredients(english).forEach((l) => hits.push(...scanIngredient(l)));
-  taxonomy.forEach((t) => hits.push(...scanIngredient(t)));
-  if (!english && taxonomy.length === 0) {
+  const original = product.ingredients_original_tags?.length ? product.ingredients_original_tags : undefined;
+  const labelTags = original ?? product.ingredients_tags ?? [];
+  const enTags = [...new Set([...(product.ingredients_tags ?? []), ...(original ?? [])])].filter((t) => t.startsWith("en:"));
+  const taxonomy = enTags
+    .filter((t) => !original || original.includes(t) || !GENERIC_CATEGORIES.has(t.slice(3).replace(/-/g, " ")))
+    .map((t) => t.slice(3).replace(/-/g, " "));
+  const { ingredients, warnings } = splitPrecautions(english);
+  const claimed = new Set((product.labels_tags ?? []).flatMap((t) => FREE_FROM_LABELS[t] ?? []));
+  const fromLabel: Hit[] = [];
+  splitIngredients(ingredients).forEach((l) => fromLabel.push(...scanIngredient(l)));
+  taxonomy.forEach((t) => fromLabel.push(...scanIngredient(t)));
+  hits.push(...fromLabel.map((h) => (h.kind === "contains" && claimed.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));
+  warnings.forEach((w) => splitIngredients(w).forEach((l) => hits.push(...scanIngredient(l, "may_contain"))));
+  if (!english && enTags.length === 0) {
     dataIssues.push(
       (product.ingredients_text ?? "").trim()
         ? "The ingredient list isn't available in English, so I can't read it."
         : "The ingredient list is missing from the product data.",
     );
+  } else if (!english && labelTags.some((t) => !t.startsWith("en:"))) {
+    dataIssues.push("Part of the ingredient list isn't in English, so I can't read it.");
   }
   return evaluate(dedupe(hits), people, dataIssues);
 }

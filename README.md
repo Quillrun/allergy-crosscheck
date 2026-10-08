@@ -134,7 +134,7 @@ Every tool result has a short `speech` line for voice, a `VERDICT:` line for the
 ## Tests
 
 ```bash
-npm test          # 61 tests: engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
+npm test          # 69 tests: engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -156,7 +156,7 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, phone scan, simulator guards | 61 automated tests (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 69 automated tests (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes; every demo button's screen measured to fit at 944×590 |

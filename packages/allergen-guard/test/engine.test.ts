@@ -214,3 +214,267 @@ test("look-alike characters can't sneak an allergen past", () => {
   for (const tricky of ["Ｍｉｌｋ", "m\u200Bilk", "MILK", "Crème fraîche"]) assert.equal(checkIngredients([tricky], leo).overall, "unsafe", tricky);
   assert.equal(checkIngredients(["water chestnuts"], [{ name: "T", allergies: ["tree_nut"] }]).overall, "no_listed_allergens");
 });
+
+const off = (tags: string[], original?: string[], extra: object = {}) => ({ product_name: "X", allergens_tags: [], traces_tags: [], ingredients_tags: tags, ingredients_original_tags: original, ...extra });
+const hit = (tags: string[], original: string[] | undefined, a: AllergenId) => checkProduct(off(tags, original), [person("X", a)]).hits.some((h) => h.allergen === a && h.kind === "contains");
+
+test("product: a parent category OFF adds to a label ingredient is not read as the ingredient", () => {
+  const rice = off(["en:rice-flour", "en:flour", "en:rice"], ["en:rice-flour"]);
+  for (const a of ["wheat", "gluten"] as const) assert.equal(hit(rice.ingredients_tags, rice.ingredients_original_tags, a), false, a);
+  assert.equal(checkProduct(rice, [person("Bea", "wheat")]).overall, "no_listed_allergens");
+  assert.equal(hit(["en:flour"], ["en:flour"], "wheat"), true); // the label says flour
+});
+
+test("product: nut categories split into the label's own nut", () => {
+  const peanut = off(["en:peanut", "en:nut"], ["en:peanut"]);
+  const people = [person("Maya", "peanut"), person("Leo", "tree_nut")];
+  const r = checkProduct(peanut, people);
+  assert.equal(r.people[0].verdict, "unsafe");
+  assert.notEqual(r.people[1].verdict, "unsafe");
+  assert.equal(hit(["en:peanut", "en:nut"], ["en:peanut"], "tree_nut"), false);
+  assert.equal(hit(["en:hazelnut", "en:tree-nut", "en:nut"], ["en:hazelnut"], "tree_nut"), true);
+});
+
+test("product: a specific category still catches a label ingredient the catalogue doesn't know", () => {
+  // Synthetic: "mystery grain" is not in the catalogue, its parent category "durum wheat" is.
+  assert.equal(scanIngredient("mystery grain").length, 0);
+  assert.ok(scanIngredient("durum wheat").some((h) => h.allergen === "wheat"));
+  assert.equal(hit(["en:mystery-grain", "en:durum-wheat"], ["en:mystery-grain"], "wheat"), true);
+});
+
+test("product: without the label's own tags every category is read (fail-closed fallback)", () => {
+  assert.equal(hit(["en:rice-flour", "en:flour"], undefined, "wheat"), true);
+});
+
+test("product: ingredients OFF couldn't read in English cannot be confirmed", () => {
+  const partial = ["en:sugar", "fr:pate-de-truc"];
+  const r = checkProduct(off(partial, partial), [person("Maya", "peanut")]);
+  assert.equal(r.overall, "cannot_confirm");
+  assert.deepEqual(r.dataIssues, ["Part of the ingredient list isn't in English, so I can't read it."]);
+  const withText = checkProduct(off(partial, partial, { ingredients_text_en: "sugar, salt" }), [person("Maya", "peanut")]);
+  assert.deepEqual(withText.dataIssues, []);
+  assert.equal(withText.overall, "no_listed_allergens");
+});
+
+const hitsFor = (text: string, a: AllergenId) => checkProduct(off([], undefined, { ingredients_text_en: text }), [person("X", a)]).hits.filter((h) => h.allergen === a);
+
+test("product: 'tree nuts' is a tree nut, not a possible peanut; 'nuts' alone still is", () => {
+  assert.ok(hitsFor("tree nuts", "tree_nut").some((h) => h.kind === "contains"));
+  assert.equal(hitsFor("tree nuts", "peanut").length, 0);
+  assert.ok(hitsFor("nuts", "peanut").length > 0);
+});
+
+test("product: an empty original-ingredients list is treated as absent", () => {
+  assert.equal(hit(["en:rice-flour", "en:flour"], [], "wheat"), true);
+});
+
+test("product: a generic category is read when the label itself names it, not when OFF adds it", () => {
+  const flavoured = (tags: string[], original: string[]) => checkProduct(off(tags, original), [person("X", "peanut")]).hits.some((h) => h.term === "flavouring");
+  assert.equal(flavoured(["en:flavouring"], ["en:flavouring"]), true);
+  assert.equal(flavoured(["en:vanilla", "en:flavouring"], ["en:vanilla"]), false);
+});
+
+const text = (t: string, extra: object = {}) => off([], undefined, { ingredients_text_en: t, ...extra });
+const kinds = (t: string, a: AllergenId, extra: object = {}) => [...new Set(checkProduct(text(t, extra), [person("X", a)]).hits.filter((h) => h.allergen === a).map((h) => h.kind))].sort();
+
+test("product: precautionary statements are 'may contain', not ingredients", () => {
+  const t = "sugar, milk powder. May contain traces of peanuts, hazelnuts.";
+  assert.deepEqual(kinds(t, "milk"), ["contains"]);
+  assert.deepEqual(kinds(t, "peanut"), ["may_contain"]);
+  assert.deepEqual(kinds(t, "tree_nut"), ["may_contain"]);
+  assert.ok(kinds("vegetable oil (may contain soybean, canola), salt", "soy").includes("may_contain")); // plus the oil's own "possible"
+  assert.ok(!kinds("vegetable oil (may contain soybean, canola), salt", "soy").includes("contains"));
+  assert.deepEqual(kinds("Contains: milk, soy.", "milk"), ["contains"]);
+  assert.deepEqual(kinds("Contains: milk, soy.", "soy"), ["contains"]);
+  assert.deepEqual(kinds("flour. Made in a factory that also handles milk and eggs. Sugar 1.5%", "egg"), ["may_contain"]);
+  assert.deepEqual(kinds("sugar, cocoa (min. 2.5%), peut contenir des traces de lait", "milk"), ["may_contain"]);
+  assert.deepEqual(kinds("cocoa, kann Spuren von Haselnüssen enthalten, salt", "tree_nut"), []);
+  assert.equal(checkProduct(text("sugar. May contain milk."), [person("X", "milk")]).overall, "unsafe");
+});
+
+test("a free-from claim also reads 'free from' and 'free of'; lactose-free milk is still milk", () => {
+  assert.deepEqual(scanIngredient("free from milk").filter((h) => h.allergen === "milk").map((h) => h.kind), ["possible"]);
+  assert.deepEqual(scanIngredient("free of milk").filter((h) => h.allergen === "milk").map((h) => h.kind), ["possible"]);
+  assert.deepEqual(scanIngredient("lactose free milk").filter((h) => h.allergen === "milk").map((h) => h.kind), ["contains", "contains"]); // via the terms "milk" and "lactose"
+  assert.ok(scanIngredient("dairy free chocolate").every((h) => h.kind !== "contains"));
+});
+
+test("E-numbers are one token however they are written", () => {
+  for (const e of ["E-220", "E 223", "e220", "Antioxidant (E-223)"]) assert.equal(verdict(e, "sulphites"), "unsafe", e);
+  assert.equal(verdict("vitamin e", "sulphites"), "cannot_confirm"); // unrecognised word, as before
+  assert.equal(verdict("1 tbsp olive oil", "sulphites"), "no_listed_allergens");
+});
+
+test("product: OFF's 'shellfish' category does not add molluscs to a shrimp", () => {
+  const tags = ["en:shrimp", "en:crustacean", "en:shellfish"];
+  assert.equal(hit(tags, ["en:shrimp"], "crustacean"), true);
+  assert.equal(hit(tags, ["en:shrimp"], "mollusc"), false);
+  assert.equal(hit(["en:shellfish"], ["en:shellfish"], "mollusc"), true);
+  assert.equal(hit(["en:shellfish"], ["en:shellfish"], "crustacean"), true);
+  assert.deepEqual(kinds("shellfish", "mollusc"), ["contains"]);
+  assert.deepEqual(kinds("shellfish", "crustacean"), ["contains"]);
+});
+
+test("product: a free-from label turns an ingredient hit into 'check the label', never the allergen list", () => {
+  const claim = (labels: string[], t: string, a: AllergenId, extra: object = {}) => checkProduct(text(t, { labels_tags: labels, ...extra }), [person("X", a)]);
+  const vegan = claim(["en:vegan"], "whey", "milk");
+  assert.equal(vegan.overall, "cannot_confirm");
+  assert.ok(vegan.hits.every((h) => h.kind !== "contains"));
+  assert.equal(claim(["en:vegan"], "water", "milk", { allergens_tags: ["en:milk"] }).overall, "unsafe");
+  assert.equal(claim(["en:vegan"], "water", "milk", { traces_tags: ["en:milk"] }).overall, "unsafe");
+  assert.equal(claim(["en:no-gluten"], "oats", "gluten").overall, "cannot_confirm");
+  assert.equal(claim(["en:no-gluten"], "wheat flour", "wheat").overall, "unsafe");
+  assert.equal(claim(["en:no-lactose"], "milk", "milk").overall, "unsafe");
+  assert.equal(claim(["en:vegan"], "whey", "soy").overall, "no_listed_allergens");
+});
+
+test("product: OFF allergen ids for foods this engine doesn't track hide nothing, unknown ones still block", () => {
+  const tagged = (tags: string[], a: AllergenId) => checkProduct({ product_name: "X", allergens_tags: tags, ingredients_text_en: "pork, salt" }, [person("X", a)]).overall;
+  assert.equal(tagged(["en:pork"], "milk"), "no_listed_allergens");
+  assert.equal(tagged(["en:none"], "peanut"), "no_listed_allergens");
+  assert.equal(tagged(["fr:lait soja lactose"], "milk"), "cannot_confirm");
+  assert.equal(tagged(["en:red-caviar"], "fish"), "unsafe");
+});
+
+// Ambiguous or non-wheat words found by ranking false hits over Open Food Facts; each real allergen still fires.
+const scanKinds = (t: string) => Object.fromEntries(scanIngredient(t).map((h) => [h.allergen, h.kind]));
+test("scan: flours that are not wheat keep their own allergen, plain flour stays wheat", () => {
+  assert.deepEqual(scanKinds("carob seed flour"), {});
+  assert.deepEqual(scanKinds("flour treatment agent"), {});
+  assert.equal(scanKinds("rye flour").gluten, "contains");
+  assert.equal(scanKinds("rye flour").wheat, undefined);
+  assert.equal(scanKinds("peanut flour").peanut, "contains");
+  assert.equal(scanKinds("peanut flour").wheat, undefined);
+  assert.equal(scanKinds("mustard flour").mustard, "contains");
+  assert.equal(scanKinds("mustard flour").wheat, undefined);
+  assert.equal(scanKinds("chestnut flour").tree_nut, "contains");
+  assert.equal(scanKinds("chestnut flour").wheat, undefined);
+  assert.equal(scanKinds("flour").wheat, "contains");
+  assert.equal(scanKinds("wheat flour").wheat, "contains");
+});
+
+test("scan: phrases that name no allergen are cleared, the real ones are not", () => {
+  assert.equal(scanKinds("nutmeg nut").tree_nut, undefined);
+  assert.equal(scanKinds("chestnut mushroom").tree_nut, undefined);
+  assert.equal(scanKinds("rice bran").gluten, undefined);
+  assert.equal(scanKinds("oat bran").gluten, "contains");
+  assert.equal(scanKinds("tart cherry").wheat, undefined);
+  assert.equal(scanKinds("apple tart").wheat, "contains");
+  assert.equal(scanKinds("milk thistle").milk, undefined);
+  assert.equal(scanKinds("coconut butter").milk, undefined);
+  assert.equal(scanKinds("rice semolina").wheat, undefined);
+  assert.equal(scanKinds("semolina").wheat, "contains");
+});
+
+test("scan: butter flavour and mocha are 'possible' milk, butter is not", () => {
+  assert.equal(scanKinds("natural butter flavor").milk, "possible");
+  assert.equal(scanKinds("butter").milk, "contains");
+  assert.equal(scanKinds("mocha").milk, "possible");
+});
+
+test("scan: English spellings and Latin names that were missed", () => {
+  const cases: [string, AllergenId][] = [
+    ["crustacea", "crustacean"], ["molluscs", "mollusc"], ["cephalopods", "mollusc"], ["wheatflour", "wheat"], ["soyabean", "soy"],
+    ["treenuts", "tree_nut"], ["chesnuts", "tree_nut"], ["salmo salar", "fish"], ["sodium bisulfite", "sulphites"],
+  ];
+  for (const [t, a] of cases) assert.equal(scanKinds(t)[a], "contains", t);
+});
+
+// Round 2: systematic false hits and missed warnings found by hand-checking the strict count.
+test("product: more precautionary wordings are 'may contain'", () => {
+  assert.deepEqual(kinds("flour, sugar. Made in a plant that also processes soy.", "soy"), ["may_contain"]);
+  assert.deepEqual(kinds("rice. Packed in a factory that processes wheat", "wheat"), ["may_contain"]);
+  assert.deepEqual(kinds("sugar, salt. MAY ALSO USE EGG", "egg"), ["may_contain"]);
+  assert.deepEqual(kinds("sugar, salt. Produced on the same equipment as milk.", "milk"), ["may_contain"]);
+  assert.ok(kinds("vegetable oil (contains one or more of: canola, soybean)", "soy").includes("may_contain"));
+  assert.ok(!kinds("vegetable oil (contains one or more of: canola, soybean)", "soy").includes("contains"));
+  assert.ok(kinds("sukker. Kan inneholde spor av soya.", "soy").includes("may_contain"));
+  assert.ok(!kinds("sukker. Kan inneholde spor av soya.", "soy").includes("contains"));
+  assert.ok(kinds("cukr. Może zawierać soja.", "soy").includes("may_contain"));
+});
+
+test("scan: 'not from', 'not derived from' and foreign 'without' claims weaken the hit, they never remove it", () => {
+  assert.deepEqual(scanIngredient("lactic acid culture [not from milk]").filter((h) => h.allergen === "milk").map((h) => h.kind), ["possible"]);
+  assert.deepEqual(scanIngredient("not derived from egg").filter((h) => h.allergen === "egg").map((h) => h.kind), ["possible"]);
+  assert.deepEqual(scanIngredient("not made from wheat").filter((h) => h.allergen === "wheat").map((h) => h.kind), ["possible"]);
+  assert.ok(scanIngredient("sans gluten").filter((h) => h.allergen === "gluten").every((h) => h.kind === "possible"));
+  assert.ok(scanIngredient("sans gluten").some((h) => h.allergen === "gluten"));
+  assert.ok(scanIngredient("ohne milch").some((h) => h.allergen === "milk" && h.kind === "contains")); // "milch" isn't a claim word, so it stays a hit
+  assert.equal(scanKinds("sans lactose milk").milk, "contains");
+});
+
+test("scan: round-2 catalogue exceptions clear the phrase and nothing else", () => {
+  assert.equal(scanKinds("corn gluten").gluten, undefined);
+  assert.equal(scanKinds("maize gluten").gluten, undefined);
+  assert.equal(scanKinds("wheat gluten").gluten, "contains");
+  assert.equal(scanKinds("gluten").gluten, "contains");
+  assert.equal(scanKinds("egg roll").egg, "possible");
+  assert.equal(scanKinds("egg roll").gluten, "possible");
+  assert.equal(scanKinds("egg yolk").egg, "contains");
+  assert.equal(scanKinds("sulphite ammonia caramel").sulphites, "possible");
+  assert.equal(scanKinds("caustic sulfite caramel").sulphites, "possible");
+  assert.equal(scanKinds("sodium sulphite").sulphites, "contains");
+  assert.equal(scanKinds("yoghurt culture").milk, "possible");
+  assert.equal(scanKinds("kefir culture").milk, "possible");
+  assert.equal(scanKinds("cheese culture").milk, "possible");
+  assert.equal(scanKinds("yogurt alternative").milk, "possible");
+  assert.equal(scanKinds("yogurt").milk, "contains");
+  assert.equal(scanKinds("parkii butter").milk, undefined);
+  assert.equal(scanKinds("butyrospermum parkii butter").milk, undefined);
+  assert.equal(scanKinds("butter").milk, "contains");
+  assert.equal(scanKinds("crabmeat").crustacean, "contains");
+});
+
+test("scan: nut, seed and cocoa butters are not dairy, and nut butters keep their nut", () => {
+  const list = "hazelnut butter, organic almond butter, organic cocoa butter";
+  assert.equal(scanKinds(list).milk, undefined);
+  assert.equal(scanKinds(list).tree_nut, "contains");
+  for (const b of ["nut butter", "almond butter", "hazelnut butter", "cashew butter", "pecan butter", "pistachio butter", "walnut butter", "macadamia butter", "brazil nut butter", "sunflower butter", "sunflower seed butter", "seed butter", "pumpkin seed butter", "sesame butter", "soy butter", "soynut butter", "cocoa butter", "cacao butter", "apple butter", "fruit butter"]) {
+    assert.equal(scanKinds(b).milk, undefined, b);
+  }
+  assert.equal(scanKinds("hazelnut butter").tree_nut, "contains");
+  assert.equal(scanKinds("cashew butter").tree_nut, "contains");
+  assert.equal(scanKinds("sesame butter").sesame, "contains");
+  assert.equal(scanKinds("peanut butter").peanut, "contains");
+  assert.equal(scanKinds("peanut butter").milk, undefined);
+  assert.equal(scanKinds("butter").milk, "contains");
+  assert.equal(scanKinds("cocoa butter, butter").milk, "contains");
+  assert.equal(scanKinds("cocoa butter butter").milk, "contains");
+});
+
+test("product: 'produced in an environment that handles' is a precaution, not an ingredient", () => {
+  assert.deepEqual(kinds("Produced in an environment that handles peanuts.", "peanut"), ["may_contain"]);
+  assert.deepEqual(kinds("rice. Packed in an environment that also processes peanuts", "peanut"), ["may_contain"]);
+  assert.deepEqual(kinds("rice. Prepared in a kitchen that also handles peanuts.", "peanut"), ["may_contain"]);
+  const t = "Ingredients: peanuts. Produced in an environment that handles milk.";
+  assert.deepEqual(kinds(t, "peanut"), ["contains"]);
+  assert.deepEqual(kinds(t, "milk"), ["may_contain"]);
+});
+
+test("scan: hydrolyzed vegetable protein with no source may be gluten, wheat or soy", () => {
+  for (const t of ["hydrolyzed vegetable protein", "hydrolysed vegetable protein", "hydrolyzed plant protein", "hydrolysed plant protein", "hvp"]) {
+    const k = scanKinds(t);
+    assert.equal(k.gluten, "possible", t);
+    assert.equal(k.wheat, "possible", t);
+    assert.equal(k.soy, "possible", t);
+  }
+  assert.equal(scanKinds("hydrolyzed wheat protein").wheat, "contains");
+  assert.equal(scanKinds("hydrolyzed soy protein").soy, "contains");
+  assert.equal(scanKinds("hydrolyzed corn gluten").gluten, undefined);
+  assert.equal(scanKinds("hydrolyzed vegetable protein hydrolyzed corn gluten").gluten, "possible");
+});
+
+test("scan: Latin (INCI) names read like the English ones", () => {
+  for (const n of ["prunus amygdalus", "prunus dulcis", "corylus avellana", "juglans regia", "anacardium occidentale", "bertholletia excelsa", "pistacia vera"]) {
+    assert.equal(scanKinds(n).tree_nut, "contains", n);
+  }
+  assert.equal(scanKinds("arachis hypogaea").peanut, "contains");
+  assert.equal(scanKinds("sesamum indicum").sesame, "contains");
+  assert.equal(scanKinds("glycine max").soy, "contains");
+  assert.deepEqual(scanKinds("prunus amygdalus dulcis oil"), scanKinds("sweet almond oil"));
+  assert.equal(scanKinds("prunus amygdalus dulcis oil").tree_nut, "contains");
+});
+
+test("scan: glycine (the amino acid) is not soy", () => {
+  assert.deepEqual(scanIngredient("glycine"), []);
+});

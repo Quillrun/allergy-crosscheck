@@ -52,7 +52,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   - a **no-tool guard**: without a tool call, the model may ask but never assert.
 
   On a real Alexa+, add-ons can't script speech. What ships is the server's side: every result starts with a `VERDICT:` line and the exact sentence to say. A verbatim hint for safety answers is the top feature request below.
-- **61 automated tests** (24 in the engine package), including:
+- **69 automated tests** (32 in the engine package), including:
   - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
   - MCP end to end over HTTP;
@@ -61,7 +61,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 
 ### What was and wasn't tested
 - **Tested:**
-  - the 61 automated tests;
+  - the 69 automated tests;
   - the full demo conversation, end to end in the simulator, on a local Qwen3.5 9B model with live data;
   - the scan page in headless Chrome, with a camera feed of a real barcode;
   - every demo screen, measured at Echo Show 8 size in headless Chrome.
@@ -72,6 +72,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 ### Challenges I ran into
 - **Open data that contradicts itself.** The answer was never to trust allergen tags alone, and to scan the ingredient text too.
 - **Words the engine didn't know.** Running it over Open Food Facts found six: "gluten", "milkfat", "butterfat", "crustaceans", "cereals containing gluten" and "E322". They are fixed now, each with a test.
+- **Category tags and unreadable ingredients.** Open Food Facts also tags each label ingredient with its parent categories (rice flour is also "flour", peanut also "nut"), and read as words those added allergens the label never named. The engine now reads the label's own tags and skips a short list of generic categories: 57,571 records lose a false "contains". And when part of an ingredient list is not in English, it now says "can't confirm" instead of "none listed": 55,933 records. A hand check of the "allergen in the text but not in the list" count found 16 of 40 hits real, 16 false and 8 unclear, so I don't claim that number.
 - **Plant-based names that contain dairy words** ("coconut yoghurt"). Swaps declare their own allergens instead of being re-parsed.
 - **Voice answers have to be short without losing the reason.** Every verdict says who, what, and where it came from.
 - **A real model behaves differently from a scripted one.** It said "Got it, I'll add Leo" without saving him, and answered a pesto question from memory; that led to the no-tool guard. It also made up shopping-list swaps until the turn history kept the tool results.
@@ -129,7 +130,7 @@ The demo-script buttons call the MCP tools directly and need no model or API key
 - the spread with no ingredient list gives "Can't confirm";
 - the cocoa mix whose tags miss the milk gives "Avoid" for Leo.
 
-To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 61 tests.
+To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 69 tests.
 
 ### New or existing project
 New: the repository's first commit is 4 October 2026, after the submission period opened on 31 August 2026.
@@ -185,7 +186,7 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
   - three verdicts, none of which is "safe";
   - product checks that read Open Food Facts allergen tags, traces and ingredient text together;
   - swaps filtered against everyone's allergies, and never a plant relative of what they replace.
-- **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 24 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents.
+- **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 32 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents.
 
 ## YouTube upload (not part of the Devpost form)
 - **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:56, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).

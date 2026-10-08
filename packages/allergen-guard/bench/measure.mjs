@@ -4,6 +4,7 @@ import { checkProduct } from "../src/engine.ts";
 import { ALL_ALLERGENS, OFF_ALLERGEN_TAGS } from "../src/catalog.ts";
 
 const MISSING = "ingredient list is missing";
+const UNREADABLE = "Part of the ingredient list isn't in English";
 const fam = (a) => (a === "wheat" || a === "gluten" ? "gluten" : a);
 const FAMS = [...new Set(ALL_ALLERGENS.map(fam))];
 const people = [{ name: "all", allergies: ALL_ALLERGENS }];
@@ -12,7 +13,7 @@ const KEEP = 5000; // per-family frequency entries kept per shard (merge trims t
 function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const rand = rng(42);
 
-const cut = () => ({ total: 0, A: 0, allergens_empty: 0, english: 0, B: 0, B_traces_only: 0, B_by_family: {} });
+const cut = () => ({ total: 0, A: 0, allergens_empty: 0, english: 0, B: 0, B_traces_only: 0, B_by_family: {}, cat_removed: 0, cat_removed_by_family: {}, unreadable: 0, unreadable_flipped: 0 });
 const all = cut(), pop = cut();
 const rev = Object.fromEntries(FAMS.map((f) => [f, { count: 0, words: new Map() }]));
 const sample = []; let seen = 0;
@@ -25,10 +26,22 @@ function tally(c, r) {
     c.B++; if (r.tracesOnly) c.B_traces_only++;
     for (const f of r.missed) c.B_by_family[f] = (c.B_by_family[f] ?? 0) + 1;
   }
+  if (r.catRemoved.length) {
+    c.cat_removed++;
+    for (const f of r.catRemoved) c.cat_removed_by_family[f] = (c.cat_removed_by_family[f] ?? 0) + 1;
+  }
+  if (r.unreadable) { c.unreadable++; if (r.flipped) c.unreadable_flipped++; }
 }
 
 export function analyse(row) {
   const res = checkProduct(row, people);
+  // Old category behaviour: the same record without the label's own tags, so every parent category is read.
+  const old = row.ingredients_original_tags?.length ? checkProduct({ ...row, ingredients_original_tags: undefined }, people) : res;
+  const contains = (x) => new Set(x.hits.filter((h) => h.kind === "contains").map((h) => h.allergen));
+  const nowHas = contains(res);
+  const catRemoved = [...new Set([...contains(old)].filter((a) => !nowHas.has(a)).map(fam))];
+  const unreadable = res.dataIssues.some((d) => d.includes(UNREADABLE));
+  const flipped = unreadable && res.hits.length === 0 && res.dataIssues.every((d) => d.includes(UNREADABLE));
   const aTags = row.allergens_tags ?? [], tTags = row.traces_tags ?? [];
   const aEmpty = aTags.length === 0;
   const A = aEmpty && tTags.length === 0 && res.dataIssues.some((d) => d.includes(MISSING));
@@ -40,7 +53,7 @@ export function analyse(row) {
   const missed = english ? [...derivedFams].filter((f) => !listed.has(f)) : [];
   const tracesOnly = missed.some((f) => traced.has(f));
   const reverse = english ? [...listed].filter((f) => !derivedFams.has(f)) : [];
-  return { A, aEmpty, english, missed, tracesOnly, reverse, derived };
+  return { A, aEmpty, english, missed, tracesOnly, reverse, derived, catRemoved, unreadable, flipped };
 }
 
 function consume(row) {

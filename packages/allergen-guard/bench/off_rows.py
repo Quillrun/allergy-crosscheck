@@ -3,7 +3,7 @@
 import sys, json
 import pyarrow.parquet as pq
 
-COLS = ["code", "allergens_tags", "traces_tags", "ingredients_tags", "ingredients_text", "unique_scans_n"]
+COLS = ["code", "allergens_tags", "traces_tags", "ingredients_tags", "ingredients_original_tags", "ingredients_text", "unique_scans_n"]
 
 def lst(v):
     return [x for x in v if isinstance(x, str)] if v else []
@@ -31,6 +31,7 @@ def main():
                 "allergens_tags": lst(d["allergens_tags"][i]),
                 "traces_tags": lst(d["traces_tags"][i]),
                 "ingredients_tags": lst(d["ingredients_tags"][i]),
+                "ingredients_original_tags": lst(d["ingredients_original_tags"][i]),
                 "ingredients_text_en": en,
                 "ingredients_text": first,
                 "unique_scans_n": d["unique_scans_n"][i] or 0,
