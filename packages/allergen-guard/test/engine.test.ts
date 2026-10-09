@@ -627,3 +627,11 @@ test("scan: an unless phrase is masked at every occurrence, and only as the exac
   assert.ok(!has("almond milk (water, almonds), almond milk", "milk"));
   assert.ok(has("almond milk (water, almonds), almond milk", "tree_nut"));
 });
+test("precaution: 'manufactured on equipment exposed to' is a warning (round-8 hand check)", () => {
+  const t = "invert sugar contains: milk manufactured on equipment exposed to:  soy, wheat, peanut, walnut, egg for";
+  for (const a of ["egg", "soy", "wheat", "peanut", "tree_nut"] as AllergenId[]) {
+    assert.ok(!labelKinds(t, a).includes("contains"), a);
+    assert.ok(labelKinds(t, a).includes("may_contain"), a);
+  }
+  assert.ok(labelKinds(t, "milk").includes("contains"));
+});

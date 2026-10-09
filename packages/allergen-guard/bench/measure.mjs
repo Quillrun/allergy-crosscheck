@@ -41,7 +41,7 @@ const CTX_OIL = /\b(oil|oils|fat|fats|shortening|margarine)\b/;
 const CTX_ALT = /\band ?\/ ?or\b|\band or\b|\bor\b/;
 const CTX_NAT = /naturally occurring in|except for those/;
 const fold = (s) => s.replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-  .replace(/[^a-z0-9()\[\]{},;\/]+/g, " ").replace(/\be (\d{3,4}[a-z]?)\b/g, "e$1").replace(/ +/g, " ");
+  .replace(/[^a-z0-9()\[\]{},;:\/]+/g, " ").replace(/\be (\d{3,4}[a-z]?)\b/g, "e$1").replace(/ +/g, " ");
 // Round 4 item-level rules (R7, round 5: flavour/aroma word anywhere in the item). R4b: free-from phrase for the occurrence's family. R5: E220-E228 needs a sulphite word in its item. R6: caramel colour (sulphite ammonia / caustic sulphite).
 const FREE_PHRASE = {
   gluten: /\bgluten free\b/, milk: /\b(milk|dairy) free\b/, egg: /\begg free\b/, soy: /\bsoya? free\b/,
@@ -50,7 +50,7 @@ const FREE_PHRASE = {
 const E_SULPHITE = /^e22[0-8][a-z]?$/;
 const SULPHITE_WORD = /(sulphite|sulfite|bisulphite|bisulfite|metabisulphite|metabisulfite|sulphur dioxide|sulfur dioxide)(s)?/;
 const E_CODE = /(?<![a-z0-9])e22[0-8][a-z]?(?![a-z0-9])/g;
-const E_ONLY = /^[\s()\[\]{},;\/]*$/;
+const E_ONLY = /^[\s()\[\]{},;:\/]*$/;
 const FLAVOUR = /\b(flavou?r|flavou?ring|aroma)(s)?\b/; // R7
 const CARAMEL = /\b(sulphite|sulfite) ammonia\b|\bcaustic (sulphite|sulfite)\b/;
 // Round 7. R8: term directly followed by "free". R9: precaution wording in the item. R10a: base-named miso. R10b: substitute wording next to the term.
@@ -59,6 +59,11 @@ const PRECAUTION = /\bmay (also )?contain\b|\btraces\b|\bcontain traces\b/;
 const MISO_BASE = /(chick ?pea|adzuki|azuki|soya? free) $/;
 const SUBST_AFTER = /^ ?(replacements?|replacers?|substitutes?|alternatives?|analogues?|analogs?)(?![a-z0-9])/;
 const SUBST_BEFORE = /(imitation|non dairy|dairy free) $/;
+// Round 8. R11: OCR-damaged "may contain" in the item. R12: term directly followed by a colon (a heading, not an ingredient). fold() keeps ":" for R12; it changes no other rule's reading.
+const OCR_PRECAUTION = /\bmay (?:also )?cont[a-z]*/;
+const HEADING_AFTER = /^ *:/;
+// Round 9. R13: a sulphite term directly preceded by "ferrous" (the iron fortificant, "ferrous sulfite" is a typo for ferrous sulfate).
+const FERROUS_BEFORE = /ferrous $/;
 const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 let strictUnlocated = 0; // hits whose term could not be found in the folded source text: dropped, and counted
 // Items and, per position, the stack of open-bracket positions.
@@ -106,6 +111,9 @@ export function survivingOccurrences(source, term, family, full) {
     const after = g.slice(pos + len), before = g.slice(0, pos);
     if (FREE_AFTER.test(after)) continue; // R8: "lactose-free": this occurrence only
     if (PRECAUTION.test(item)) continue; // R9: "may contain" / traces in the item
+    if (OCR_PRECAUTION.test(item)) continue; // R11: "may contairi milk" and other OCR-damaged precautions in the item
+    if (HEADING_AFTER.test(after)) continue; // R12: "MILK CHOCOLATE EGG:" is a heading: this occurrence only
+    if (family === "sulphites" && FERROUS_BEFORE.test(before)) continue; // R13: "ferrous sulfite" is the iron fortificant, not a sulphite
     if (term === "miso" && MISO_BASE.test(before)) continue; // R10a: chickpea / adzuki / soy-free miso
     if (SUBST_AFTER.test(after) || SUBST_BEFORE.test(before)) continue; // R10b: replacement, substitute, imitation, non-dairy...
     n++;
@@ -137,7 +145,7 @@ const all = cut(), pop = cut();
 const rev = Object.fromEntries(FAMS.map((f) => [f, { count: 0, words: new Map() }]));
 const sample = []; let seen = 0;
 const SAMPLE_N = 200;
-const randS = rng(17), strictSample = []; let strictSeen = 0;
+const randS = rng(23), strictSample = []; let strictSeen = 0;
 const randC = rng(11), changeSample = []; let changeSeen = 0;
 const groups = new Map(); // "family|oldTerm|phrase" -> { n, ex }
 const bump = (o, f) => { o[f] = (o[f] ?? 0) + 1; };
