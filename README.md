@@ -2,6 +2,8 @@
 
 Allergy Crosscheck tells you who at the table can eat a dish or a product, and why. A household tells Alexa who is allergic to what, guests included. It then checks recipes and packaged foods against everyone at the table, explains the risk on an Echo Show screen, suggests swaps that don't trip anyone else's allergy, and puts them on the shopping list.
 
+It is built around one rule: **when the data is missing, ambiguous or the lookup fails, the answer is "I can't confirm it's OK — treat it as unsafe", never a confident yes.** It never tells anyone a food is "safe".
+
 **Quick start** (Node 22.6 or newer, no build step):
 
 ```bash
@@ -9,18 +11,16 @@ npm install
 npm start    # then open http://127.0.0.1:8787/ and press the demo script buttons (no LLM needed)
 ```
 
-It is built around one rule: **when the data is missing, ambiguous or the lookup fails, the answer is "I can't confirm it's OK — treat it as unsafe", never a confident yes.** It never tells anyone a food is "safe".
-
 - **Self-hosted MCP server**, MCP spec **2025-11-25**, **Streamable HTTP** (stateless), 9 tools.
 - **MCP Apps view** (`ui://allergy-crosscheck/verdict.html`, `text/html;profile=mcp-app`) for Echo Show: verdict banner, per-person results, flagged ingredients, swaps, tap-to-choose products.
 - **Phone scan page** (`/scan`): scan a barcode with the camera, then ask "Can Maya have what I just scanned?". Reading out 13 digits works too, but scanning is quicker. It uses the browser's BarcodeDetector, with a WebAssembly fallback for Safari served by the server itself; typed digits work too.
-- **Alexa+ simulator**: an LLM drives the server through a real MCP client, with browser voice in and out, and renders the MCP Apps view the way an Echo Show would.
+- **Alexa+ simulator**: an LLM drives the server through a real MCP client, with browser voice in and out, and renders the MCP Apps view approximating how an Echo Show hosts it.
 - **Open-source engine** in [`packages/allergen-guard`](packages/allergen-guard): zero dependencies, MIT.
 
 | Missing product data: "can't confirm", never "allergen-free" | A recipe check: verdict per person, the risky lines, swaps checked against everyone |
 |---|---|
 | ![Can't confirm](docs/screenshots/cannot-confirm.png) | ![Lasagne check](docs/screenshots/lasagne-check.png) |
-| **Allergen tags say soy; the ingredient text adds milk** | **A guest saved until Saturday: they drop off after the visit** |
+| **Allergen tags say soy; the ingredient text adds milk** | **A guest saved until Saturday: not checked after the visit** |
 | ![Product check](docs/screenshots/product-check.png) | ![Household](docs/screenshots/household.png) |
 
 Screens from the recorded demo run: a local model driving the server, with live data.
@@ -46,7 +46,7 @@ Allergy Crosscheck:
 | Nobody's allergies saved, or an unknown name in "for" | Says so |
 | Nothing found | "I didn't find *X* listed… check the label" |
 
-In the simulator, a **verdict lock** applies: after a check, the spoken answer is the tool's own sentence, so the model can't soften "avoid" into "should be fine". A **no-tool guard** covers the other way a model goes wrong: answering from memory. Without a tool call, the model may ask a question but not assert anything. It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
+In the simulator, a **verdict lock** applies: after a check, the spoken answer is the tool's own sentence, so the model can't soften "avoid" into "should be fine". A **no-tool guard** covers the other way a model goes wrong: answering from memory. Without a tool call, a keyword filter blocks common verdict and action phrases ("safe", "fine", "saved"…). It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
 
 ## Run it
 
@@ -136,12 +136,12 @@ The tool result, trimmed (`structuredContent` also carries each person's reasons
 | `find_recipe` | Look up a dish's ingredient list |
 | `add_to_shopping_list`, `get_shopping_list`, `remove_from_shopping_list` | Shopping list for the swaps |
 
-Every tool result has a short `speech` line for voice, a `VERDICT:` line for the model, and `structuredContent` for the screen.
+Every tool result has a short `speech` line for voice, a `Say to the user:` sentence for the model (check results also lead with a `VERDICT:` line), and `structuredContent` for the screen.
 
 ## Tests
 
 ```bash
-npm test          # 69 tests: engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
+npm test          # 105 tests (68 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -163,14 +163,14 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, phone scan, simulator guards | 69 automated tests (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 105 automated tests, 68 of them in the engine package (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes; every demo button's screen measured to fit at 944×590 |
 | Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |
 | Amazon's Local Inspector | **Not run.** It installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4) |
 
-The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`). On real Alexa+, add-ons can't script what Alexa says. There, the defence is in the server: every result leads with a `VERDICT:` line and the exact sentence to say, and the tool descriptions tell the model to repeat it. Asking Amazon for a verbatim-speech hook is entry 2 in the [friction log](docs/FRICTION_LOG.md).
+The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`). On real Alexa+, add-ons can't script what Alexa says. There, the defence is in the server: every check result leads with a `VERDICT:` line and every result carries the exact sentence to say, and the tool descriptions tell the model to repeat it. Asking Amazon for a verbatim-speech hook is entry 2 in the [friction log](docs/FRICTION_LOG.md).
 
 ## Limits, stated plainly
 

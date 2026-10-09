@@ -6,19 +6,21 @@ Field by field, in the order of the Devpost form. Facts match the repo as built.
 Allergy Crosscheck
 
 ## Elevator pitch (200 characters max)
-An Alexa+ add-on that checks recipes and scanned food for everyone at the table and says who can eat it, and why. It never says "safe": if the data can't back an answer, it says "I can't confirm".
+An Alexa+ add-on that tells you who at the table can eat a dish or a scanned food, and why. It never says "safe": when the data is missing, it says "I can't confirm".
 
 ## Thumbnail
 `docs/video/gallery/thumbnail.png` (3:2).
 
 ## About the project (paste as the story)
 
+Who at the table can eat tonight's dinner, and why? Allergy Crosscheck answers that by voice and on the Echo Show screen, for the whole household and its guests, from a recipe or a scanned product. When the data can't back an answer, it says "I can't confirm" instead of guessing.
+
 ### Inspiration
 Two real records from Open Food Facts, the open database behind many allergy apps. A chocolate hazelnut spread has an empty allergen list and no ingredient list, so a checker that trusts the list would call it allergen-free. A hot cocoa mix lists soy as its only allergen, while its ingredients include nonfat dry milk, whey and caseinate. A voice assistant that answers confidently from data like that is dangerous. One that knows when it doesn't know is useful.
 
 This is common. I ran the engine over all 4,784,317 Open Food Facts records (snapshot of 7 October 2026). 72.3% of them list no allergens, no "may contain", and have no ingredient list. So do 53.2% of the products scanned in the Open Food Facts app. A checker that trusts the list would say "no allergens" for each one; this one says "can't confirm". Details: [`packages/allergen-guard/bench/README.md`](packages/allergen-guard/bench/README.md). Data: Open Food Facts (ODbL).
 
-The stakes are high. About 33 million people in the US have at least one food allergy, including 1 in 13 children ([FARE](https://www.foodallergy.org/resources/facts-and-statistics)). In national surveys, 42% of US children with a food allergy had been to an emergency room for it at least once ([Gupta 2018](https://pubmed.ncbi.nlm.nih.gov/30455345/)), and 51% of adults with one had had a severe reaction ([Gupta 2019](https://pubmed.ncbi.nlm.nih.gov/30646188/)). Two situations stand out: in a Dutch study of unexpected reactions, 44% came from pre-packaged products and 23% from meals eaten away from home, at friends' or relatives' homes, at school or in restaurants (preliminary results, [Michelsen-Huisman 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC4412422/)). "May contain" labels don't settle it either: 46% of the food-allergy shoppers surveyed were unsure or wrongly believed those labels are required by law ([Marchisotto 2017](https://pubmed.ncbi.nlm.nih.gov/27818137/)). At home, the real question is whether a dish is OK for everyone at the table tonight.
+The stakes are high. In the US, about 1 in 15 adults (6.7%) and 1 in 19 children (5.3%) have a food allergy ([CDC, National Health Interview Survey, 2024 data](https://www.cdc.gov/nchs/pressroom/releases/20260108.html)). In national surveys, 42% of US children with a food allergy had been to an emergency room for it at least once ([Gupta 2018](https://pubmed.ncbi.nlm.nih.gov/30455345/)), and 51% of adults with one had had a severe reaction ([Gupta 2019](https://pubmed.ncbi.nlm.nih.gov/30646188/)). Two situations stand out: in a Dutch study of unexpected reactions, 44% came from pre-packaged products and 23% from meals eaten away from home, at friends' or relatives' homes, at school or in restaurants (preliminary results, [Michelsen-Huisman 2015](https://pmc.ncbi.nlm.nih.gov/articles/PMC4412422/)). "May contain" labels don't settle it either: 46% of the food-allergy shoppers surveyed were unsure or wrongly believed those labels are required by law ([Marchisotto 2017](https://pubmed.ncbi.nlm.nih.gov/27818137/)). At home, the real question is whether a dish is OK for everyone at the table tonight.
 
 Alexa+ already remembers a family's allergies. Amazon says it understands "your family's dietary preferences, allergies, and weekly traditions" ([Amazon](https://aboutamazon.com/news/devices/amazon-2025-devices-alexa-event-live-updates)). But remembering an allergy isn't the same as checking food for it.
 
@@ -27,18 +29,20 @@ Allergy Crosscheck tells you who at the table can eat a dish or a product, and w
 
 Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have dairy or celery, is coming on Saturday. "Check tonight's lasagne" gives each of them a verdict on the Echo Show, names the risky ingredients, and suggests swaps checked against both of them, so a fix for Leo never trips Maya.
 
-- **Household and guests:** who is allergic to what, with an end date for visitors. Guests drop off the list after their visit.
+- **Household and guests:** who is allergic to what, with an end date for visitors. Guests stop being checked after their last day.
 - **Recipes:** a dish name, looked up on TheMealDB, or ingredients read out. You get a verdict per person, the risky lines, and household-aware swaps that go onto a shopping list.
 - **Packaged food:** scan the barcode on your phone and ask "Can Maya have what I just scanned?", or say the name or the barcode. If several products match, it asks which one. It reads the Open Food Facts allergen tags, traces and ingredient text together, which is how it finds the cocoa mix's milk.
 - **Fail-closed:** there are three answers: "Avoid", "Can't confirm" and "None listed, check the label". Never "safe". Missing, ambiguous or non-English data gives "Can't confirm". So does a recipe word it doesn't recognise ("I don't know what's in garam masala") and a failed lookup.
 
 ### How I built it
-- **More than an API wrapper.** Amazon names a "basic MCP wrapper around an existing API" as the obvious Alexa+ idea. This is built on the creative ones on its list:
-  - **state across sessions:** the household and dated guests are kept between conversations, and guests drop off after their visit;
-  - **orchestration across services:** one spoken question looks the dish up on TheMealDB, checks every person, and suggests swaps checked against everyone; the next puts them on the shopping list;
-  - **MCP Apps:** an Echo Show screen with a verdict per person and tap-to-choose that calls back into the server;
-  - **a cross-check, not a lookup:** a product's allergen tags, traces and ingredient text are read together, which is how it finds the milk that the cocoa mix's tags leave out.
-- **Self-hosted MCP server** in TypeScript with the MCP TypeScript SDK 1.32. It uses MCP spec **2025-11-25** over **Streamable HTTP**, is stateless, and has 9 tools. Every result leads with a `VERDICT:` line and the exact sentence to say, plus `structuredContent` for the screen.
+- **More than an API wrapper.** Amazon names a "basic MCP wrapper around an existing API" as the obvious Alexa+ idea. Of the creative examples in the judging criteria, this builds three and part of a fourth:
+  - **State across sessions:** the household and dated guests are saved between conversations, and a guest drops off the list after their last day (`src/server/store.ts`, `until`; `save_person` in `src/server/tools.ts`). The "what I just scanned" scan is kept for 30 minutes.
+  - **An agentic flow across services:** one spoken question runs `check_recipe`, which looks the dish up on TheMealDB, checks every ingredient against every person, and suggests swaps checked against everyone. A later turn calls `add_to_shopping_list` with the swaps. The model chooses the calls; the code is in `src/server/tools.ts` and `src/server/sources.ts`. Packaged food goes the same way through Open Food Facts.
+  - **MCP Apps:** the Echo Show screen, with tap-to-choose that calls back into the server (`public/widget.html`).
+  - **Cards, partly:** the screen is made of card panels: "Who's eating", "Watch out for", "Swaps", "Which one?" and "Shopping list". These are HTML sections I drew inside the MCP Apps view, not Alexa+'s own card or carousel components, and there are no images or media.
+  - **Not built:** purchasing, and Agent Skills.
+  - **A cross-check, not a lookup:** a product's allergen tags, traces and ingredient text are read together, which is how it finds the milk that the cocoa mix's tags leave out.
+- **Self-hosted MCP server** in TypeScript with the MCP TypeScript SDK 1.32. It uses MCP spec **2025-11-25** over **Streamable HTTP**, is stateless, and has 9 tools. Every check result (`check_recipe`, `check_product`) leads with a `VERDICT:` line, and every result carries the exact sentence to say, plus `structuredContent` for the screen.
 - **MCP Apps screen** for the Echo Show (`text/html;profile=mcp-app`), built to the Alexa+ MCP design guide:
   - each verdict fits one screen at Echo Show 8 size;
   - text is 16px or larger, touch targets 48px, contrast at least 4.5:1;
@@ -47,12 +51,12 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   Tapping a choice calls back into the server with `tools/call`. `_meta.ui.resourceUri` is on every tool definition and every result.
 - **Open-source engine, `allergen-guard`**, MIT, with zero dependencies. It covers the EU 14 and US Big 9 allergens, with wheat separate from gluten, and has an ingredient dictionary with exclusions (peanut butter isn't dairy; oyster mushrooms aren't shellfish). Swaps declare their own allergens and are never a plant relative of what they replace.
 - **Phone scan page:** the camera reads the barcode with the browser's BarcodeDetector, or a WebAssembly decoder for Safari that the server serves itself. The server keeps the scan for 30 minutes as "what I just scanned".
-- **Simulated Alexa+**, because the Alexa+ MCP Toolkit is US-only and I'm outside the US. An LLM drives the server through a real MCP client, and the browser handles voice and hosts the MCP Apps screen. The simulator adds two guards, as a test harness rather than part of the add-on:
+- **Simulated Alexa+**, because the Alexa+ docs say the MCP Toolkit is available in the United States and I'm outside the US; I did not attempt a deployment. An LLM drives the server through a real MCP client, and the browser handles voice and hosts the MCP Apps screen. The simulator adds two guards, as a test harness rather than part of the add-on:
   - a **verdict lock**: after a check, the spoken answer is the tool's own sentence;
-  - a **no-tool guard**: without a tool call, the model may ask but never assert.
+  - a **no-tool guard**: a keyword filter that blocks common verdict and action phrases when no tool ran.
 
-  On a real Alexa+, add-ons can't script speech. What ships is the server's side: every result starts with a `VERDICT:` line and the exact sentence to say. A verbatim hint for safety answers is the top feature request below.
-- **69 automated tests** (32 in the engine package), including:
+  On a real Alexa+, add-ons can't script speech. What ships is the server's side: every check result starts with a `VERDICT:` line, and every result carries the exact sentence to say. A verbatim hint for safety answers is the top feature request below.
+- **105 automated tests** (68 of them in the engine package), including:
   - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
   - MCP end to end over HTTP;
@@ -61,18 +65,18 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 
 ### What was and wasn't tested
 - **Tested:**
-  - the 69 automated tests;
+  - the 105 automated tests;
   - the full demo conversation, end to end in the simulator, on a local Qwen3.5 9B model with live data;
   - the scan page in headless Chrome, with a camera feed of a real barcode;
   - every demo screen, measured at Echo Show 8 size in headless Chrome.
 - **Not tested:**
-  - a real Alexa+, because the Toolkit is US-only;
+  - a real Alexa+: the docs say the Toolkit is available in the United States, and I did not attempt a deployment from outside the US;
   - Amazon's Local Inspector. Even with a developer account, it installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4).
 
 ### Challenges I ran into
 - **Open data that contradicts itself.** The answer was never to trust allergen tags alone, and to scan the ingredient text too.
 - **Words the engine didn't know.** Running it over Open Food Facts found six: "gluten", "milkfat", "butterfat", "crustaceans", "cereals containing gluten" and "E322". They are fixed now, each with a test.
-- **Category tags and unreadable ingredients.** Open Food Facts also tags each label ingredient with its parent categories (rice flour is also "flour", peanut also "nut"), and read as words those added allergens the label never named. The engine now reads the label's own tags and skips a short list of generic categories: 57,571 records lose a false "contains". And when part of an ingredient list is not in English, it now says "can't confirm" instead of "none listed": 55,933 records. A hand check of the "allergen in the text but not in the list" count found 16 of 40 hits real, 16 false and 8 unclear, so I don't claim that number.
+- **Category tags and unreadable ingredients.** Open Food Facts also tags each label ingredient with its parent categories (rice flour is also "flour", peanut also "nut"), and read as words those added allergens the label never named. The engine now reads the label's own tags and skips a short list of generic categories: 57,571 records lose a false "contains". And when part of an ingredient list is not in English, it now says "can't confirm" instead of "none listed": 55,933 records. The "allergen in the text but not in the list" count is not claimed: after nine pre-registered rounds of hand checks, the final round found 93 of 100 checked records real (95% interval 86.3-96.6%) on a count of 8,388 records.
 - **Plant-based names that contain dairy words** ("coconut yoghurt"). Swaps declare their own allergens instead of being re-parsed.
 - **Voice answers have to be short without losing the reason.** Every verdict says who, what, and where it came from.
 - **A real model behaves differently from a scripted one.** It said "Got it, I'll add Leo" without saving him, and answered a pesto question from memory; that led to the no-tool guard. It also made up shopping-list swaps until the turn history kept the tool results.
@@ -97,7 +101,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 - An allergist review of the dictionary and the swaps.
 
 ## Built with (tags)
-alexa+, model-context-protocol, mcp-apps, typescript, node.js, open-food-facts, themealdb, web-speech-api, barcode-detector, mlx, qwen, claude-code
+alexa+, model-context-protocol, mcp-apps, streamable-http, typescript, node.js, open-food-facts, themealdb, web-speech-api, barcode-detector, mlx, qwen, claude-code
 
 ## Try it out (links)
 - Code repository: <GitHub URL, once AUTHOR decides private or public>
@@ -130,7 +134,7 @@ The demo-script buttons call the MCP tools directly and need no model or API key
 - the spread with no ingredient list gives "Can't confirm";
 - the cocoa mix whose tags miss the milk gives "Avoid" for Leo.
 
-To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 69 tests.
+To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 105 tests.
 
 ### New or existing project
 New: the repository's first commit is 4 October 2026, after the submission period opened on 31 August 2026.
@@ -142,31 +146,68 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
 - **Used for:** the screen and voice rules (design guide), where Alexa+ reads `_meta.ui`, and the certification path (Local Inspector).
 - **Worked well:** the design guide is concrete; its sizes, contrast and density rules reshaped the screen. Add-ons are plain MCP, so the whole server could be built and tested with standard MCP tools before any Alexa-specific step.
 - **Needs work:**
-  - The Toolkit is US-only, so from outside the US I built a simulator instead of testing on a real Alexa+ (friction log 1).
+  - The docs say the Toolkit is available in the United States; I did not attempt a deployment from outside the US and built a simulator instead of testing on a real Alexa+ (friction log 1).
   - There's no way to ask Alexa+ to speak a safety verdict verbatim: "You can't script what Alexa says" (2).
   - There's no automated way to test multi-turn conversations (3).
   - The Local Inspector isn't on public npm. It installs from a private registry that needs an AWS account, an IAM user and access to an Amazon role, and searching npm for `alexa-ai` finds an unrelated package (4).
   - The Alexa+ docs put `_meta.ui` in the tool call response, while the MCP Apps spec puts `resourceUri` on the tool definition. I did both (5).
-- **Onboarding (zero to hello world):** a local MCP server came quickly, because it's the open standard. Hello world on Alexa+ itself, a deployed add-on answering in the web simulator, wasn't reachable from outside the US.
+- **Onboarding (zero to hello world):** a local MCP server came quickly, because it's the open standard. Hello world on Alexa+ itself, a deployed add-on answering in the web simulator, I did not attempt it from outside the US, because the docs say the Toolkit is available in the United States.
 - **Would I build with it again?** <AUTHOR: yes or no, and why>
 
-**MCP TypeScript SDK**
-- **Used for:** the server (stateless Streamable HTTP, spec 2025-11-25), plus the MCP client in the simulator and the tests.
+**MCP TypeScript SDK** (`@modelcontextprotocol/sdk` 1.32, with `zod` for tool inputs)
+- **Used for:** the server (stateless Streamable HTTP, spec 2025-11-25, 9 tools), plus the MCP client in the simulator and the tests.
 - **Worked well:** the server took a few lines, and the SDK client made end-to-end tests over real HTTP easy.
 - **Needs work:** nothing blocking came up.
+- **Onboarding:** `npm install`, register tools with a `zod` schema, serve over HTTP. No account or key.
 
-**MCP Apps**
-- **Used for:** the Echo Show screen, including tap-to-choose that calls back into the server.
+**MCP Apps** (spec 2026-01-26)
+- **Used for:** the Echo Show screen (`ui://allergy-crosscheck/verdict.html`), including tap-to-choose that calls back into the server.
 - **Worked well:** one HTML file and a small postMessage JSON-RPC bridge were enough for a full screen.
-- **Needs work:** where `_meta.ui` goes (above).
+- **Needs work:** where `_meta.ui` goes (above, friction log 5). I couldn't check the screen on a real Alexa+, only in my host shim.
+- **Onboarding:** the spec plus the Alexa+ design guide was enough to get a first screen. The host shim I built to test it is part of the simulator.
 
-**Open Food Facts API and TheMealDB API**
-- **Used for:** product data by barcode or name, and recipes by dish name.
-- **Worked well:** both are free to develop against. Open Food Facts needs no key, and TheMealDB has a free development key.
-- **Needs work:** Open Food Facts data is volunteer-entered and sometimes contradicts itself. That's why Allergy Crosscheck reads the allergen tags and the ingredient text together, and fails closed.
+**Alexa developer console: Voice & Tone** (Test tab)
+- **Used for:** Alexa's five lines in the demo video, in Amazon's own Alexa voice.
+- **Worked well:** the voice is the real one, and the page's own `getTTS` call returns the audio as a base64 MP3.
+- **Needs work:** no export or download control, and the editor adds its own closing `</speak>` tag, so a typed one causes a 400 (friction log 6).
+- **Onboarding:** the Test tab only opens once a skill exists, so I created an empty private skill for it. Account sign-up also rejected a non-US letter in my name (friction log 7).
+
+**Open Food Facts API**
+- **Used for:** packaged products by barcode (`/api/v2/product`) and by name (`search.openfoodfacts.org`).
+- **Worked well:** free, no key, and it carries allergen tags, traces and ingredient text in one record.
+- **Needs work:** the data is volunteer-entered and sometimes contradicts itself or is empty (72.3% of records, above). That's why Allergy Crosscheck reads the tags and the ingredient text together, and fails closed.
+- **Onboarding:** one `curl`; no sign-up.
+
+**TheMealDB API**
+- **Used for:** recipes by dish name (`search.php?s=`).
+- **Worked well:** free, with a free development key, and ingredients and measures in one response.
+- **Needs work:** ingredients come as 20 numbered fields (`strIngredient1`…), and the search matches on the name, so the code retries with leading words dropped when a full name isn't found ("shrimp pad thai" becomes "pad thai").
+- **Onboarding:** one request with the public development key.
+
+**Local model via MLX (Qwen3.5 9B, 4-bit)**
+- **Used for:** the model that drives the simulator, so the whole demo ran with no cloud API.
+- **Worked well:** it handled the full demo conversation end to end with tool calling.
+- **Needs work:** a 9B model skipped tools: it said "Got it, I'll add Leo" without saving him, and answered a pesto question from memory (friction log 2). The simulator's two guards cover that.
+- **Onboarding:** the simulator speaks any OpenAI-compatible endpoint; two environment variables, `LLM_BASE_URL` and `LLM_MODEL`.
+
+**Web Speech API** (speech recognition and synthesis, in Chrome)
+- **Used for:** voice in and out of the simulator.
+- **Worked well:** no install and no key.
+- **Needs work:** Chrome sends the audio to its own speech service, which the simulator page says.
+- **Onboarding:** a few lines of browser JavaScript.
+
+**BarcodeDetector API** (with the `barcode-detector` package as a WebAssembly fallback)
+- **Used for:** the phone scan page, which reads a product's barcode with the camera.
+- **Worked well:** the native API where the browser has it; the ponyfill fills the gap for Safari, served by the server itself.
+- **Needs work:** not every browser has it, so a fallback is needed.
+- **Onboarding:** a few lines, plus the camera permission.
+
+**Claude Code**
+- **Used for:** the coding agent for this repository (every commit carries a Claude co-author line).
+- **Worked well / needs work:** <AUTHOR: one or two sentences on what Claude Code did well and badly on this project>
 
 ### Feature requests (optional)
-- **Critical:** let developer accounts in any country use the web simulator for development-stage add-ons. It's the only end-to-end test path, and it was closed to me.
+- **Critical:** let developer accounts in any country use the web simulator for development-stage add-ons. The docs describe it as the end-to-end test path, and the Toolkit is documented as available in the United States; I did not attempt it from outside the US.
 - **Critical:** a verbatim hint on tool results, such as `speech: { text, verbatim: true }`, for health and safety add-ons. A verdict must never be paraphrased into "should be fine".
 - **Important:** scripted multi-turn conversation tests in the Local Inspector or the `alexa-ai` CLI. The bugs that mattered most only showed up across turns.
 - **Important:** publish the Local Inspector and the `alexa-ai` CLI on public npm under the `@alexa-ai` scope, so it can run in CI and nobody installs an unscoped look-alike.
@@ -186,7 +227,7 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
   - three verdicts, none of which is "safe";
   - product checks that read Open Food Facts allergen tags, traces and ingredient text together;
   - swaps filtered against everyone's allergies, and never a plant relative of what they replace.
-- **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 32 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents.
+- **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 68 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents.
 
 ## YouTube upload (not part of the Devpost form)
 - **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:56, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
@@ -199,7 +240,7 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
 ```
 This audio was created with Boson AI's Higgs Audio — https://www.boson.ai/higgs-audio
 
-Allergy Crosscheck is an Alexa+ add-on, shown in a simulator, that checks recipes and scanned food for everyone at the table, guests included, and tells you who can eat it, and why. It never says "safe": when the data can't back an answer, it says "I can't confirm".
+Allergy Crosscheck is an Alexa+ add-on, shown in a simulator, that tells you who at the table can eat it, and why: it checks recipes and scanned food for everyone, guests included. It never says "safe": when the data can't back an answer, it says "I can't confirm".
 
 Built for Amazon's Build, Ship, Shape hackathon (Alexa+ track): a self-hosted MCP server (spec 2025-11-25, Streamable HTTP), an MCP Apps screen for the Echo Show, and an open-source allergen engine. The voices are synthetic. Product data: Open Food Facts (ODbL). Recipes: TheMealDB.
 
@@ -220,5 +261,5 @@ Pick one:
 - **Public:** the root `LICENSE` (MIT) is in place, so GitHub shows the licence in the About section, which the rules ask for. No other step.
 - **Private:** on submission day, add these collaborators: `chris-trag`, `knmeiss`, `giolaq`, `anishamalde`, `mosesroth`, `emersonsklar`, and `testing@devpost.com`. GitHub invitations expire after 7 days, so don't add them earlier.
 
-**GitHub About text:** A fail-closed allergy checker for Alexa+: an MCP server and Echo Show screen that tell you who at the table can eat it, and why. They check recipes and scanned food for everyone, and never say "safe".
+**GitHub About text:** An Alexa+ MCP server and Echo Show screen that tell you who at the table can eat it, and why. They check recipes and scanned food for everyone, and never say "safe".
 **Topics:** alexa, alexa-plus, mcp, mcp-server, mcp-apps, food-allergy, allergens, open-food-facts, echo-show, typescript
