@@ -17,6 +17,8 @@
     "typescript": "^5.9.3"
   },
   "private": true,
+  "license": "MIT",
+  "keywords": ["alexa", "mcp", "allergens", "food-allergy", "open-food-facts"],
   "type": "module",
   "engines": {
     "node": ">=22.6"

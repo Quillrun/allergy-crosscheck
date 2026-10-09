@@ -2,6 +2,13 @@
 
 Allergy Crosscheck tells you who at the table can eat a dish or a product, and why. A household tells Alexa who is allergic to what, guests included. It then checks recipes and packaged foods against everyone at the table, explains the risk on an Echo Show screen, suggests swaps that don't trip anyone else's allergy, and puts them on the shopping list.
 
+**Quick start** (Node 22.6 or newer, no build step):
+
+```bash
+npm install
+npm start    # then open http://127.0.0.1:8787/ and press the demo script buttons (no LLM needed)
+```
+
 It is built around one rule: **when the data is missing, ambiguous or the lookup fails, the answer is "I can't confirm it's OK — treat it as unsafe", never a confident yes.** It never tells anyone a food is "safe".
 
 - **Self-hosted MCP server**, MCP spec **2025-11-25**, **Streamable HTTP** (stateless), 9 tools.
