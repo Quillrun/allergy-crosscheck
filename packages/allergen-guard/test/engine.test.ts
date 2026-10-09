@@ -501,3 +501,112 @@ test("'latte' and 'cafe latte' are English, not a foreign-text flag", () => {
   assert.deepEqual(englishOnly("eggs, latte").dataIssues, []);
   assert.deepEqual(englishOnly("cafe latte").dataIssues, []);
 });
+
+const kindsOf = (text: string) => {
+  const k: Partial<Record<AllergenId, string>> = {};
+  for (const h of checkProduct({ product_name: "X", allergens_tags: [], traces_tags: [], ingredients_text_en: text }, []).hits) {
+    if (k[h.allergen] !== "contains") k[h.allergen] = h.kind;
+  }
+  return k;
+};
+
+test("engine: 'shares equipment with peanuts' is may_contain, not contains", () => {
+  const k = kindsOf("Milk chocolate (sugar, milk). Shares equipment with peanuts.");
+  assert.equal(k.milk, "contains");
+  assert.equal(k.peanut, "may_contain");
+  for (const w of ["Produced on equipment shared with peanuts", "Made on a line that also makes peanuts", "Processed on shared equipment with peanuts", "Shares the same facility with peanuts"]) {
+    assert.equal(kindsOf(`Sugar. ${w}.`).peanut, "may_contain", w);
+  }
+});
+
+test("engine: corn milk and plant creams are not milk; cream, sour cream, ice cream still are", () => {
+  assert.equal(scanIngredient("Corn milk 98.03%").some((h) => h.allergen === "milk" && h.kind === "contains"), false);
+  assert.equal(scanKinds("Corn milk 98.03%").milk, "possible"); // rarer plant milk: downgraded, never absent
+  assert.equal(scanIngredient("oat cream").some((h) => h.allergen === "milk"), false);
+  assert.notEqual(kindsOf("daiya oat cream blend (water, gluten-free oat flour, pea protein)").milk, "contains");
+  assert.equal(scanKinds("cream").milk, "contains");
+  assert.equal(scanKinds("sour cream").milk, "contains");
+  assert.equal(scanKinds("ice cream").milk, "contains");
+  assert.deepEqual(scanIngredient("cream of tartar"), []);
+  for (const [nut, a] of [["peanut milk", "peanut"], ["walnut milk", "tree_nut"], ["hazelnut milk", "tree_nut"]] as [string, AllergenId][]) {
+    assert.equal(scanKinds(nut)[a], "contains", nut);
+  }
+});
+
+test("engine: 'cheese flavour' and 'prawn flavour' are possible, never nothing; stated milk stays contains", () => {
+  assert.equal(scanKinds("artificial cheddar cheese flavor").milk, "possible");
+  const k = kindsOf("Prawn Cocktail Flavour [Salt, Wheat Flour]");
+  assert.equal(k.crustacean, "possible");
+  assert.equal(k.wheat, "contains");
+  assert.ok(scanIngredient("cheese flavour (milk)").some((h) => h.allergen === "milk" && h.kind === "contains"), "cheese flavour (milk)");
+  assert.ok(scanIngredient("cheese flavour (dairy)").some((h) => h.allergen === "milk" && h.kind === "contains"), "cheese flavour (dairy)");
+  assert.equal(scanKinds("cheddar cheese").milk, "contains");
+  assert.ok(scanIngredient("natural crustaceans flavouring").some((h) => h.allergen === "crustacean" && h.kind === "contains"));
+  assert.equal(scanKinds("cheese flavour and cheese powder").milk, "contains");
+});
+
+test("engine: UK allergy-advice boilerplate is not gluten; real advice still counts", () => {
+  const tpl = "Allergy Advice: For allergens, including cereals containing gluten, see ingredients in bold.";
+  assert.equal(kindsOf(`Sugar, cocoa butter. ${tpl}`).gluten, undefined);
+  assert.equal(kindsOf("Sugar. Allergy Advice: For allergens see cereals containing gluten…").gluten, "contains");
+  assert.equal(kindsOf(`Wheat flour, sugar. ${tpl}`).gluten, "contains");
+  assert.equal(kindsOf("Allergy advice: contains milk.").milk, "contains");
+  assert.equal(kindsOf("Sugar. Allergy advice: for allergens see wheat, in bold.").wheat, "contains");
+});
+
+test("engine: a real allergen list after 'for allergens see' is scanned, the template is not", () => {
+  const k = kindsOf("Black gram, onion, salt. Allergy Advice: For allergens see cereals containing gluten, nuts, soya and sulphites.");
+  assert.equal(k.gluten, "contains");
+  assert.ok(k.tree_nut && k.soy && k.sulphites, JSON.stringify(k));
+  assert.equal(kindsOf("Sugar, cocoa butter. Allergy Advice: For allergens, including cereals containing gluten, see ingredients in bold.").gluten, undefined);
+});
+
+test("engine: asafoetida is possible gluten; 'hing' only matches as a word", () => {
+  assert.equal(kindsOf("Black gram, Onion, Asafoetida").gluten, "possible");
+  assert.equal(kindsOf("onion, asafetida").gluten, "possible");
+  assert.equal(kindsOf("salt, hing").gluten, "possible");
+  for (const t of ["thing", "washing powder", "sprinkling", "king prawns"]) assert.equal(kindsOf(t).gluten, undefined, t);
+});
+
+test("engine: rarer plant milks downgrade milk to possible, established ones mask it", () => {
+  const w = kindsOf("fresh walnut milk");
+  assert.equal(w.tree_nut, "contains");
+  assert.equal(w.milk, "possible");
+  const p = kindsOf("of thad chips are profe container the nuts peanut milk son");
+  assert.equal(p.peanut, "contains");
+  assert.equal(p.milk, "possible");
+  assert.equal(kindsOf("oat milk").milk, undefined);
+  assert.equal(kindsOf("water, cow milk").milk, "contains");
+});
+
+// Round-5 hand check: label wording that is a warning, not an ingredient.
+const labelKinds = (text: string, a: AllergenId) => [...new Set(checkProduct({ ingredients_text_en: text }, [person("X", a)]).hits.filter((h) => h.allergen === a).map((h) => h.kind))].sort();
+test("precaution: 'not suitable for … allergy sufferers' is one precaution sentence", () => {
+  const t = "Garlic, Salt, Dried Chillies.  Not suitable for Nut, Peanut and Sesame allergy sufferers.";
+  for (const a of ["tree_nut", "peanut", "sesame"] as AllergenId[]) { assert.ok(labelKinds(t, a).includes("may_contain"), a); assert.ok(!labelKinds(t, a).includes("contains"), a); }
+  assert.ok(labelKinds("Rice. Unsuitable for those with a sesame allergy.", "sesame").includes("may_contain"));
+  assert.ok(!labelKinds("Rice. Unsuitable for those with a sesame allergy.", "sesame").includes("contains"));
+  assert.ok(labelKinds("Flour, sesame. Not suitable for vegetarians.", "sesame").includes("contains"));
+  assert.ok(labelKinds("Flour, sesame. Not suitable for vegetarians.", "sesame").length === 1);
+  // the sentence ends at its full stop: what follows stays an ingredient
+  assert.ok(labelKinds("Not suitable for nut allergy sufferers. Sesame, salt.", "sesame").includes("contains"));
+});
+test("precaution: a may-contain list cut by a full stop joins the precaution; nothing else does", () => {
+  const t = "Salt. For allergens, see ingredients in bold. May contain traces of gluten. egg peanuts and nuts.";
+  for (const a of ["egg", "peanut", "tree_nut", "gluten"] as AllergenId[]) { assert.ok(labelKinds(t, a).includes("may_contain"), a); assert.ok(!labelKinds(t, a).includes("contains"), a); }
+  const n = "May contain traces of nuts. Egg pasta (durum wheat, egg).";
+  assert.ok(labelKinds(n, "egg").includes("contains"));
+  assert.ok(labelKinds(n, "wheat").includes("contains"));
+});
+test("precaution: unclosed bracket and Spanish lists keep the engine's current reading", () => {
+  assert.deepEqual(labelKinds("Vegetable oil (contains one or more of the following: palm, canola, soybean", "soy"), ["may_contain", "possible"]);
+  assert.ok(labelKinds("CONTIENE: TRIGO, SULFITOS Y SOYA. PUEDE CONTENER LECHE.", "soy").includes("contains"));
+});
+test("scan: miso with a soy-free composition is possible soy; otherwise soy", () => {
+  assert.deepEqual(labelKinds("organic rice miso (organic rice, water, salt, alcohol, koji culture)", "soy"), ["possible"]);
+  assert.deepEqual(labelKinds("miso", "soy"), ["contains"]);
+  assert.deepEqual(labelKinds("miso (water, soybeans, rice)", "soy"), ["contains"]);
+});
+test("precaution: a following sentence with any other word is not part of the list", () => {
+  assert.ok(labelKinds("ALLERGIES: contains almonds and may contain traces of hazelnuts. Wheat & gluten free.", "wheat").includes("contains"));
+});

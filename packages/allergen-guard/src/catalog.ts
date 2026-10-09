@@ -167,6 +167,8 @@ export type Term = {
 };
 
 const PLANT_MILKS = ["almond milk", "oat milk", "soy milk", "soya milk", "rice milk", "coconut milk", "cashew milk", "hemp milk", "pea milk", "plant milk"];
+// Rarer, and also what OCR makes of "contains nuts, peanut, milk": masked from dairy milk but still possible milk (the nut term flags the nut).
+const RARE_PLANT_MILKS = ["corn milk", "peanut milk", "walnut milk", "hazelnut milk"];
 const NOT_DAIRY_BUTTER = ["peanut butter", "cocoa butter", "shea butter", "apple butter", "nut butter", "almond butter", "cashew butter", "seed butter", "sunflower butter", "sunflower seed butter", "butter bean", "butter beans", "coconut butter", "cacao butter", "mango butter", "kokum butter", "butter flavour", "butter flavor", "butter flavouring", "butter flavoring", "parkii butter", "butyrospermum parkii butter",
   "hazelnut butter", "pecan butter", "pistachio butter", "walnut butter", "macadamia butter", "brazil nut butter", "pumpkin seed butter", "sesame butter", "soy butter", "soynut butter", "fruit butter"];
 const NOT_WHEAT_FLOUR = [
@@ -203,16 +205,17 @@ export const TERMS: Term[] = [
   { terms: ["amaretti", "macaron", "orgeat", "romesco", "baklava", "dukkah"], contains: ["tree_nut"], possible: ["egg", "wheat", "gluten", "sesame"] },
   { terms: ["amaretto", "frangelico", "nocino", "biscotti", "mole", "nut oil"], contains: [], possible: ["tree_nut", "peanut"] },
   // milk
-  { terms: ["milk", "buttermilk", "milk powder", "milkfat"], contains: ["milk"], unless: [...PLANT_MILKS, "milk thistle"] },
+  { terms: ["milk", "buttermilk", "milk powder", "milkfat"], contains: ["milk"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS, "milk thistle"] },
+  { terms: RARE_PLANT_MILKS, contains: [], possible: ["milk"] },
   { terms: ["butter", "ghee", "butterfat"], contains: ["milk"], unless: NOT_DAIRY_BUTTER },
-  { terms: ["cream", "sour cream", "creme fraiche", "half and half"], contains: ["milk"], unless: ["cream of tartar", "coconut cream", "ice cream", "cream soda", "cream crackers"] },
+  { terms: ["cream", "sour cream", "creme fraiche", "half and half"], contains: ["milk"], unless: ["cream of tartar", "coconut cream", "ice cream", "cream soda", "cream crackers", "oat cream", "soy cream", "soya cream", "cashew cream", "almond cream", "rice cream", "plant cream", "vegan cream"] },
   {
     terms: ["cheese", "parmesan", "parmigiano", "pecorino", "mozzarella", "cheddar", "ricotta", "feta", "mascarpone", "gouda", "brie",
       "camembert", "gruyere", "halloumi", "paneer", "burrata", "quark", "skyr"],
     contains: ["milk"],
     unless: ["cheese culture"],
   },
-  { terms: ["milkshake", "cappuccino", "flat white", "macchiato", "frappuccino", "hot chocolate"], contains: ["milk"], possible: ["soy", "tree_nut"], unless: PLANT_MILKS },
+  { terms: ["milkshake", "cappuccino", "flat white", "macchiato", "frappuccino", "hot chocolate"], contains: ["milk"], possible: ["soy", "tree_nut"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS] },
   { terms: ["mocha"], contains: [], possible: ["milk"] },
   { terms: ["barley grass", "wheat grass"], contains: [], possible: ["gluten", "wheat"] }, // young leaves, gluten only if seeds get in
   { terms: ["butter flavour", "butter flavor", "butter flavouring", "butter flavoring"], contains: [], possible: ["milk"] },
@@ -250,6 +253,8 @@ export const TERMS: Term[] = [
   { terms: ["soy", "soya", "soybean", "soyabean", "soja", "tofu", "bean curd", "tempeh", "edamame", "miso", "shoyu", "tamari", "natto", "textured vegetable protein", "tvp", "glycine max"], contains: ["soy"] },
   // HVP with no named source is soy, wheat or corn; the sourced forms ("hydrolyzed wheat protein") match their own source term
   { terms: ["hydrolyzed vegetable protein", "hydrolysed vegetable protein", "hydrolyzed plant protein", "hydrolysed plant protein", "hvp"], contains: [], possible: ["gluten", "wheat", "soy"] },
+  // commercial asafoetida (hing) is routinely compounded with wheat flour
+  { terms: ["asafoetida", "asafetida", "hing"], contains: [], possible: ["gluten", "wheat"] },
   { terms: ["lecithin", "e322", "vegetable protein"], contains: [], possible: ["soy"] },
   { terms: ["emulsifier"], contains: [], possible: ["soy", "egg"] },
   { terms: ["margarine", "vegetable spread"], contains: [], possible: ["milk", "soy"] },

@@ -3,7 +3,7 @@ import { createInterface } from "node:readline";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { checkProduct } from "../src/engine.ts";
-import { ALL_ALLERGENS, OFF_ALLERGEN_TAGS, TERMS, normalize } from "../src/catalog.ts";
+import { ALL_ALLERGENS, FREE_FROM_LABELS, OFF_ALLERGEN_TAGS, TERMS, normalize } from "../src/catalog.ts";
 
 // OLD_ENGINE=<package dir> also runs that engine on every record and counts what the new one drops or weakens.
 const OLD = process.env.OLD_ENGINE ? (await import(pathToFileURL(resolve(process.env.OLD_ENGINE, "src/engine.ts")).href)).checkProduct : null;
@@ -42,12 +42,22 @@ const CTX_ALT = /\band ?\/ ?or\b|\band or\b|\bor\b/;
 const CTX_NAT = /naturally occurring in|except for those/;
 const fold = (s) => s.replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
   .replace(/[^a-z0-9()\[\]{},;\/]+/g, " ").replace(/\be (\d{3,4}[a-z]?)\b/g, "e$1").replace(/ +/g, " ");
+// Round 4 item-level rules (R7, round 5: flavour/aroma word anywhere in the item). R4b: free-from phrase for the occurrence's family. R5: E220-E228 needs a sulphite word in its item. R6: caramel colour (sulphite ammonia / caustic sulphite).
+const FREE_PHRASE = {
+  gluten: /\bgluten free\b/, milk: /\b(milk|dairy) free\b/, egg: /\begg free\b/, soy: /\bsoya? free\b/,
+  tree_nut: /\bnut free\b/, peanut: /\b(pea)?nut free\b/, sesame: /\bsesame free\b/,
+};
+const E_SULPHITE = /^e22[0-8][a-z]?$/;
+const SULPHITE_WORD = /(sulphite|sulfite|bisulphite|bisulfite|metabisulphite|metabisulfite|sulphur dioxide|sulfur dioxide)(s)?/;
+const E_CODE = /(?<![a-z0-9])e22[0-8][a-z]?(?![a-z0-9])/g;
+const E_ONLY = /^[\s()\[\]{},;\/]*$/;
+const FLAVOUR = /\b(flavou?r|flavou?ring|aroma)(s)?\b/; // R7
+const CARAMEL = /\b(sulphite|sulfite) ammonia\b|\bcaustic (sulphite|sulfite)\b/;
 const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 let strictUnlocated = 0; // hits whose term could not be found in the folded source text: dropped, and counted
-export function survivingOccurrences(source, term) {
-  const f = fold(source), at = [];
+// Items and, per position, the stack of open-bracket positions.
+function splitItems(f) {
   const open = { "(": 1, "[": 1, "{": 1 }, close = { ")": 1, "]": 1, "}": 1 };
-  // item boundaries and, per position, the stack of open-bracket positions
   const items = [], stacks = []; let start = 0, stack = [];
   for (let i = 0; i < f.length; i++) {
     stacks[i] = stack;
@@ -57,28 +67,48 @@ export function survivingOccurrences(source, term) {
     else if ((c === "," || c === ";") && !stack.length) { items.push([start, i]); start = i + 1; }
   }
   items.push([start, f.length]);
+  return { items, stacks };
+}
+// The engine reports a hit's source as a fragment of the text (e.g. "and celery seed}"), so an item can reach beyond it.
+// `full` is the record's whole English text: the fragment is located in it (first match) and each occurrence's item, bracket stack and R1-R7 context are read there.
+// Not found: the fragment's own text is used (the pre-round-5 behaviour).
+export function survivingOccurrences(source, term, family, full) {
+  const f = fold(source), at = [];
+  const ff = full ? fold(full) : "", off = ff ? ff.indexOf(f) : -1;
+  const g = off >= 0 ? ff : f, base = off >= 0 ? off : 0;
+  const { items, stacks } = splitItems(g);
   const re = new RegExp(`(?<![a-z0-9])${esc(term)}(?:s|es)?(?![a-z0-9])`, "g");
   for (const m of f.matchAll(re)) at.push(m.index);
   if (!at.length) { strictUnlocated++; return -1; }
   let n = 0;
-  for (const pos of at) {
+  for (const p of at) {
+    const pos = base + p;
     const [a, b] = items.find(([x, y]) => pos >= x && pos < y);
-    const item = f.slice(a, b);
+    const item = g.slice(a, b);
     if (CTX_OIL.test(item)) continue; // R1: oil or fat in the item
-    if ((stacks[pos] ?? []).some((o) => CTX_OIL.test(f.slice(Math.max(0, f.slice(0, o).search(/[^,;()\[\]{}]*$/)), o)))) continue; // R1: inside brackets whose head names an oil or fat
+    if ((stacks[pos] ?? []).some((o) => CTX_OIL.test(g.slice(Math.max(0, g.slice(0, o).search(/[^,;()\[\]{}]*$/)), o)))) continue; // R1: inside brackets whose head names an oil or fat
     if (CTX_ALT.test(item)) continue; // R2: alternatives
     const nat = item.search(CTX_NAT);
     if (nat >= 0 && pos - a > nat) continue; // R3: after "naturally occurring in" / "except for those"
+    if (family && FREE_PHRASE[family]?.test(item)) continue; // R4b: free-from phrase in the item
+    if (E_SULPHITE.test(term) && !SULPHITE_WORD.test(item)) { // R5: E-number consistency
+      const rest = item.replace(E_CODE, " ").replace(/\b(preservatives?|antioxidants?|e)\b/g, " ");
+      if (!E_ONLY.test(rest)) continue;
+    }
+    if (family === "sulphites" && CARAMEL.test(item)) continue; // R6: caramel colour
+    if (FLAVOUR.test(item)) continue; // R7: flavour context
     n++;
   }
   return n;
 }
-const strictKeep = (h) => {
+const freeFams = (labels) => new Set((labels ?? []).flatMap((l) => (FREE_FROM_LABELS[l] ?? []).map(fam)));
+const strictKeep = (h, free = new Set(), full = "") => {
   const f = fam(h.allergen);
   if (!STRICT[f]?.has(h.term)) return false;
+  if (free.has(f)) return false; // R4a: the record's labels claim this family free
   const line = normalize(h.source);
   if (OIL(h.term).test(line) || EXCLUDE[f]?.test(line)) return false;
-  return survivingOccurrences(h.source, h.term) > 0; // unlocated (-1) is dropped: the rules cannot vouch for it
+  return survivingOccurrences(h.source, h.term, f, full) > 0; // unlocated (-1) is dropped: the rules cannot vouch for it
 };
 
 // Diagnostic: foreign-language allergen words in English text that the engine called clean while OFF's own lists are empty.
@@ -96,7 +126,7 @@ const all = cut(), pop = cut();
 const rev = Object.fromEntries(FAMS.map((f) => [f, { count: 0, words: new Map() }]));
 const sample = []; let seen = 0;
 const SAMPLE_N = 200;
-const randS = rng(3), strictSample = []; let strictSeen = 0;
+const randS = rng(9), strictSample = []; let strictSeen = 0;
 const randC = rng(11), changeSample = []; let changeSeen = 0;
 const groups = new Map(); // "family|oldTerm|phrase" -> { n, ex }
 const bump = (o, f) => { o[f] = (o[f] ?? 0) + 1; };
@@ -156,7 +186,7 @@ export function analyse(row) {
     else {
       strictChecked = true;
       const t = checkProduct({ ...row, ingredients_tags: [], ingredients_original_tags: [] }, people);
-      strictHits = t.hits.filter((h) => h.kind === "contains" && h.source !== "allergen list" && h.source !== "may contain" && strictKeep(h));
+      strictHits = t.hits.filter((h) => h.kind === "contains" && h.source !== "allergen list" && h.source !== "may contain" && strictKeep(h, freeFams(row.labels_tags), enTextOf(row)));
       strictFams = [...new Set(strictHits.map((h) => fam(h.allergen)))];
       strictMissed = strictFams.filter((f) => !listed.has(f) && !traced.has(f));
     }

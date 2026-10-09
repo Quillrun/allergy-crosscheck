@@ -33,16 +33,35 @@ const COMPILED: Compiled[] = TERMS.flatMap((entry) =>
   }),
 );
 
+// "cheddar cheese flavour", "prawn cocktail flavour": a named flavour is not the food, but it can contain it.
+const FLAVOURED_FOODS: AllergenId[] = ["milk", "crustacean", "fish", "mollusc"];
+const ALLERGEN_NAMES = ["crustacean", "crustacea", "mollusc", "mollusk", "cephalopod"]; // "crustaceans flavouring" names the allergen itself
+const flavouredRe = (term: string) => new RegExp(`(^| )${term}(s|es)?(?: [a-z0-9]+){0,2} flavou?r(?:ing)?s?(?= |$)`, "g");
+
+const hasSoyFreeMiso = (line: string) => {
+  const bracket = /\bmiso\b[^()]*\(([^)]*)\)/i.exec(line)?.[1];
+  return bracket !== undefined && !/\b(?:soy|soya|soja|soyabeans?|soybeans?|edamame)\b/i.test(bracket);
+};
+
 /** Find allergen hits in one ingredient line ("2 tbsp tahini", "skimmed milk powder 8.7%"). */
 export function scanIngredient(line: string, kind: "contains" | "may_contain" = "contains"): Hit[] {
   const text = normalize(line);
   if (!text) return [];
   const hits: Hit[] = [];
+  // An explicit "contains milk" or "(milk)" in the same item keeps the flavour's food a definite hit.
+  const stated = /\bcontains?\b/.test(text);
+  const bracketed = new Set([...line.matchAll(/\(([^)]*)\)/g)].flatMap((m) => resolveAllergies([m[1]]).ids));
+  // "miso (rice, water, salt, koji)": a bracketed composition naming no soy is not soy for sure, but it can still be cross-contaminated.
+  const soyFreeMiso = hasSoyFreeMiso(line);
   for (const c of COMPILED) {
     let masked = ` ${text} `;
     for (const u of c.unless) masked = masked.replace(new RegExp(u.source, "g"), "  ");
     if (!c.re.test(masked.trim())) continue;
-    for (const a of c.entry.contains) hits.push({ allergen: a, kind, source: line.trim(), term: c.term });
+    const flavour = kind === "contains" && !stated && !ALLERGEN_NAMES.includes(c.term) && !c.re.test(masked.replace(flavouredRe(c.term), " ").trim());
+    for (const a of c.entry.contains) {
+      const downgrade = (flavour && FLAVOURED_FOODS.includes(a) && !bracketed.has(a)) || (soyFreeMiso && c.term === "miso" && a === "soy" && kind === "contains");
+      hits.push({ allergen: a, kind: downgrade ? "possible" : kind, source: line.trim(), term: c.term });
+    }
     const possible = c.entry.possible === "all" ? ALL_ALLERGENS : (c.entry.possible ?? []);
     for (const a of possible) hits.push({ allergen: a, kind: "possible", source: line.trim(), term: c.term });
   }
@@ -60,6 +79,10 @@ const PHRASES = TERMS.flatMap((t) => [...t.terms, ...(t.unless ?? [])])
   .map((t) => normalize(t))
   .sort((a, b) => b.length - a.length) // "sour cream" before "cream"
   .map((t) => wordRe(t));
+const TERM_PHRASES = TERMS.filter((t) => t.contains.length).flatMap((t) => t.terms) // allergen terms only: "gluten free" is not a list item
+  .map((t) => normalize(t))
+  .sort((a, b) => b.length - a.length)
+  .map((t) => wordRe(t));
 const known = (w: string) => /^\d/.test(w) || KNOWN.has(w) || KNOWN.has(w.replace(/es$/, "")) || KNOWN.has(w.replace(/s$/, "")) || KNOWN.has(w.replace(/ies$/, "y"));
 
 /** Words in an ingredient line that are neither plain foods, allergen terms nor filler ("2 tbsp korma paste" -> ["korma", "paste"]). */
@@ -73,9 +96,14 @@ export function unrecognised(line: string): string[] {
 /** The food a line names, without quantities and preparation words ("2 tbsp garam masala" -> "garam masala"). */
 const foodName = (line: string) => normalize(line).split(" ").filter((w) => w && !/^\d/.test(w) && !FILLER.has(w)).join(" ");
 
+// UK "Allergy Advice: For allergens, including cereals containing gluten, see ingredients in bold." is a pointer, not an ingredient.
+// Only these template words go; any named allergen after "see" stays.
+const ADVICE_TEMPLATE = /\bfor allergens,?\s+(?:including\s+cereals\s+containing\s+gluten,?\s+)?see\b(?:\s+ingredients)?(?:\s+in(?:\s+bold(?:\s+type)?)?)?/gi;
+const stripAdvice = (text: string) => text.replace(ADVICE_TEMPLATE, " ");
+
 /** Split recipe text into ingredient lines (quantities stay: they don't affect matching). */
 export function splitIngredients(input: string | string[]): string[] {
-  const parts = Array.isArray(input) ? input : input.split(/\n|;|,(?![^()]*\))/);
+  const parts = Array.isArray(input) ? input : stripAdvice(input).split(/\n|;|,(?![^()]*\))/);
   return parts.map((p) => p.replace(/^[\s\-*•]+/, "").trim()).filter(Boolean);
 }
 
@@ -84,7 +112,7 @@ const PRECAUTION = new RegExp(
   [
     "may (?:also )?contain", "contains traces of", "traces of", "may be present",
     "(?:made|produced|manufactured|packed|processed|prepared) (?:in|at) (?:an? |the |our )?(?:\\w+ ){0,2}(?:factory|facility|site|kitchen|environment) that (?:also )?(?:handles|uses|processes)",
-    "made on (?:shared )?equipment",
+    "made on (?:shared )?equipment", "shares (?:the same )?(?:equipment|facility|production line|line) with", "produced on equipment shared with", "made on a line that also", "processed on shared equipment",
     "\\b(?:plant|factory|facility|site|line|lines|equipment|premises|bakery|kitchen|environment) (?:that|which|where) (?:also )?(?:processes|handles|uses|manufactures|packs|produces|makes)",
     "(?:in|on) the same (?:facility|equipment|line|lines|premises)", "shared (?:equipment|facility|line)", "may also use", "contains one or more of",
     "kan inneholde", "kan inneh[aå]lla", "kan indeholde", "mo[zż]e zawiera[cć]", "mo[zž]e obsahovat", "m[oô][zž]e obsahova[tť]", "gali b[uū]ti", "pode conter",
@@ -95,22 +123,48 @@ const PRECAUTION = new RegExp(
   "gi",
 );
 
+// "Not suitable for Nut, Peanut and Sesame allergy sufferers.": a sentence of its own, only a precaution when it speaks of allergy.
+const NOT_SUITABLE = /(?<=^|[.\n]\s*)(?:not suitable|unsuitable) for\b(?=(?:[^.\n]|\.(?!\s|$))*\ballerg(?:y|ic|ies)\b)/gi;
+const SENTENCE_END = /\.(?=\s|$)|\n/;
+
+/** True for a sentence made only of allergen terms joined by spaces, commas, "and", "or", "&" ("egg peanuts and nuts"). */
+function onlyAllergenTerms(sentence: string): boolean {
+  if (!scanIngredient(sentence, "may_contain").length) return false;
+  let rest = ` ${normalize(sentence)} `;
+  for (const re of TERM_PHRASES) rest = rest.replace(new RegExp(re.source, "g"), "  ");
+  return rest.split(" ").every((w) => !w || w === "and" || w === "or" || w === "&");
+}
+
 /** Split label text into the ingredients and the precautionary statements ("may contain …") in it. */
 function splitPrecautions(text: string): { ingredients: string; warnings: string[] } {
   const warnings: string[] = [];
   let ingredients = "";
   let at = 0;
-  for (const m of text.matchAll(PRECAUTION)) {
+  const found = [...text.matchAll(PRECAUTION), ...text.matchAll(NOT_SUITABLE)].sort((a, b) => a.index - b.index);
+  for (const m of found) {
     if (m.index < at) continue;
-    let base = 0;
-    for (const c of text.slice(0, m.index)) base += c === "(" ? 1 : c === ")" ? -1 : 0;
-    let depth = base;
     let end = text.length, next = end;
-    for (let i = m.index; i < text.length; i++) {
-      const c = text[i];
-      if (c === "(") depth++;
-      else if (c === ")" && --depth < base) { end = next = i; break; }
-      else if (c === "." && depth <= base && !(/\d/.test(text[i - 1] ?? "") && /\d/.test(text[i + 1] ?? ""))) { end = i; next = i + 1; break; }
+    if (/^(?:not suitable|unsuitable)/i.test(m[0])) {
+      const stop = SENTENCE_END.exec(text.slice(m.index));
+      if (stop) { end = m.index + stop.index; next = end + stop[0].length; }
+    } else {
+      let base = 0;
+      for (const c of text.slice(0, m.index)) base += c === "(" ? 1 : c === ")" ? -1 : 0;
+      let depth = base;
+      for (let i = m.index; i < text.length; i++) {
+        const c = text[i];
+        if (c === "(") depth++;
+        else if (c === ")" && --depth < base) { end = next = i; break; }
+        else if (c === "." && depth <= base && !(/\d/.test(text[i - 1] ?? "") && /\d/.test(text[i + 1] ?? ""))) { end = i; next = i + 1; break; }
+      }
+    }
+    // A stray full stop can cut the list ("May contain traces of gluten. egg peanuts and nuts."): a next sentence of only allergen terms belongs to it.
+    if (text[end] === "." && next === end + 1) {
+      const tail = /^\s*([^.()]+)(?:\.|$)/.exec(text.slice(next));
+      if (tail && onlyAllergenTerms(tail[1])) {
+        end = next + tail[0].replace(/\.$/, "").length;
+        next += tail[0].length;
+      }
     }
     ingredients += end === next ? `${text.slice(at, m.index)} ` : `${text.slice(at, m.index).replace(/[\s.]+$/, "")}, `;
     warnings.push(text.slice(m.index, end));
@@ -169,7 +223,7 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
     if (ids) ids.forEach((a) => hits.push({ allergen: a, kind: "may_contain", source: "may contain", term: tag }));
     else ALL_ALLERGENS.forEach((a) => hits.push({ allergen: a, kind: "possible", source: "may contain", term: tag }));
   }
-  const english = (product.ingredients_text_en ?? "").trim();
+  const english = stripAdvice(product.ingredients_text_en ?? "").trim();
   const original = product.ingredients_original_tags?.length ? product.ingredients_original_tags : undefined;
   const labelTags = original ?? product.ingredients_tags ?? [];
   const enTags = [...new Set([...(product.ingredients_tags ?? []), ...(original ?? [])])].filter((t) => t.startsWith("en:"));
