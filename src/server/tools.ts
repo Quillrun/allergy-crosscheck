@@ -49,6 +49,7 @@ export type View = {
 };
 
 export function createServer(store: Store, sources: Sources): McpServer {
+  const deps: Deps = { store, sources };
   const server = new McpServer(
     { name: "allergy-crosscheck", title: "Allergy Crosscheck", version: "0.1.0" },
     { instructions: `Allergy Crosscheck keeps a household's food allergies and checks recipes and products against them. ${VOICE_RULE}` },
@@ -61,6 +62,22 @@ export function createServer(store: Store, sources: Sources): McpServer {
     async () => ({ contents: [{ uri: WIDGET_URI, mimeType: WIDGET_MIME, text: WIDGET_HTML }] }),
   );
 
+  registerSavePerson(server, deps);
+  registerRemovePerson(server, deps);
+  registerListPeople(server, deps);
+  registerFindRecipe(server, deps);
+  registerCheckRecipe(server, deps);
+  registerCheckProduct(server, deps);
+  registerAddToShoppingList(server, deps);
+  registerGetShoppingList(server, deps);
+  registerRemoveFromShoppingList(server, deps);
+
+  return server;
+}
+
+type Deps = { store: Store; sources: Sources };
+
+function registerSavePerson(server: McpServer, { store }: Deps): void {
   server.registerTool(
     "save_person",
     {
@@ -115,7 +132,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
       });
     },
   );
+}
 
+function registerRemovePerson(server: McpServer, { store }: Deps): void {
   server.registerTool(
     "remove_person",
     {
@@ -136,7 +155,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
       }, !removed);
     },
   );
+}
 
+function registerListPeople(server: McpServer, { store }: Deps): void {
   server.registerTool(
     "list_people",
     {
@@ -158,7 +179,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
       });
     },
   );
+}
 
+function registerFindRecipe(server: McpServer, { sources }: Deps): void {
   server.registerTool(
     "find_recipe",
     {
@@ -188,7 +211,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
       });
     },
   );
+}
 
+function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void {
   server.registerTool(
     "check_recipe",
     {
@@ -254,7 +279,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
       });
     },
   );
+}
 
+function registerCheckProduct(server: McpServer, { store, sources }: Deps): void {
   server.registerTool(
     "check_product",
     {
@@ -303,7 +330,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
       return productReply(product?.product_name ?? name ?? code, checkProduct(product ?? null, people, error), people, store, missing, product ? { label: "Open Food Facts" } : undefined);
     },
   );
+}
 
+function registerAddToShoppingList(server: McpServer, { store }: Deps): void {
   server.registerTool(
     "add_to_shopping_list",
     {
@@ -317,7 +346,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
       return reply({ kind: "shopping", title: "Shopping list", speech: `Added ${joinWords(items)}. You have ${list.length} item${list.length === 1 ? "" : "s"} on the list.`, shopping: list, disclaimer: DISCLAIMER });
     },
   );
+}
 
+function registerGetShoppingList(server: McpServer, { store }: Deps): void {
   server.registerTool(
     "get_shopping_list",
     { title: "Shopping list", description: "Read the household shopping list.", annotations: { readOnlyHint: true }, _meta: ui("Reading the list…", "Shopping list") },
@@ -328,7 +359,9 @@ export function createServer(store: Store, sources: Sources): McpServer {
       return reply({ kind: "shopping", title: "Shopping list", speech: list.length ? `On the list: ${joinWords(spoken)}.` : "The shopping list is empty.", shopping: list, disclaimer: DISCLAIMER });
     },
   );
+}
 
+function registerRemoveFromShoppingList(server: McpServer, { store }: Deps): void {
   server.registerTool(
     "remove_from_shopping_list",
     {
@@ -343,8 +376,6 @@ export function createServer(store: Store, sources: Sources): McpServer {
       return reply({ kind: "shopping", title: "Shopping list", speech: removed ? `Removed ${item}.` : `${item} wasn't on the list.`, shopping: store.shopping(), disclaimer: DISCLAIMER }, !removed);
     },
   );
-
-  return server;
 }
 
 function productReply(label: string, result: CheckResult, people: Person[], store: Store, missing: string[], source?: View["source"]) {
