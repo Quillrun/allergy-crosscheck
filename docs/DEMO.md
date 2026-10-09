@@ -8,7 +8,7 @@ The submitted video (2:56, 3840×2160 at 60 fps, recorded 8 October 2026) is a r
 - The narrator and the user are local text-to-speech with Boson AI's Higgs Audio (Higgs TTS 3), used under its Creator Use Grant, from reference voices made for this project, so no real person's voice is imitated.
 - Credit, as the licence asks: "This audio was created with Boson AI's Higgs Audio — https://www.boson.ai/higgs-audio".
 - Alexa's lines are exactly what the run returned. Every clip was checked against its script with Whisper.
-- The simulator renders the widget in a 944×590 frame (the simulator's own size, not an Echo Show spec) and scales it to fill the video frame.
+- The recorded run rendered the widget in the simulator's earlier 944×590 frame (the simulator's own size, not an Echo Show spec), scaled to fill the video frame. The simulator now emulates an Echo Show 8 (1280×800 with the guide's 1.667 root scale over a 768×480 base canvas), and the widget was re-measured to fit; the video was not re-recorded, so it shows the earlier layout.
 - Products are shown by their generic names from the records.
 - The phone scans were recorded with Chrome's fake camera showing an image of each product's real barcode; the scan page decoded them live.
 
@@ -27,7 +27,7 @@ The submitted video (2:56, 3840×2160 at 60 fps, recorded 8 October 2026) is a r
 | Phone scan: a hot cocoa mix | (the scan page finds it) |
 | Voice turn | User: "And this one I just scanned?" Alexa: avoid for Leo (milk, in the whey, caseinate and lactose), can't confirm for Maya. Narrator: the record lists soy as its only allergen and milk only as a "may contain"; the ingredient text adds the milk. |
 | Slide: test harness in my simulator | "Testing on a real model, I caught it claiming to save a guest it never saved. So every check result starts with the verdict and every result carries the exact sentence to say, and my simulator holds the model to it, word for word." |
-| Slide: how it's built | Narration: "A self-hosted MCP server, an MCP Apps screen built to the Alexa+ design guide, and an open-source allergen engine, with tests that try to trick it into saying safe." (Accuracy note: the screen's measured layout is checked against a 944x590 test frame, not yet the guide's canvas.) Last line: "Allergy Crosscheck: who at the table can eat it, and why." |
+| Slide: how it's built | Narration: "A self-hosted MCP server, an MCP Apps screen built to the Alexa+ design guide, and an open-source allergen engine, with tests that try to trick it into saying safe." (Accuracy note: the video shows the earlier 944x590 layout; the current screen is authored at the guide's 768×480 base canvas and measured at 768×480 and 1280×800 in headless Chrome, not on a real Echo Show.) Last line: "Allergy Crosscheck: who at the table can eat it, and why." |
 
 ## Recording it yourself
 

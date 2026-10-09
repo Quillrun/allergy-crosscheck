@@ -23,7 +23,7 @@ npm start    # then open http://127.0.0.1:8787/ and press the demo script button
 | **Allergen tags say soy; the ingredient text adds milk** | **A guest saved until Saturday: not checked after the visit** |
 | ![Product check](docs/screenshots/product-check.png) | ![Household](docs/screenshots/household.png) |
 
-Screens from the recorded demo run: a local model driving the server, with live data.
+Screens from the recorded demo run: a local model driving the server, with live data. They show the screen's earlier layout, from before it was moved to the 768×480 base canvas.
 
 ## Why fail-closed matters here
 
@@ -94,10 +94,11 @@ The simulator in this repo stands in for steps 3 and 4.
 
 The same HTTPS host serves the phone scan page at `https://<host>/scan`; browsers only open the camera on https pages (or localhost).
 
-The screen follows parts of the Alexa+ MCP design guide: the 48px minimum touch target, 4.5:1 text contrast, light and dark themes, and the host's theme, device class and safe-area insets from `hostContext`. It was laid out and tested at 944×590, not at the guide's 768×480 base canvas.
-- every demo screen fits the simulator's 16:10 screen frame, which measured 944×590 in headless Chrome (the frame size is the simulator's own, not an Amazon figure; not tested at the guide's 768×480 base canvas or on a real Echo Show): long product lists are grouped by allergen, with "+N more";
-- text is 16px or larger (my own choice; the guide gives no minimum text size), touch targets are at least 48px (guide: 48×48px minimum), and text contrast is at least 4.5:1 in both themes (guide: 4.5:1 for text 17px and under, 3:1 for bold or 18px and larger);
-- it applies the host's theme, device class and safe-area insets;
+The screen follows parts of the Alexa+ MCP design guide: it is authored at the guide's 768×480 base canvas with the guide's type, spacing and corner-radius tokens, and the host's size from `hostContext` becomes one root scale (`zoom` on the root element). It also follows the guide's 48×48px minimum touch target, its text contrast ratios, and the host's theme and safe-area insets. It was measured in headless Chrome, not on a real Echo Show.
+- every demo screen fits 768×480 with no scrolling, in dark and light, and fits 1280×800 at the root scale of 1.667 in dark theme (the guide's figures for an Echo Show 8: 1280÷768 = 800÷480 = 1.667; light theme was measured at 768×480 only). The tallest, the lasagne check, ends 16 base pixels above the bottom edge. Before this change two screens (the lasagne check and the cocoa mix) overflowed 768×480, at 636 and 624px tall. A recipe check uses two columns (who's eating and the risky lines on the left, the swaps on the right), long product lists are grouped into one row per distinct set of flags, with "+N more", and the shopping list shows eight lines and "and N more". No person's row is dropped to make room;
+- text is 14px (the guide's Body2) or larger at the base canvas, 23px or more on an Echo Show 8 after the 1.667 scale (my choice of floor; the guide's type table goes down to 8px), touch targets are 48px at the base canvas (guide: 48×48px minimum), and text contrast is at least 4.5:1 in both themes (guide: 4.5:1 for text 17px and under, 3:1 for bold or 18px and larger);
+- the widget applies a root scale of min(`maxWidth`÷768, `maxHeight`÷480), at least 1 (1 when the host sends no size), following the guide's visual-foundations page; the simulator sends an Echo Show 8 context (1280×800) and renders the frame at 1280×800 CSS px, scaled down to fit the page;
+- it applies the host's theme and safe-area insets (divided by the scale, so the host's pixels are not scaled twice);
 - no links out of the view.
 
 Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result repeats `resourceUri`. Some failures set `isError`: `save_person` (allergy not recognised, date already passed), `remove_person` (nobody by that name), `find_recipe` (recipe not found), `check_product` (nothing scanned, or no product named) and `remove_from_shopping_list` (item not on the list). A product name that finds nothing is a normal "check the label" answer, not an error.
@@ -166,7 +167,7 @@ test/                      integration tests
 | Engine, store, MCP over real HTTP, phone scan, simulator guards | 105 automated tests, 68 of them in the engine package (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
-| The screen and the tap-to-choose flow | Headless Chrome, in the simulator's 16:10 screen frame (944×590), in dark and light themes; every demo button's screen measured to fit that frame. Not tested at the guide's 768×480 base canvas or on a real Echo Show |
+| The screen and the tap-to-choose flow | Headless Chrome, with every demo button's screen measured at the guide's 768×480 base canvas (dark and light), at 1280×800 with the 1.667 root scale (dark theme only), and in the simulator's Echo Show 8 frame: all fit with no scrolling. The tap-to-choose click was checked in that scaled frame. Not tested on a real Echo Show |
 | Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |
 | Amazon's Local Inspector | **Not run.** It installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4) |
 

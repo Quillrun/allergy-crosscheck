@@ -6,19 +6,19 @@ In the tables below, `$C` stands for the local cache directory `~/Library/Caches
 
 | | Engine commit | Run | Sample | Checkers | Result |
 |---|---|---|---|---|---|
-| Round 1 | `2595749` | `$C/run3` | seed 77031, 100 records | A and B, 50 each | 73/100 |
-| Round 2 | `1186f6e` | `$C/run4` | 200-record `strict_sample` (seed 7), no overlap with round 1; 100 drawn with mulberry32 seed 20261008 | A and B, independent, 50 each | 90/100 |
-| Round 3 | `4c7c554` (rules `4f64c78`) | `$C/run5` | 200-record `strict_sample` (reservoir seed 3); 4 records overlapping rounds 1-2 excluded; 100 drawn with mulberry32 seed 20261009 | A and B, independent, 50 each | 95/100 |
-| Round 4 | `4c7c554` (unchanged since round 3; count rules R1–R6, commit `b737e42`) | `$C/run6` | 200-record `strict_sample` (reservoir seed 5); 8 records overlapping rounds 1-3 excluded; 100 drawn with mulberry32 seed 20261010 | A and B, independent, 50 each | 93/100 |
-| Round 5 | `872b0ec` (rules `4549ccd`, pre-registered before the run; count rules R1–R7) | `$C/run7` | 200-record `strict_sample` (reservoir seed 9); 5 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261011 | A and B, independent, 50 each | 97/100 after lead re-check (96/100 by the checkers alone) |
-| Round 6 | `34056e1` (narrow redo, after `ca74f30` and the revert `119f5f4` of `ed3c86c`; rules `2b7ec57`, pre-registered before the run; R1–R7 unchanged) | `$C/run9` | 200-record `strict_sample` (reservoir seed 13); 9 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261012 | A and B, independent, 50 each | 95/100 (checkers A 47/50 and B 48/50; the lead agrees with every call) |
-| Round 7 | `34056e1` (unchanged; rules `0dc1610`, pre-registered before the run; R8, glyceride correction, R9, R10a, R10b) | `$C/run10` | 200-record `strict_sample` (reservoir seed 17); 6 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261013 | A and B, independent, 50 each | 95/100 (checkers A 46/50 and B 49/50; the lead agrees with every call) |
-| Round 8 | `ada6e5b` (rules `83507ba`, pre-registered before the run; R11, R12) | `$C/run11` | 200-record `strict_sample` (reservoir seed 21); 14 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261014 | A and B, independent, 50 each | 98/100 (checkers A 50/50 and B 48/50; the lead agrees with every call) |
-| Round 9 | `edcce91` (rules `80c42b8`, pre-registered before the run; R13) | `$C/run12` | 200-record `strict_sample` (reservoir seed 23); 23 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261015 | A and B, independent, 50 each | 93/100 (checkers A 48/50 and B 45/50; the lead agrees with every call) |
+| Round 1 | `4e4ef42` | `$C/run3` | seed 77031, 100 records | A and B, 50 each | 73/100 |
+| Round 2 | `d9cffca` | `$C/run4` | 200-record `strict_sample` (seed 7), no overlap with round 1; 100 drawn with mulberry32 seed 20261008 | A and B, independent, 50 each | 90/100 |
+| Round 3 | `0d2357f` (rules `37f89ae`) | `$C/run5` | 200-record `strict_sample` (reservoir seed 3); 4 records overlapping rounds 1-2 excluded; 100 drawn with mulberry32 seed 20261009 | A and B, independent, 50 each | 95/100 |
+| Round 4 | `0d2357f` (unchanged since round 3; count rules R1–R6, commit `f88bc4a`) | `$C/run6` | 200-record `strict_sample` (reservoir seed 5); 8 records overlapping rounds 1-3 excluded; 100 drawn with mulberry32 seed 20261010 | A and B, independent, 50 each | 93/100 |
+| Round 5 | `858d317` (rules `04e5241`, pre-registered before the run; count rules R1–R7) | `$C/run7` | 200-record `strict_sample` (reservoir seed 9); 5 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261011 | A and B, independent, 50 each | 97/100 after lead re-check (96/100 by the checkers alone) |
+| Round 6 | `fa229b8` (narrow redo, after `9313dbb` and the revert `5009f9b` of `145267b`; rules `4f594cd`, pre-registered before the run; R1–R7 unchanged) | `$C/run9` | 200-record `strict_sample` (reservoir seed 13); 9 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261012 | A and B, independent, 50 each | 95/100 (checkers A 47/50 and B 48/50; the lead agrees with every call) |
+| Round 7 | `fa229b8` (unchanged; rules `4cd40fb`, pre-registered before the run; R8, glyceride correction, R9, R10a, R10b) | `$C/run10` | 200-record `strict_sample` (reservoir seed 17); 6 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261013 | A and B, independent, 50 each | 95/100 (checkers A 46/50 and B 49/50; the lead agrees with every call) |
+| Round 8 | `55f497c` (rules `1caacd9`, pre-registered before the run; R11, R12) | `$C/run11` | 200-record `strict_sample` (reservoir seed 21); 14 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261014 | A and B, independent, 50 each | 98/100 (checkers A 50/50 and B 48/50; the lead agrees with every call) |
+| Round 9 | `402b308` (rules `4f0a9a4`, pre-registered before the run; R13) | `$C/run12` | 200-record `strict_sample` (reservoir seed 23); 23 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261015 | A and B, independent, 50 each | 93/100 (checkers A 48/50 and B 45/50; the lead agrees with every call) |
 
-Round 2 also compared the new engine against the old one (`2595749`). Determinism: shard 2 re-run gave identical counts apart from timing.
+Round 2 also compared the new engine against the old one (`4e4ef42`). Determinism: shard 2 re-run gave identical counts apart from timing.
 
-## Round 1 (engine 2595749, seed 77031): 38/50 + 35/50 = 73/100
+## Round 1 (engine 4e4ef42, seed 77031): 38/50 + 35/50 = 73/100
 
 The result files are `$C/run3/hc_a_result.md` and `hc_b_result.md`; the earlier summary is `$C/run3/summary.json`.
 
@@ -165,7 +165,7 @@ Per family (real / not real):
 
 The systematic causes (foreign-language and badly parsed records, plus two word families that are not the allergen) became the round-2 rules in the README.
 
-## Round 2 (engine 1186f6e, rules from the README): 45/50 + 45/50 = 90/100
+## Round 2 (engine d9cffca, rules from the README): 45/50 + 45/50 = 90/100
 
 Run: `$C/run4` (`summary.json`; trimmed copy in [`results-strict-2026-10-08.json`](results-strict-2026-10-08.json)). Result files: `$C/run4/hc_a_result.md` and `hc_b_result.md`.
 
@@ -320,11 +320,11 @@ The lead re-checked every NOT REAL record, both borderline records (B#12, sherry
 
 Under the pre-registered rule (100/100 to claim; at most 2 rounds) the count is **not claimed**. The measured precision is reported instead: 90/100, 95% Wilson interval 82.6%-94.5%.
 
-The figures are for engine `1186f6e`. The fixes for (d) and (e) change the engine, not this measurement. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `d9cffca`. The fixes for (d) and (e) change the engine, not this measurement. Whether the number is used anywhere public is the operator's decision.
 
-## Round 3 (engine 4c7c554, rules 4f64c78, Round-3 rules from the README): 47/50 + 48/50 = 95/100
+## Round 3 (engine 0d2357f, rules 37f89ae, Round-3 rules from the README): 47/50 + 48/50 = 95/100
 
-Run: `$C/run5` (`summary.json`; trimmed copy in [`results-strict-round3-2026-10-09.json`](results-strict-round3-2026-10-09.json)). Result files: `$C/run5/hc_a_result.md` and `hc_b_result.md`. The run took 38.9 minutes wall clock. Determinism: shard 2 re-run gave identical counts apart from timing. The old-engine comparison is against `1186f6e` (`$C/snap-1186f6e`).
+Run: `$C/run5` (`summary.json`; trimmed copy in [`results-strict-round3-2026-10-09.json`](results-strict-round3-2026-10-09.json)). Result files: `$C/run5/hc_a_result.md` and `hc_b_result.md`. The run took 38.9 minutes wall clock. Determinism: shard 2 re-run gave identical counts apart from timing. The old-engine comparison is against `d9cffca` (`$C/snap-d9cffca`).
 
 The `strict_sample` came from reservoir seed 3 (200 records). 4 records overlapped rounds 1-2 and were excluded; 100 of the rest were drawn with mulberry32 seed 20261009 and split 50/50 between two independent checkers.
 
@@ -481,9 +481,9 @@ None of the five is the engine telling a user something false. For the user, the
 
 Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 95/100, 95% Wilson interval 88.8%-97.8%. Progress across rounds: 73/100, then 90/100, then 95/100.
 
-The figures are for engine `4c7c554` with the round-3 rules (`4f64c78`). Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `0d2357f` with the round-3 rules (`37f89ae`). Whether the number is used anywhere public is the operator's decision.
 
-## Round 4 (rules b737e42, engine 4c7c554): 46/50 + 47/50 = 93/100
+## Round 4 (rules f88bc4a, engine 0d2357f): 46/50 + 47/50 = 93/100
 
 Run: `$C/run6` (`summary.json`; copy in [`results-strict-round4-2026-10-09.json`](results-strict-round4-2026-10-09.json)). Result files: `$C/run6/hc_a_result.md` and `hc_b_result.md`. The run took 20 minutes wall clock. Determinism: shard 2 re-run gave identical counts apart from timing. The engine is unchanged since round 3; only the count's rules changed (R1–R6).
 
@@ -645,11 +645,11 @@ Under the pre-registered rule (100/100 to claim) the count is **not claimed**. T
 
 A 100/100 sample is only likely if true precision is about 99%. At 95% true precision, 100/100 happens about 0.6% of the time (0.95^100). Rounds 3 and 4 put the count's precision at about 93-95%. Each round found new long-tail cases, so further rule rounds were stopped.
 
-The figures are for engine `4c7c554` and the R1–R6 count rules. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `0d2357f` and the R1–R6 count rules. Whether the number is used anywhere public is the operator's decision.
 
-## Round 5 (rules 4549ccd, engine 872b0ec): 47/50 + 49/50 = 96/100 by the checkers, 97/100 after lead re-check
+## Round 5 (rules 04e5241, engine 858d317): 47/50 + 49/50 = 96/100 by the checkers, 97/100 after lead re-check
 
-Run: `$C/run7` (`summary.json`; copy in [`results-strict-round5-2026-10-09.json`](results-strict-round5-2026-10-09.json)). Result files: `$C/run7/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,391 s. Determinism: shard 2 re-run gave identical counts apart from `seconds`. The rules (commit `4549ccd`) were pre-registered before the run; the engine as run is `872b0ec`.
+Run: `$C/run7` (`summary.json`; copy in [`results-strict-round5-2026-10-09.json`](results-strict-round5-2026-10-09.json)). Result files: `$C/run7/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,391 s. Determinism: shard 2 re-run gave identical counts apart from `seconds`. The rules (commit `04e5241`) were pre-registered before the run; the engine as run is `858d317`.
 
 `A` is unchanged: 3,457,538 / 826,465. `strict_missed` is 8,551 for all records (list empty 2,098, partial 6,453) and 2,161 for popular ones (735 / 1,426), down from 9,506 / 2,426 in round 4.
 
@@ -806,17 +806,17 @@ Borderline calls kept REAL, lead agrees:
 
 Result: **97 of 100 real after the lead re-check** (96 by the checkers alone). The 95% Wilson interval for 97/100 is 91.5%-99.0%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 97/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100.
 
-Separately, and not part of the count: the round-5 vanished-hit audit of the run found two fail-opens introduced in engine `872b0ec`. The allergy-advice strip removed a real "For allergens see cereals containing gluten, nuts, soya and sulphites" (5013803340155, gluten lost), and "peanut milk" as a plant milk hid "milk" in garbled text (0034952369342). It also found asafoetida (0664648120492) losing its only gluten signal. These were fixed in engine commit `ca74f30`.
+Separately, and not part of the count: the round-5 vanished-hit audit of the run found two fail-opens introduced in engine `858d317`. The allergy-advice strip removed a real "For allergens see cereals containing gluten, nuts, soya and sulphites" (5013803340155, gluten lost), and "peanut milk" as a plant milk hid "milk" in garbled text (0034952369342). It also found asafoetida (0664648120492) losing its only gluten signal. These were fixed in engine commit `9313dbb`.
 
-The figures are for engine `872b0ec` and the R1–R7 count rules. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `858d317` and the R1–R7 count rules. Whether the number is used anywhere public is the operator's decision.
 
-## Round 6 (rules 2b7ec57, engine 34056e1): 47/50 + 48/50 = 95/100
+## Round 6 (rules 4f594cd, engine fa229b8): 47/50 + 48/50 = 95/100
 
-Run: `$C/run9` (`summary.json`; copy in [`results-strict-round6-2026-10-09.json`](results-strict-round6-2026-10-09.json)). Result files: `$C/run9/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,476.5 s (wall clock 2,477 s). Determinism: shard 2 re-run gave identical counts apart from `seconds`. The rules (commit `2b7ec57`, R1–R7 unchanged, `strict_sample` seed 13) were pre-registered before the run; the engine as run is `34056e1`.
+Run: `$C/run9` (`summary.json`; copy in [`results-strict-round6-2026-10-09.json`](results-strict-round6-2026-10-09.json)). Result files: `$C/run9/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,476.5 s (wall clock 2,477 s). Determinism: shard 2 re-run gave identical counts apart from `seconds`. The rules (commit `4f594cd`, R1–R7 unchanged, `strict_sample` seed 13) were pre-registered before the run; the engine as run is `fa229b8`.
 
 `A` is unchanged: 3,457,538 / 826,465 (total 4,784,317 / 1,552,376). `strict_missed` is 8,516 for all records (list empty 2,094, partial 6,422) and 2,142 for popular ones (732 / 1,410), down from 8,551 / 2,161 in round 5.
 
-Engine history for this round: the round-5 fail-opens were fixed in `ca74f30`. The first attempt at the three round-5 misses, `ed3c86c`, was reverted (`119f5f4`) because on full data it downgraded about 7,600 family "contains" results, including real ingredients (for example "CONTIENE: … SOYA", "lecithina de soya", "contains one or more of the following" lists, and an unclosed bracket that swallowed the rest of a text); no allergen vanished. `34056e1` is the narrow redo. Its full-data downgrade gate, run before the engine commit: 431 family-records went from contains to weaker, all one of the three intended patterns (not-suitable-for sentence 291, cut list after a precaution 98, soy-free miso 42); none went to nothing.
+Engine history for this round: the round-5 fail-opens were fixed in `9313dbb`. The first attempt at the three round-5 misses, `145267b`, was reverted (`5009f9b`) because on full data it downgraded about 7,600 family "contains" results, including real ingredients (for example "CONTIENE: … SOYA", "lecithina de soya", "contains one or more of the following" lists, and an unclosed bracket that swallowed the rest of a text); no allergen vanished. `fa229b8` is the narrow redo. Its full-data downgrade gate, run before the engine commit: 431 family-records went from contains to weaker, all one of the three intended patterns (not-suitable-for sentence 291, cut list after a precaution 98, soy-free miso 42); none went to nothing.
 
 The `strict_sample` came from reservoir seed 13 (pool of 200 records). 9 records overlapped earlier rounds and were excluded; the draw excluded every code in `run3` to `run7` `hc_a`/`hc_b`. 100 were drawn with mulberry32 seed 20261012 from `run9/strict_sample.json` and split into `run9/hc_a.json` and `hc_b.json`, 50/50 between two independent checkers.
 
@@ -976,13 +976,13 @@ Borderline calls kept REAL, lead agrees:
 
 Result: **95 of 100 real** (checker A 47/50, checker B 48/50; the lead agrees with every call). The 95% Wilson interval is 88.8%-97.8%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 95/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100.
 
-The figures are for engine `34056e1` and the R1–R7 count rules. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `fa229b8` and the R1–R7 count rules. Whether the number is used anywhere public is the operator's decision.
 
-## Round 7 (rules 0dc1610, engine 34056e1): 46/50 + 49/50 = 95/100
+## Round 7 (rules 4cd40fb, engine fa229b8): 46/50 + 49/50 = 95/100
 
-Run: `$C/run10` (`summary.json`; copy in [`results-strict-round7-2026-10-09.json`](results-strict-round7-2026-10-09.json)). Result files: `$C/run10/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,446 s (wall clock 2,447 s). Determinism: shard 2 re-run gave identical counts apart from `seconds`. The rules (commit `0dc1610`: R8 free-from adjacency, the glyceride singular correction, R9 precaution in the item, R10a base-named miso, R10b substitutes; `strict_sample` seed 17) were committed at 18:32, before the run (shards written 19:11); the engine is unchanged, `34056e1`.
+Run: `$C/run10` (`summary.json`; copy in [`results-strict-round7-2026-10-09.json`](results-strict-round7-2026-10-09.json)). Result files: `$C/run10/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,446 s (wall clock 2,447 s). Determinism: shard 2 re-run gave identical counts apart from `seconds`. The rules (commit `4cd40fb`: R8 free-from adjacency, the glyceride singular correction, R9 precaution in the item, R10a base-named miso, R10b substitutes; `strict_sample` seed 17) were committed at 18:32, before the run (shards written 19:11); the engine is unchanged, `fa229b8`.
 
-`A` is 3,457,538 / 826,465 (total 4,784,317 / 1,552,376), as before. `B` is 136,562 / 64,086, equal to round 6's; it differs from round 5's because the engine changed between round 5 and 6 (`ca74f30`, `34056e1`). `strict_missed` is 8,436 for all records (list empty 2,081, partial 6,355) and 2,116 for popular ones (727 / 1,389), down from 8,516 / 2,142 in round 6.
+`A` is 3,457,538 / 826,465 (total 4,784,317 / 1,552,376), as before. `B` is 136,562 / 64,086, equal to round 6's; it differs from round 5's because the engine changed between round 5 and 6 (`9313dbb`, `fa229b8`). `strict_missed` is 8,436 for all records (list empty 2,081, partial 6,355) and 2,116 for popular ones (727 / 1,389), down from 8,516 / 2,142 in round 6.
 
 The `strict_sample` came from reservoir seed 17 (pool of 200 records). 6 records overlapped earlier rounds and were excluded; the draw excluded every code in `run3` to `run7` and `run9` `hc_a`/`hc_b`. 100 were drawn with mulberry32 seed 20261013 from `run10/strict_sample.json` and split into `run10/hc_a.json` and `hc_b.json`, 50/50 between two independent checkers.
 
@@ -1141,11 +1141,11 @@ Borderline calls kept REAL, lead agrees:
 
 Result: **95 of 100 real** (checker A 46/50, checker B 49/50; the lead agrees with every call). The 95% Wilson interval is 88.8%-97.8%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 95/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100, then 95/100.
 
-The figures are for engine `34056e1` and the Round-7 count rules. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `fa229b8` and the Round-7 count rules. Whether the number is used anywhere public is the operator's decision.
 
-## Round 8 (rules 83507ba, engine ada6e5b): 50/50 + 48/50 = 98/100
+## Round 8 (rules 1caacd9, engine 55f497c): 50/50 + 48/50 = 98/100
 
-Run: `$C/run11` (`summary.json`; copy in [`results-strict-round8-2026-10-09.json`](results-strict-round8-2026-10-09.json)). Result files: `$C/run11/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,591.677 s (wall clock 2,594 s). Determinism: shard 2 re-run gave identical counts apart from `seconds`. The engine is `ada6e5b` (E8: unless phrases are masked at every occurrence, the root cause being that `wordRe` consumed its trailing space so a back-to-back repeat was not matched; "could contain" and "...on machinery that also..." are precautions). Before that commit the full-data gate showed 198 family losses, all repeated unless phrases, "could contain" or machinery sentences. The rules (commit `83507ba`: R11 OCR precaution `/\bmay (?:also )?cont[a-z]*/`, R12 heading: a term directly followed by ":", `fold()` keeps ":"; `strict_sample` seed 21) were committed at 20:40:13; the run's `start.txt` has the same second, 20:40:13.
+Run: `$C/run11` (`summary.json`; copy in [`results-strict-round8-2026-10-09.json`](results-strict-round8-2026-10-09.json)). Result files: `$C/run11/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,591.677 s (wall clock 2,594 s). Determinism: shard 2 re-run gave identical counts apart from `seconds`. The engine is `55f497c` (E8: unless phrases are masked at every occurrence, the root cause being that `wordRe` consumed its trailing space so a back-to-back repeat was not matched; "could contain" and "...on machinery that also..." are precautions). Before that commit the full-data gate showed 198 family losses, all repeated unless phrases, "could contain" or machinery sentences. The rules (commit `1caacd9`: R11 OCR precaution `/\bmay (?:also )?cont[a-z]*/`, R12 heading: a term directly followed by ":", `fold()` keeps ":"; `strict_sample` seed 21) were committed at 20:40:13; the run's `start.txt` has the same second, 20:40:13.
 
 The audit of the engine change on the full data: all 183 changed records were re-run; the 21 records that became "no listed allergens" are all correct (the only source was a repeated coconut milk, coconut cream, rice, maize or corn flour, or tart cherries phrase); the 222 vanished groups are all back-to-back repeats of an unless phrase (174 of them the generic "sauce" possible-all hit leaking from a repeated "soy sauce"); there is no fail-open. "soy sauce" still gives soy and wheat contains.
 
@@ -1308,13 +1308,13 @@ Borderline calls kept REAL, lead agrees:
 
 Result: **98 of 100 real** (checker A 50/50, checker B 48/50; the lead agrees with every call). The 95% Wilson interval is 93.0%-99.4%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 98/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100, then 95/100, then 98/100.
 
-The figures are for engine `ada6e5b` and the Round-8 count rules.
+The figures are for engine `55f497c` and the Round-8 count rules.
 
-## Round 9 (rules 80c42b8, engine edcce91): 48/50 + 45/50 = 93/100
+## Round 9 (rules 4f0a9a4, engine 402b308): 48/50 + 45/50 = 93/100
 
-Run: `$C/run12` (`summary.json`; copy in [`results-strict-round9-2026-10-09.json`](results-strict-round9-2026-10-09.json)). Result files: `$C/run12/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,848.0 s (wall clock 2,848 s). Determinism: shard 2 re-run gave identical counts apart from `seconds` (2,848.0 s in the 8-way run, 2,208.1 s solo). The engine is `edcce91` (E9: "(manufactured|made|produced|processed|packed|packaged) on equipment exposed to" is a precaution). Before that commit the full-data text-only gate (575 s scan) showed 2 records / 6 family losses (0423000006573: peanut, tree_nut, egg, gluten, soy; 0241148304494: peanut), all inside "on equipment exposed to" sentences, all to may_contain+possible, nothing to none. The rules (commit `80c42b8`: R13, a sulphite term directly preceded by "ferrous" does not count; `strict_sample` seed 23; 51 fixtures) were committed at 22:27:30; the run's `start.txt` is 22:27:39, after the commit.
+Run: `$C/run12` (`summary.json`; copy in [`results-strict-round9-2026-10-09.json`](results-strict-round9-2026-10-09.json)). Result files: `$C/run12/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,848.0 s (wall clock 2,848 s). Determinism: shard 2 re-run gave identical counts apart from `seconds` (2,848.0 s in the 8-way run, 2,208.1 s solo). The engine is `402b308` (E9: "(manufactured|made|produced|processed|packed|packaged) on equipment exposed to" is a precaution). Before that commit the full-data text-only gate (575 s scan) showed 2 records / 6 family losses (0423000006573: peanut, tree_nut, egg, gluten, soy; 0241148304494: peanut), all inside "on equipment exposed to" sentences, all to may_contain+possible, nothing to none. The rules (commit `4f0a9a4`: R13, a sulphite term directly preceded by "ferrous" does not count; `strict_sample` seed 23; 51 fixtures) were committed at 22:27:30; the run's `start.txt` is 22:27:39, after the commit.
 
-Old engine `ada6e5b` against new engine `edcce91` on all records: `changed` 0, `to_none` 0 (E9's two records keep "contains" for those families through their Open Food Facts allergen tags).
+Old engine `55f497c` against new engine `402b308` on all records: `changed` 0, `to_none` 0 (E9's two records keep "contains" for those families through their Open Food Facts allergen tags).
 
 `A` is 3,457,538 / 826,465, as before (total 4,784,317 / 1,552,376). `B` is 136,440 (popular 64,046), unchanged from round 8. `strict_named` is 163,056 / 55,789. `strict_missed` is 8,388 for all records (list empty 2,069, partial 6,319) and 2,106 for popular ones (724 / 1,382), down from 8,401 and 2,107 in round 8.
 
@@ -1488,4 +1488,4 @@ Borderline calls kept REAL, lead agrees:
 
 Result: **93 of 100 real** (checker A 48/50, checker B 45/50; the lead agrees with every call). The 95% Wilson interval is 86.3%-96.6%. Round 9 was the last round (decision 2026-10-09). The count is **not claimed**. The reported figure is the measured precision of the final engine and rules: 93 of 100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100, then 95/100, then 98/100, then 93/100. Rounds 5 to 9 ranged 93-98.
 
-The figures are for engine `edcce91` and the Round-9 count rules.
+The figures are for engine `402b308` and the Round-9 count rules.

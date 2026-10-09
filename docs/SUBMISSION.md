@@ -43,9 +43,9 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   - **Not built:** purchasing, and Agent Skills.
   - **A cross-check, not a lookup:** a product's allergen tags, traces and ingredient text are read together, which is how it finds the milk that the cocoa mix's tags leave out.
 - **Self-hosted MCP server** in TypeScript with the MCP TypeScript SDK 1.32. It uses MCP spec **2025-11-25** over **Streamable HTTP**, is stateless, and has 9 tools. Every check result (`check_recipe`, `check_product`) leads with a `VERDICT:` line, and every result carries the exact sentence to say, plus `structuredContent` for the screen.
-- **MCP Apps screen** for the Echo Show (`text/html;profile=mcp-app`), following the Alexa+ MCP design guide's touch-target, contrast and host-context rules:
-  - each verdict fits the simulator's 944×590 (16:10) screen frame; the guide's Echo Show 8 figures are a 768×480 base canvas scaled 1.667× to 1280×800, and I did not test at those;
-  - text is 16px or larger (my choice; the guide has no minimum), touch targets at least 48px (guide minimum), text contrast at least 4.5:1 (guide: 4.5:1 for text 17px and under, 3:1 for bold or 18px and larger);
+- **MCP Apps screen** for the Echo Show (`text/html;profile=mcp-app`), following the Alexa+ MCP design guide's base canvas, zoom, touch-target and contrast figures, and using the `hostContext` fields theme, safeAreaInsets, maxWidth and maxHeight:
+  - authored at the guide's 768×480 base canvas with its type, spacing and corner-radius tokens; the widget applies one root scale from `hostContext` maxWidth/maxHeight, 1.667 for the Echo Show 8's 1280×800 (guide figures), and each demo verdict fits both with no scrolling (measured in headless Chrome, not on a real Echo Show);
+  - text is 14px or larger at the base canvas (my floor; the guide's type table goes lower), touch targets 48px at the base canvas (guide minimum: 48×48px), text contrast at least 4.5:1 (guide: 4.5:1 for text 17px and under, 3:1 for bold or 18px and larger);
   - it uses the host's theme and safe-area insets.
 
   Tapping a choice calls back into the server with `tools/call`. `_meta.ui.resourceUri` is on every tool definition and every result.
@@ -68,7 +68,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   - the 105 automated tests;
   - the full demo conversation, end to end in the simulator, on a local Qwen3.5 9B model with live data;
   - the scan page in headless Chrome, with a camera feed of a real barcode;
-  - every demo screen, measured in headless Chrome at the simulator's 944×590 screen frame (not Amazon's Echo Show 8 canvas).
+  - every demo screen, measured in headless Chrome at 768×480 (the guide's base canvas, dark and light) and at 1280×800 with the 1.667 root scale (dark theme only; the simulator's Echo Show 8 frame).
 - **Not tested:**
   - a real Alexa+: the docs say the Toolkit is available in the United States, and I did not attempt a deployment from outside the US;
   - Amazon's Local Inspector. Even with a developer account, it installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4).
@@ -85,7 +85,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 - The server's results never call a food "safe"; the engine's tests check that, and a simulator test checks that a fake model's "totally safe" is overridden. On a real Alexa+ the spoken words are the model's.
 - One spoken question checks everyone at the table, including a guest who drops off after the visit.
 - It finds the milk in a real cocoa mix whose allergen tags miss it.
-- It follows MCP spec 2025-11-25 exactly over Streamable HTTP, with an MCP Apps screen that fits the simulator's Echo Show-style frame (untested on a real Echo Show).
+- It follows MCP spec 2025-11-25 exactly over Streamable HTTP, with an MCP Apps screen authored at the Alexa+ 768×480 base canvas and checked in an Echo Show 8 simulator frame (untested on a real Echo Show).
 - The language model runs locally (Qwen3.5 9B, 4-bit, MLX), with no cloud LLM API; product and recipe data come live from Open Food Facts and TheMealDB.
 
 ### What I learned
@@ -144,7 +144,7 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
 
 **Alexa+ MCP Toolkit** (docs, MCP design guide, Local Inspector)
 - **Used for:** the screen and voice rules (design guide), where Alexa+ reads `_meta.ui`, and the certification path (Local Inspector).
-- **Worked well:** the design guide is concrete; its touch-target and contrast numbers, its far-field and low-density advice and its `hostContext` fields reshaped the screen. (The guide gives no minimum text size.) Add-ons are plain MCP, so the whole server could be built and tested with standard MCP tools before any Alexa-specific step.
+- **Worked well:** the design guide is concrete; its 768×480 base canvas, its 1.667 zoom for the Echo Show 8/15, its 48×48 touch targets and its contrast ratios shaped the screen; the widget uses the `hostContext` fields theme, safeAreaInsets, maxWidth and maxHeight. (The guide's type table lists sizes but sets no minimum text size.) Add-ons are plain MCP, so the whole server could be built and tested with standard MCP tools before any Alexa-specific step.
 - **Needs work:**
   - The docs say the Toolkit is available in the United States; I did not attempt a deployment from outside the US and built a simulator instead of testing on a real Alexa+ (friction log 1).
   - There's no way to ask Alexa+ to speak a safety verdict verbatim: "You can't script what Alexa says" (2).

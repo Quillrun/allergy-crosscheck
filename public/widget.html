@@ -5,7 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Allergy Crosscheck</title>
 <style>
+  /* Authored at the Alexa+ MCP design guide's 768x480 base canvas, with its type, spacing and corner-radius
+     tokens. One root scale is applied (zoom on <html>), derived from hostContext maxWidth/maxHeight only (deviceClass
+     is not read), so nothing below is sized per device. Layout uses no viewport-width breakpoints except the phone fallback:
+     under zoom a media query still sees the host's pixels. */
   :root {
+    --t-display5: 24px; --t-headline1: 20px; --t-headline2: 18px; --t-body1: 16px; --t-body2: 14px;
+    --s-4xs: 2px; --s-2xs: 6px; --s-xs: 8px; --s-sm: 12px; --s-md: 16px;
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
     --bg: #0f1419; --panel: #1a2129; --text: #f2f4f6; --muted: #a7b0ba; --line: #2b343e;
     --unsafe: #ff7a7e; --unsafe-bg: #3b1214; --confirm: #f5a524; --confirm-bg: #3a2a0c;
     --none: #8ea4bd; --none-bg: #1d2836; --chip: #26303b;
@@ -16,44 +23,45 @@
     --none: #3f5d7d; --none-bg: #e8eef5; --chip: #eef1f4;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--text); font: 18px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { padding: calc(20px + var(--inset-top, 0px)) calc(24px + var(--inset-right, 0px)) calc(16px + var(--inset-bottom, 0px)) calc(24px + var(--inset-left, 0px)); }
-  h1 { font-size: 26px; margin: 0 0 8px; font-weight: 650; }
-  .banner { border-radius: 16px; padding: 12px 20px; margin-bottom: 12px; display: flex; gap: 14px; align-items: center; }
-  .banner .icon { font-size: 34px; line-height: 1; }
-  .banner .label { font-size: 28px; font-weight: 750; letter-spacing: .2px; }
-  .banner .sub { color: var(--muted); font-size: 16px; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: var(--t-body1)/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { padding: calc(var(--s-sm) + var(--inset-top, 0px)) calc(var(--s-md) + var(--inset-right, 0px)) calc(var(--s-xs) + var(--inset-bottom, 0px)) calc(var(--s-md) + var(--inset-left, 0px)); }
+  h1 { font-size: var(--t-headline1); line-height: 1.2; margin: 0 0 var(--s-2xs); font-weight: 650; }
+  .banner { border-radius: var(--r-lg); padding: var(--s-xs) var(--s-md); margin-bottom: var(--s-xs); display: flex; gap: var(--s-sm); align-items: center; }
+  .banner .icon { font-size: var(--t-display5); line-height: 1; }
+  .banner .label { font-size: var(--t-display5); line-height: 1.15; font-weight: 750; letter-spacing: .2px; white-space: nowrap; }
+  .banner .sub { color: var(--muted); font-size: var(--t-body2); flex: 1; }
   .unsafe { background: var(--unsafe-bg); border: 2px solid var(--unsafe); } .unsafe .label { color: var(--unsafe); }
   .cannot_confirm { background: var(--confirm-bg); border: 2px solid var(--confirm); } .cannot_confirm .label { color: var(--confirm); }
   .no_listed_allergens { background: var(--none-bg); border: 2px solid var(--none); } .no_listed_allergens .label { color: var(--none); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
-  /* A recipe check: the swaps card gets the widest column, the short people card the narrowest. */
-  .grid.recipe { grid-template-columns: minmax(0, 3fr) minmax(0, 4fr) minmax(0, 5fr); }
-  @media (max-width: 720px) { .grid.recipe { grid-template-columns: 1fr; } }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
-  .card h2 { font-size: 16px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
-  .person { display: grid; grid-template-columns: 1fr auto; column-gap: 8px; align-items: start; padding: 6px 0; border-top: 1px solid var(--line); }
+  /* Two columns; a recipe check puts who's eating and the risky lines left, the swaps right. */
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-xs); align-items: start; }
+  .grid.one { grid-template-columns: minmax(0, 1fr); }
+  .grid.recipe { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); grid-template-areas: "who swaps" "watch swaps"; }
+  .grid.recipe .who { grid-area: who; } .grid.recipe .watch { grid-area: watch; } .grid.recipe .swaps { grid-area: swaps; }
+  @media (max-width: 560px) { .grid, .grid.recipe { grid-template-columns: minmax(0, 1fr); grid-template-areas: none; } .grid.recipe > * { grid-area: auto; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-xs) var(--s-sm); }
+  .card h2 { font-size: var(--t-body2); text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 var(--s-4xs); font-weight: 600; }
+  .person { display: grid; grid-template-columns: 1fr auto; column-gap: var(--s-xs); align-items: start; padding: var(--s-2xs) 0; border-top: 1px solid var(--line); }
   .person .why { grid-column: 1 / -1; }
   .person:first-of-type { border-top: 0; }
-  .person .name { font-weight: 650; font-size: 20px; }
-  .person .why { color: var(--muted); font-size: 16px; }
-  .pill { font-size: 16px; font-weight: 700; border-radius: 16px; padding: 2px 12px; white-space: nowrap; align-self: flex-start; }
+  .person .name { font-weight: 650; font-size: var(--t-headline2); }
+  .person .why { color: var(--muted); font-size: var(--t-body2); }
+  .pill { font-size: var(--t-body2); font-weight: 700; border-radius: var(--r-lg); padding: 0 var(--s-sm); white-space: nowrap; align-self: flex-start; }
   .pill.unsafe { color: var(--unsafe); border-width: 1px; } .pill.cannot_confirm { color: var(--confirm); border-width: 1px; } .pill.no_listed_allergens { color: var(--none); border-width: 1px; }
   ul { margin: 0; padding: 0; list-style: none; }
-  li { padding: 3px 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  li { padding: var(--s-2xs) 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: var(--s-4xs) var(--s-2xs); align-items: center; }
   li:first-child { border-top: 0; }
   .flagged { font-weight: 650; }
-  .chip { background: var(--chip); border-radius: 8px; padding: 2px 8px; font-size: 16px; color: var(--muted); }
+  .chip { background: var(--chip); border-radius: var(--r-sm); padding: 0 var(--s-xs); font-size: var(--t-body2); color: var(--muted); }
   .chip.contains, .chip.may_contain { color: var(--unsafe); } .chip.possible, .chip.unknown { color: var(--confirm); }
   .swap .arrow { color: var(--muted); }
-  button.choice { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; min-height: 48px; padding: 12px 16px; margin-top: 8px; border-radius: 12px; background: var(--chip); font-size: 19px; }
+  button.choice { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; min-height: 48px; padding: var(--s-sm) var(--s-md); margin-top: var(--s-xs); border-radius: var(--r-md); background: var(--chip); font-size: var(--t-body1); }
+  button.choice:first-of-type { margin-top: 0; }
   button.choice:focus-visible { outline: 3px solid var(--none); }
-  .issues { color: var(--confirm); font-size: 16px; margin-top: 8px; }
-  footer { color: var(--muted); font-size: 16px; margin-top: 8px; display: flex; justify-content: space-between; gap: 12px; }
-  .more { color: var(--muted); }
-  .small main { padding: calc(12px + var(--inset-top, 0px)) calc(16px + var(--inset-right, 0px)) calc(12px + var(--inset-bottom, 0px)) calc(16px + var(--inset-left, 0px)); }
-  .small .banner .label { font-size: 24px; }
-  .empty { color: var(--muted); padding: 40px 0; text-align: center; font-size: 20px; }
+  .issues { color: var(--confirm); font-size: var(--t-body2); margin-top: var(--s-xs); }
+  footer { color: var(--muted); font-size: var(--t-body2); margin-top: var(--s-xs); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--s-sm); }
+  .more { color: var(--muted); font-size: var(--t-body2); }
+  .empty { color: var(--muted); padding: 40px 0; text-align: center; font-size: var(--t-headline1); }
 </style>
 </head>
 <body>
@@ -95,20 +103,33 @@
     if (msg.method === "ui/resource-teardown" && msg.id !== undefined) post({ jsonrpc: "2.0", id: msg.id, result: {} });
   });
 
-  // Host context: theme, a device-size class (deviceClass is authoritative), safe-area insets.
+  // Host context: theme, safe-area insets, and the one root scale. The UI is authored at the 768x480 base
+  // canvas; the scale is the host's canvas over that, min(maxWidth/768, maxHeight/480): 1.667 on an Echo
+  // Show 8 or 15 (1280x800), 1 when the host sends no size. It never goes below 1, so a phone-sized host
+  // keeps readable text and gets the one-column layout instead of a shrunken canvas.
+  const BASE = { width: 768, height: 480 };
+  let host = {};
+  const rootScale = ({ maxWidth, maxHeight }) =>
+    maxWidth > 0 && maxHeight > 0 ? Math.max(1, Math.min(maxWidth / BASE.width, maxHeight / BASE.height)) : 1;
+
   function applyContext(ctx) {
     if (!ctx) return;
+    host = { ...host, ...ctx }; // host-context-changed may carry only what changed
     const root = document.documentElement;
-    if (ctx.theme) root.dataset.theme = ctx.theme;
-    if (ctx.deviceClass) root.className = /small/i.test(ctx.deviceClass) ? "small" : "large";
+    if (host.theme) root.dataset.theme = host.theme;
+    const zoom = rootScale(host);
+    root.style.zoom = zoom === 1 ? "" : String(zoom);
+    // The host measures insets in its own pixels; the zoom would scale them a second time.
     for (const side of ["top", "right", "bottom", "left"]) {
-      if (typeof ctx.safeAreaInsets?.[side] === "number") root.style.setProperty(`--inset-${side}`, `${ctx.safeAreaInsets[side]}px`);
+      if (typeof host.safeAreaInsets?.[side] === "number") root.style.setProperty(`--inset-${side}`, `${host.safeAreaInsets[side] / zoom}px`);
     }
     resize();
   }
 
+  // Tell the host how big the content is, in the host's own pixels.
   function resize() {
-    notify("ui/notifications/size-changed", { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight });
+    const box = document.getElementById("app").getBoundingClientRect(); // already in the host's pixels under the root zoom
+    notify("ui/notifications/size-changed", { width: Math.ceil(box.width), height: Math.ceil(box.height) });
   }
 
   async function choose(barcode) {
@@ -125,7 +146,7 @@
     if (!v) return;
     const parts = [`<h1>${esc(v.title)}</h1>`];
     if (v.overall) {
-      parts.push(`<div class="banner ${v.overall}" role="status"><span class="icon" aria-hidden="true">${ICON[v.overall]}</span><div><div class="label">${LABEL[v.overall]}</div><div class="sub">${SUB[v.overall]}</div></div></div>`);
+      parts.push(`<div class="banner ${v.overall}" role="status"><span class="icon" aria-hidden="true">${ICON[v.overall]}</span><span class="label">${LABEL[v.overall]}</span><span class="sub">${SUB[v.overall]}</span></div>`);
     }
     const cards = [];
     if (v.people?.length && v.kind !== "shopping") {
@@ -135,14 +156,14 @@
           : `<span class="chip">${p.guest ? `guest${p.until ? ` · until ${esc(day(p.until))}` : ""}` : "household"}</span>`;
         // On a recipe the "Watch out for" card names the ingredients, so a person's row keeps only the allergen.
         const reasons = v.kind === "recipe_check" ? (p.reasons ?? []).map((r) => r.split(":")[0]) : p.reasons ?? [];
-        const why = v.overall ? [...new Set(reasons)].map(esc).join("<br>") : esc((p.allergies ?? []).join(", "));
+        const why = v.overall ? [...new Set(reasons)].map(esc).join(v.kind === "recipe_check" ? ", " : "<br>") : esc((p.allergies ?? []).join(", "));
         return `<div class="person"><div class="name">${esc(p.name)}</div>${right}<div class="why">${why}</div></div>`;
       }).join("");
-      cards.push(`<section class="card"><h2>${v.overall ? "Who's eating" : "Household"}</h2>${rows}</section>`);
+      cards.push(`<section class="card who"><h2>${v.overall ? "Who's eating" : "Household"}</h2>${rows}</section>`);
     }
     if (v.items?.length) {
-      // A check shows the flagged lines and summarises the rest, so the verdict, the risky
-      // ingredients and the swaps fit the simulator's 944x590 frame. A plain recipe shows the first eight.
+      // A check shows the flagged lines and summarises the rest, with a cap of eight lines; a plain
+      // recipe shows its first eight.
       const flagged = v.items.filter((i) => i.flags?.length);
       const shown = v.overall ? flagged : v.items.slice(0, 8);
       const rest = v.items.length - shown.length;
@@ -155,22 +176,23 @@
       });
       if (rest > 0) rows.push(`<li class="more">${v.overall ? `${shown.length ? "+ " : ""}${rest} ${shown.length ? "other " : ""}ingredient${rest === 1 ? "" : "s"}: nothing listed for these allergies` : `and ${rest} more`}</li>`);
       const heading = v.kind === "product_check" ? "What I found" : v.overall ? "Watch out for" : "Ingredients";
-      cards.push(`<section class="card"><h2>${heading}</h2><ul>${rows.join("")}</ul></section>`);
+      cards.push(`<section class="card watch"><h2>${heading}</h2><ul>${rows.join("")}</ul></section>`);
     }
     if (v.swaps?.length) {
       const rows = v.swaps.map((s) => `<li class="swap"><span class="flagged">${esc(s.replace)}</span><span class="arrow">→</span><span>${s.options.map(esc).join(" · ")}</span><span class="chip">${esc(s.because)}</span></li>`).join("");
-      cards.push(`<section class="card"><h2>Swaps</h2><ul>${rows}</ul></section>`);
+      cards.push(`<section class="card swaps"><h2>Swaps</h2><ul>${rows}</ul></section>`);
     }
     if (v.candidates?.length) {
       const rows = v.candidates.map((c) => `<button class="choice" data-barcode="${esc(c.barcode)}">${esc(c.name)}${c.brand ? ` <span class="chip">${esc(c.brand)}</span>` : ""}</button>`).join("");
       cards.push(`<section class="card"><h2>Which one?</h2>${rows}</section>`);
     }
     if (v.shopping) {
-      const rows = v.shopping.length ? v.shopping.map((s) => `<li>${esc(s.item)}${s.note ? `<span class="chip">${esc(s.note)}</span>` : ""}</li>`).join("") : `<li>Empty</li>`;
+      // Shows at most eight lines, then "and N more".
+      const rows = v.shopping.length ? v.shopping.slice(0, 8).map((s) => `<li>${esc(s.item)}${s.note ? `<span class="chip">${esc(s.note)}</span>` : ""}</li>`).join("") + (v.shopping.length > 8 ? `<li class="more">and ${v.shopping.length - 8} more</li>` : "") : `<li>Empty</li>`;
       cards.push(`<section class="card"><h2>Shopping list</h2><ul>${rows}</ul></section>`);
     }
     if (!v.overall && !cards.length) parts.push(`<div class="card">${esc(v.speech)}</div>`);
-    parts.push(`<div class="grid${cards.length === 3 && v.swaps?.length ? " recipe" : ""}">${cards.join("")}</div>`);
+    parts.push(`<div class="grid${cards.length === 3 && v.swaps?.length ? " recipe" : cards.length === 1 ? " one" : ""}">${cards.join("")}</div>`);
     // Data issues already shown on every person's row aren't repeated underneath.
     const issues = (v.dataIssues ?? []).filter((d) => !(v.people?.length && v.people.every((p) => (p.reasons ?? []).includes(d))));
     if (issues.length) parts.push(`<div class="issues">${issues.map(esc).join("<br>")}</div>`);
