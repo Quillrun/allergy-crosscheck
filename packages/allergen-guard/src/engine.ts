@@ -25,7 +25,8 @@ const RANK: Record<Verdict, number> = { no_listed_allergens: 0, cannot_confirm: 
 export const worst = (a: Verdict, b: Verdict): Verdict => (RANK[a] >= RANK[b] ? a : b);
 
 type Compiled = { term: string; re: RegExp; entry: Term; unless: RegExp[] };
-const wordRe = (phrase: string) => new RegExp(`(^| )${phrase.split(" ").join(" ")}(s|es)?( |$)`);
+// The trailing space is a lookahead, not consumed, so a phrase repeated after a single space ("coconut milk coconut milk") matches both times.
+const wordRe = (phrase: string) => new RegExp(`(^| )${phrase.split(" ").join(" ")}(s|es)?(?= |$)`);
 const COMPILED: Compiled[] = TERMS.flatMap((entry) =>
   entry.terms.map((t) => {
     const term = normalize(t);
@@ -110,9 +111,10 @@ export function splitIngredients(input: string | string[]): string[] {
 // "may contain traces of nuts", "made in a factory that also handles milk": a warning, not an ingredient.
 const PRECAUTION = new RegExp(
   [
-    "may (?:also )?contain", "contains traces of", "traces of", "may be present",
+    "may (?:also )?contain", "could contain", "contains traces of", "traces of", "may be present",
     "(?:made|produced|manufactured|packed|processed|prepared) (?:in|at) (?:an? |the |our )?(?:\\w+ ){0,2}(?:factory|facility|site|kitchen|environment) that (?:also )?(?:handles|uses|processes)",
     "made on (?:shared )?equipment", "shares (?:the same )?(?:equipment|facility|production line|line) with", "produced on equipment shared with", "made on a line that also", "processed on shared equipment",
+    "(?:made|produced|processed|manufactured) on machinery that also (?:processes|handles)",
     "\\b(?:plant|factory|facility|site|line|lines|equipment|premises|bakery|kitchen|environment) (?:that|which|where) (?:also )?(?:processes|handles|uses|manufactures|packs|produces|makes)",
     "(?:in|on) the same (?:facility|equipment|line|lines|premises)", "shared (?:equipment|facility|line)", "may also use", "contains one or more of",
     "kan inneholde", "kan inneh[aå]lla", "kan indeholde", "mo[zż]e zawiera[cć]", "mo[zž]e obsahovat", "m[oô][zž]e obsahova[tť]", "gali b[uū]ti", "pode conter",

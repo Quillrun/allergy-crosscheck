@@ -1,6 +1,6 @@
 # Hand-check of the strict count
 
-The strict count (README, "The count we claim") was hand-checked in five rounds against rules fixed before each run. The rule: draw 100 records from the 200-record `strict_sample`, judge each on the snapshot record, and claim the count only if 100 of 100 are real. The original protocol allowed 2 rounds; round 3 ran under the Round-3 rules the README fixed on 2026-10-08, after round 2, with the same 100-of-100 decision rule. Round 4 ran under the Round-4 rules (R1–R6, README, fixed 2026-10-09), again with the same decision rule. Round 5 ran under the Round-5 rules (R1–R7, README, fixed 2026-10-09), with the same decision rule. A record is real only if the English ingredient text names, as an ingredient, something that contains the allergen, and neither the allergen list nor the "may contain" list names it. Unclear counts as not real.
+The strict count (README, "The count we claim") was hand-checked in seven rounds against rules fixed before each run. The rule: draw 100 records from the 200-record `strict_sample`, judge each on the snapshot record, and claim the count only if 100 of 100 are real. The original protocol allowed 2 rounds; round 3 ran under the Round-3 rules the README fixed on 2026-10-08, after round 2, with the same 100-of-100 decision rule. Round 4 ran under the Round-4 rules (R1–R6, README, fixed 2026-10-09), again with the same decision rule. Round 5 ran under the Round-5 rules (R1–R7, README, fixed 2026-10-09), with the same decision rule. Round 6 ran under the same R1–R7 rules (README, fixed 2026-10-09) with the same decision rule. Round 7 ran under the Round-7 rules (R8–R10b and the glyceride correction, README, fixed 2026-10-09) with the same decision rule. A record is real only if the English ingredient text names, as an ingredient, something that contains the allergen, and neither the allergen list nor the "may contain" list names it. Unclear counts as not real.
 
 In the tables below, `$C` stands for the local cache directory `~/Library/Caches/allergy-crosscheck`. The records are public Open Food Facts data. Each checker's table is copied verbatim from its result file.
 
@@ -11,6 +11,8 @@ In the tables below, `$C` stands for the local cache directory `~/Library/Caches
 | Round 3 | `4c7c554` (rules `4f64c78`) | `$C/run5` | 200-record `strict_sample` (reservoir seed 3); 4 records overlapping rounds 1-2 excluded; 100 drawn with mulberry32 seed 20261009 | A and B, independent, 50 each | 95/100 |
 | Round 4 | `4c7c554` (unchanged since round 3; count rules R1–R6, commit `b737e42`) | `$C/run6` | 200-record `strict_sample` (reservoir seed 5); 8 records overlapping rounds 1-3 excluded; 100 drawn with mulberry32 seed 20261010 | A and B, independent, 50 each | 93/100 |
 | Round 5 | `872b0ec` (rules `4549ccd`, pre-registered before the run; count rules R1–R7) | `$C/run7` | 200-record `strict_sample` (reservoir seed 9); 5 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261011 | A and B, independent, 50 each | 97/100 after lead re-check (96/100 by the checkers alone) |
+| Round 6 | `34056e1` (narrow redo, after `ca74f30` and the revert `119f5f4` of `ed3c86c`; rules `2b7ec57`, pre-registered before the run; R1–R7 unchanged) | `$C/run9` | 200-record `strict_sample` (reservoir seed 13); 9 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261012 | A and B, independent, 50 each | 95/100 (checkers A 47/50 and B 48/50; the lead agrees with every call) |
+| Round 7 | `34056e1` (unchanged; rules `0dc1610`, pre-registered before the run; R8, glyceride correction, R9, R10a, R10b) | `$C/run10` | 200-record `strict_sample` (reservoir seed 17); 6 records overlapping earlier rounds excluded; 100 drawn with mulberry32 seed 20261013 | A and B, independent, 50 each | 95/100 (checkers A 46/50 and B 49/50; the lead agrees with every call) |
 
 Round 2 also compared the new engine against the old one (`2595749`). Determinism: shard 2 re-run gave identical counts apart from timing.
 
@@ -802,6 +804,337 @@ Borderline calls kept REAL, lead agrees:
 
 Result: **97 of 100 real after the lead re-check** (96 by the checkers alone). The 95% Wilson interval for 97/100 is 91.5%-99.0%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 97/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100.
 
-Separately, and not part of the count: the round-5 vanished-hit audit of the run found two fail-opens introduced in engine `872b0ec`. The allergy-advice strip removed a real "For allergens see cereals containing gluten, nuts, soya and sulphites" (5013803340155, gluten lost), and "peanut milk" as a plant milk hid "milk" in garbled text (0034952369342). It also found asafoetida (0664648120492) losing its only gluten signal. These are being fixed in a separate engine commit.
+Separately, and not part of the count: the round-5 vanished-hit audit of the run found two fail-opens introduced in engine `872b0ec`. The allergy-advice strip removed a real "For allergens see cereals containing gluten, nuts, soya and sulphites" (5013803340155, gluten lost), and "peanut milk" as a plant milk hid "milk" in garbled text (0034952369342). It also found asafoetida (0664648120492) losing its only gluten signal. These were fixed in engine commit `ca74f30`.
 
 The figures are for engine `872b0ec` and the R1–R7 count rules. Whether the number is used anywhere public is the operator's decision.
+
+## Round 6 (rules 2b7ec57, engine 34056e1): 47/50 + 48/50 = 95/100
+
+Run: `$C/run9` (`summary.json`; copy in [`results-strict-round6-2026-10-09.json`](results-strict-round6-2026-10-09.json)). Result files: `$C/run9/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,476.5 s (wall clock 2,477 s). Determinism: shard 2 re-run gave identical counts apart from `seconds`. The rules (commit `2b7ec57`, R1–R7 unchanged, `strict_sample` seed 13) were pre-registered before the run; the engine as run is `34056e1`.
+
+`A` is unchanged: 3,457,538 / 826,465 (total 4,784,317 / 1,552,376). `strict_missed` is 8,516 for all records (list empty 2,094, partial 6,422) and 2,142 for popular ones (732 / 1,410), down from 8,551 / 2,161 in round 5.
+
+Engine history for this round: the round-5 fail-opens were fixed in `ca74f30`. The first attempt at the three round-5 misses, `ed3c86c`, was reverted (`119f5f4`) because on full data it downgraded about 7,600 family "contains" results, including real ingredients (for example "CONTIENE: … SOYA", "lecithina de soya", "contains one or more of the following" lists, and an unclosed bracket that swallowed the rest of a text); no allergen vanished. `34056e1` is the narrow redo. Its full-data downgrade gate, run before the engine commit: 431 family-records went from contains to weaker, all one of the three intended patterns (not-suitable-for sentence 291, cut list after a precaution 98, soy-free miso 42); none went to nothing.
+
+The `strict_sample` came from reservoir seed 13 (pool of 200 records). 9 records overlapped earlier rounds and were excluded; the draw excluded every code in `run3` to `run7` `hc_a`/`hc_b`. 100 were drawn with mulberry32 seed 20261012 from `run9/strict_sample.json` and split into `run9/hc_a.json` and `hc_b.json`, 50/50 between two independent checkers.
+
+### Checker A
+
+| # | code | missed families | ingredient words | verdict | reason |
+|---|---|---|---|---|---|
+| 1 | 0068246700047 | egg | "liquid egg" | REAL | egg named; list has milk only |
+| 2 | 0886926377613 | peanut | "peanut butter (roasted peanuts)" | REAL | peanut named; list gluten only |
+| 3 | 0961003011731 | egg, milk | "fresh eggs; skimmed milk powder" | REAL | both egg and milk named, list gluten only |
+| 4 | 0010749011106 | soy | "SOY LECITHIN" | REAL | soy lecithin is soy (not an exempt oil); list gluten, milk |
+| 5 | 0072036717047 | sulphites | "sodium bisulfite" | REAL | sulphite additive ingredient; lists empty |
+| 6 | 0071007018688 | sulphites | "sodium metabisulfite (dough conditioners)" | REAL | plain list item, no and/or in item; lists lack sulphites |
+| 7 | 0007203672132 | soy, milk, egg | "organic soy lecithin; organic skim milk; organic eggs" | REAL | all three named, list gluten only |
+| 8 | 0077260044259 | sulphites | "sulfur dioxide; sodium metabisulfite" | REAL | named as ingredients in cherries/coconut/apricots items; no sulphite tag |
+| 9 | 0042272011506 | gluten | "durum flour (lasagna pasta)" | REAL | durum is wheat; list milk only |
+| 10 | 8008698048788 | milk | "lactose-free storage" | NOT REAL | 'lactose-free' is a free-from wording, no milk ingredient |
+| 11 | 0722252334039 | tree_nut | "macadamia nut butter" | REAL | macadamia is a tree nut; list milk, soybeans |
+| 12 | 0041331031394 | sulphites | "sodium bisulfite" | REAL | sulphite preservative; lists empty |
+| 13 | 5010102115491 | sulphites | "sodium metabisulphite" | REAL | sulphite preservative; list apple only |
+| 14 | 0041512134746 | tree_nut | "almond meal" | REAL | almond is tree nut; no nuts tag |
+| 15 | 5020379171458 | egg | "pasteurised whole egg (6%)" | REAL | egg named; list gluten, milk |
+| 16 | 0013562300693 | gluten | "ORGANIC WHEAT PEACE PASTA" | REAL | wheat pasta ingredient; list milk only (borderline: odd product-style name) |
+| 17 | 0072981005251 | sulphites | "sodium sulfite" | REAL | sulphite ingredient; no sulphite tag |
+| 18 | 0041303051979 | sulphites | "sulfur dioxide [for color retention]; sulfur dioxide (as preservative)" | REAL | sulphur dioxide named; list nuts, peanuts, soybeans |
+| 19 | 20674526 | sulphites | "Preservative: Sodium Metabisulphite" | REAL | sulphite named repeatedly; lists empty |
+| 20 | 0085239156902 | sulphites | "sulfur dioxide (preservative)" | REAL | lists empty |
+| 21 | 0073575703027 | fish | "dried bonito mix" | REAL | bonito is fish; list gluten, soybeans |
+| 22 | 0041497546213 | soy | "modified soy protein" | REAL | soy protein is soy; list gelatin, gluten, milk |
+| 23 | 0747479300032 | gluten | "pasta (durum semolina)" | REAL | durum semolina is wheat; no gluten tag |
+| 24 | 0859098005318 | crustacean | "crawfish" | REAL | crawfish is a crustacean; no crustacean tag |
+| 25 | 5011022008047 | milk | "whey powder mix)" | REAL | whey powder is milk; list gluten, soybeans (borderline: fragmentary text) |
+| 26 | 20952310 | sulphites | "preservative: sodium metabisulphite" | REAL | lists empty |
+| 27 | 0075391028421 | sulphites | "sodium bisulfite; sodium metabisulfite" | REAL | list names crustaceans only |
+| 28 | 0041130599705 | sulphites | "SULFUR DIOXIDE (A PRESERVATIVE)" | REAL | lists empty |
+| 29 | 09020139 | sulphites | "preservative (potassium metabisulphite)" | REAL | sulphite named; no sulphite tag; may-contain only nuts, peanuts |
+| 30 | 0711381307472 | celery | "ground celery seeds" | REAL | celery seed is celery; list fish, mustard |
+| 31 | 0741643035706 | sulphites | "sodium metabisulfite (preservative)" | REAL | lists empty |
+| 32 | 0041133303262 | milk | "buttermilk solids; buttermilk powder; nonfat dry milk; sodium caseinate" | REAL | milk named; list gluten, pork, soybeans |
+| 33 | 5057172516032 | sulphites | "Sodium Metabisulphite" | REAL | lists empty |
+| 34 | 0085239207192 | soy | "soy mono and diglyceride" | NOT REAL | soy-derived mono/diglyceride is an emulsifier fat, not clearly soy protein; unclear (borderline) |
+| 35 | 0851763006057 | gluten | "unbleached white flour; spelt flour" | REAL | spelt is wheat, white flour is wheat flour in US usage; no gluten tag (borderline: 'white flour' alone unspecified, spelt decisive) |
+| 36 | 8938504626025 | sulphites | "SODIUM METABISULFITE" | REAL | lists empty |
+| 37 | 0071524120017 | sulphites | "sodium metabisulfite (as preservatives)" | REAL | list orange only |
+| 38 | 0077890459515 | gluten | "Cooked Wheat Berries (Wheat Berries, Water)" | REAL | wheat named; list soybeans only |
+| 39 | 0011594202114 | soy, gluten | "hydrolyzed soy; wheat gluten" | REAL | both named as ingredients, list milk only |
+| 40 | 0073210004106 | sulphites | "potassium metabisulfite" | REAL | lists empty |
+| 41 | 0631782001529 | egg | "cage-free eggs" | REAL | egg named; list gluten |
+| 42 | 0004656702104 | sulphites | "sodium sulfite" | REAL | sulphite named; lists gluten, soybeans |
+| 43 | 0674971180063 | egg | "non-gmo cage-free eggs" | REAL | egg named; list gluten, milk, nuts, soybeans |
+| 44 | 8850643003416 | sulphites | "sodium metabisulphite" | REAL | sulphite named; no sulphite tag |
+| 45 | 0070896040442 | gluten | "wheat starch" | REAL | wheat starch contains wheat (not a glucose-syrup/maltodextrin exemption); list soybeans only |
+| 46 | 0053326028074 | soy | "'silica soy and may contain wheat'" | NOT REAL | garbled fragment, soy is not clearly an ingredient (borderline) |
+| 47 | 0075450001396 | sulphites | "sulfur dioxide (preservative)" | REAL | lists empty |
+| 48 | 0031000006839 | sulphites | "sodium bisulfite" | REAL | sulphite named; no sulphite tag |
+| 49 | 0084253269858 | tree_nut | "organic cashew butter" | REAL | cashew is tree nut; lists empty |
+| 50 | 0048000003959 | fish | "light tuna" | REAL | tuna is fish; list celery, eggs, mustard |
+
+#### Totals
+REAL 47, NOT REAL 3 of 50: 8008698048788, 0085239207192, 0053326028074.
+
+### Checker B
+
+| # | code | missed families | ingredient words | verdict | reason |
+|---|---|---|---|---|---|
+| 1 | 0073490000003 | sulphites | "potassium metabisulfite" | REAL | sulphite ingredient; lists empty |
+| 2 | 0080874414806 | sulphites | "SODIUM METABISULPHITE" | REAL | preservative ingredient; only en:no-gluten label |
+| 3 | 0070470496627 | milk | "Pasteurized grade a milk" | REAL | milk is first ingredient; lists empty |
+| 4 | 0085239301845 | sulphites | "rice wine vinegar (... contain sulfites)" | REAL | explicit sulfites statement in ingredient; tags lack sulphites |
+| 5 | 0703694584749 | lupin | "sweet lupine flour" | REAL | lupin ingredient; tags only eggs, gluten |
+| 6 | 0492610205485 | sulphites | "sulfur dioxide (preservative)" | REAL | ingredient; lists empty |
+| 7 | 0073405102914 | sulphites | "sodium bisulfite (as preservatives)" | REAL | ingredient; lists empty |
+| 8 | 0838054003964 | sulphites | "potassium metabisulphite" | REAL | ingredient; lists empty |
+| 9 | 0078742434391 | soy | "soy protein and wheat gluten" | REAL | soy protein is soy; tags gluten, milk only |
+| 10 | 5051379028930 | gluten | "Israeli couscous" | REAL (borderline) | couscous is wheat pasta (gluten) but wheat not spelled out; tags only soybeans |
+| 11 | 0819710020136 | gluten | "organic semolina wheat flour" | REAL | wheat; tags only milk |
+| 12 | 0085239723128 | gluten | "unbleached wheat flour" | REAL | wheat; tags only milk |
+| 13 | 0050000549009 | milk | "dry whole milk" | REAL | milk ingredient; tags only gluten |
+| 14 | 8712566139385 | sulphites | "potassium METABISULPHITE" | REAL | tags only mustard |
+| 15 | 0857484001142 | sulphites | "apricot (containing sulfur dioxide)" | REAL | sulphur dioxide named in ingredient; tags lack sulphites |
+| 16 | 0072799036904 | soy | "soy lecithin emulsifier" | REAL | soy lecithin is soy under FALCPA; tags gluten, milk |
+| 17 | 0011284050186 | sulphites | "evaporated apples (treated with sulfur dioxide to preserve color)" | REAL (borderline) | SO2 named as treatment within ingredient item, not a separate additive |
+| 18 | 0071512512145 | sulphites | "dough conditioners (sodium sulfite, ...)" | REAL | sodium sulfite ingredient |
+| 19 | 0070328444640 | mustard | "spices (including mustard, ...)" | REAL | mustard named; tags only celery |
+| 20 | 0075450001402 | sulphites | "sulfur dioxide (preservative)" | REAL | ingredient; lists empty |
+| 21 | 0804879504207 | soy | "chickpea miso" | NOT REAL | miso here is made from chickpeas, soy not named |
+| 22 | 0094331460602 | sulphites | "sodium metabisulfite (as preservative)" | REAL | tags only banana |
+| 23 | 0075450174496 | milk | "milk replacement (soya protein, ...)" | NOT REAL | a milk substitute made of soya protein, not milk |
+| 24 | 5051399313634 | sulphites | "Potassium Bisulphite, Potassium Metabisulphite" | REAL | preservatives; lists empty |
+| 25 | 4056489824466 | sulphites | "Preservative: Sodium Metabisulphite" | REAL | in seasoning; gluten-free label irrelevant |
+| 26 | 0659422312460 | milk | "evaporated milk" | REAL | tags eggs, soybeans only |
+| 27 | 0041270926300 | sulphites | "sulfur dioxide (preservative)" | REAL | lists empty |
+| 28 | 0657522045202 | sesame | "sesame seed meal" | REAL | tags only gluten |
+| 29 | 0861050000408 | milk | "sweet cream buttermilk" | REAL | tags gluten, soybeans |
+| 30 | 0075071800415 | gluten | "enriched wheat flour" | REAL | crust wheat flour; tags eggs, milk, pork (text truncated but wheat flour is clear) |
+| 31 | 5059697705632 | sulphites | "Sodium Metabisulphite" | REAL | lists empty |
+| 32 | 0888670017876 | sulphites | "sulfur dioxide [to preserve color]" | REAL | three items; tags only kiwi |
+| 33 | 0073218350618 | egg | "eggs with sodium silicoaluminate" | REAL | egg ingredient; tags gluten, milk |
+| 34 | 0054100172709 | sulphites | "potassium metabisulfite" | REAL | lists empty |
+| 35 | 0015400827706 | milk | "non fat milk", "whey solids" | REAL | tags lack milk |
+| 36 | 0097342000249 | mustard | "#1 mustard seed" | REAL | tags only soybeans |
+| 37 | 0190912100582 | tree_nut | "Cashew Butter*" | REAL | cashew is tree nut; tags only peanuts (not en:nuts) |
+| 38 | 0859283003273 | egg | "whole dried egg powder" | REAL | tags gluten, milk, soybeans |
+| 39 | 0011110833310 | sulphites | "DRIED FRUIT TREATED WITH SODIUM BISULFITE AND SULFUR DIOXIDE" | REAL (borderline) | treatment statement after the list, not an ingredient line, but it names the additives actually used; tags banana, nuts |
+| 40 | 0760941241565 | sulphites | "preservative (sodium bisulfites)", "sodium metabisulfite (preservative)" | REAL | tags lack sulphites |
+| 41 | 0072730262171 | milk | "Grade a lowfat milk" | REAL | lists empty |
+| 42 | 4335619183414 | sulphites | "sodium metabisulphite" | REAL | vegan label irrelevant; lists empty |
+| 43 | 0850016839961 | mustard | "SPICES (INCLUDES MUSTARD)" | REAL | tags eggs, milk, soybeans |
+| 44 | 8001060000933 | sulphites | "antioxidant (residual sulfur dioxide)" | REAL (borderline) | "residual" but listed as an ingredient item; no-gluten label only |
+| 45 | 5010251980681 | sulphites | "Preservative (sodium metabisulphite)" | REAL | tags gluten, pork |
+| 46 | 5056517315064 | fish | "Thai Fish Sauce (Water, Anchovy Fish Extract, ...)" | REAL (borderline) | anchovy in fish sauce is fish; "extract" is not a flavouring exemption here; tags crustaceans, soybeans |
+| 47 | 0011213014340 | sulphites | "SULFUR DIOXIDE (PRESERVATIVE)" | REAL | lists empty |
+| 48 | 0089016100492 | sulphites | "potassium metabisulfite (preservative)" | REAL | lists empty |
+| 49 | 0818371011002 | fish | "Keta salmon" | REAL | tags mustard, sesame, soybeans |
+| 50 | 0733636331001 | celery | "ORCANIC CELERY" (vegetable broth concentrate) | REAL (borderline) | typo "ORCANIC" but celery clear; tags only milk |
+
+#### Totals
+REAL 48, NOT REAL 2 of 50: 0804879504207, 0075450174496.
+
+Checkers combined: 95/100.
+
+### Round 6 lead re-check
+
+The lead re-checked every NOT REAL, every borderline and 10 random REAL records. The lead agrees with every call of both checkers.
+
+NOT REAL, by record:
+- 8008698048788 (milk): NOT REAL, agree. "flavourings,lactose-free storage: dry" is a free-from claim run into a storage line; R4(b)'s free-from phrases don't include "lactose free".
+- 0085239207192 (soy): NOT REAL, agree. "soy mono and diglyceride": the glycerides exclusion matches "glycerides" only, not the singular.
+- 0053326028074 (soy): NOT REAL, agree. The garbled "magnesium stearate and silica soy and may contain wheat." leaves it unclear whether soy is an ingredient or part of the warning.
+- 0804879504207 (soy): NOT REAL, agree. "chickpea miso*": the miso is named by its base, chickpea, and no soy is named. The soy-free-miso rule needs a bracket.
+- 0075450174496 (milk): NOT REAL, agree. "milk replacement (soya protein, maltodextrin, cerelose, guar gum, beta carotene)" is a milk substitute.
+
+Borderline calls kept REAL, lead agrees:
+- 5051379028930 gluten: "Israeli couscous"; couscous is on the pre-registered strict gluten list, and it is wheat pasta.
+- 0011284050186 sulphites: "evaporated apples (treated with sulfur dioxide…)".
+- 0011110833310 sulphites: "DRIED FRUIT TREATED WITH SODIUM BISULFITE AND SULFUR DIOXIDE…".
+- 8001060000933 sulphites: "antioxidant (residual sulfur dioxide)".
+- 5056517315064 fish: "Anchovy Fish Extract" in a fish sauce; fish, not a flavouring.
+- 0733636331001 celery: "ORCANIC CELERY".
+- 0013562300693 gluten: "ORGANIC WHEAT PEACE PASTA".
+- 5011022008047 milk: "whey powder".
+- 0851763006057 gluten: "spelt flour".
+
+10 random REAL records re-checked, all REAL: 0190912100582, 0492610205485, 0007203672132, 0075450001396, 0760941241565, 5051399313634, 0674971180063, 0072981005251, 0073575703027, 0859098005318.
+
+### Round 6: the 5 NOT REAL, by cause
+
+| Cause | Records | Where the gap is |
+|---|---|---|
+| (a) A free-from claim run into a storage line ("lactose-free storage") | 1 (A#10, 8008698048788) | The count's rule: R4(b)'s phrases don't include "lactose free" |
+| (b) A singular "mono and diglyceride" | 1 (A#34, 0085239207192) | The count's rule: the glycerides exclusion matches "glycerides" only |
+| (c) Garbled text, unclear whether soy is an ingredient or part of the warning | 1 (A#46, 0053326028074) | Unclear counts as not real |
+| (d) A miso named by its base ("chickpea miso*"), no soy named | 1 (B, 0804879504207) | The soy-free-miso rule needs a bracket |
+| (e) A milk substitute ("milk replacement (soya protein, …)") | 1 (B, 0075450174496) | A milk substitute read as dairy |
+
+### Round 6 outcome
+
+Result: **95 of 100 real** (checker A 47/50, checker B 48/50; the lead agrees with every call). The 95% Wilson interval is 88.7%-97.8%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 95/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100.
+
+The figures are for engine `34056e1` and the R1–R7 count rules. Whether the number is used anywhere public is the operator's decision.
+
+## Round 7 (rules 0dc1610, engine 34056e1): 46/50 + 49/50 = 95/100
+
+Run: `$C/run10` (`summary.json`; copy in [`results-strict-round7-2026-10-09.json`](results-strict-round7-2026-10-09.json)). Result files: `$C/run10/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,446 s (wall clock 2,447 s). Determinism: shard 2 re-run gave identical counts apart from `seconds`. The rules (commit `0dc1610`: R8 free-from adjacency, the glyceride singular correction, R9 precaution in the item, R10a base-named miso, R10b substitutes; `strict_sample` seed 17) were committed at 18:32, before the run (shards written 19:11); the engine is unchanged, `34056e1`.
+
+`A` is 3,457,538 / 826,465 (total 4,784,317 / 1,552,376), as before. `B` is 136,562 / 64,086, equal to round 6's; it differs from round 5's because the engine changed between round 5 and 6 (`ca74f30`, `34056e1`). `strict_missed` is 8,436 for all records (list empty 2,081, partial 6,355) and 2,116 for popular ones (727 / 1,389), down from 8,516 / 2,142 in round 6.
+
+The `strict_sample` came from reservoir seed 17 (pool of 200 records). 6 records overlapped earlier rounds and were excluded; the draw excluded every code in `run3` to `run7` and `run9` `hc_a`/`hc_b`. 100 were drawn with mulberry32 seed 20261013 from `run10/strict_sample.json` and split into `run10/hc_a.json` and `hc_b.json`, 50/50 between two independent checkers.
+
+### Checker A
+
+| # | code | missed families | ingredient words | verdict | reason |
+|---|---|---|---|---|---|
+| 1 | 0054100009609 | sulphites | "sodium metabisulfite, potassium metabisulfite" | REAL | named in preservatives; allergen/traces lists empty |
+| 2 | 4056489913078 | sulphites | "sodium metabisulphite" | REAL | preservative ingredient; list only apple |
+| 3 | 0742287300120 | sulphites | "sodium metabisulphite" | REAL | ingredient; lists empty |
+| 4 | 0844527032249 | milk | "whole milk solids, nonfat dry milk" | REAL | melting wafers component; lists gluten/soy only |
+| 5 | 0076479162129 | sulphites | "sodium bisulfite" | REAL | ingredient; lists empty |
+| 6 | 0021333399227 | milk | "buttermilk solids, nonfat milk, whey solids" | REAL | dairy ingredients; no milk tag |
+| 7 | 0100001000457 | sulphites | "sodium metabisulfite" | REAL | in wrap ingredients; no sulphite tag |
+| 8 | 5059697767654 | sulphites | "Sodium Metabisulphite" | REAL | preservative ingredient; lists empty |
+| 9 | 0085239312339 | milk | "whey powder" | REAL | whey is milk; no milk tag |
+| 10 | 5000237128169 | milk | "only 'also may contairi milk'" | NOT REAL | precaution sentence, not an ingredient |
+| 11 | 0074175461300 | mollusc | "dried clam broth" | REAL (borderline) | clam is a mollusc (EU Annex II 14); not FALCPA; broth of clam named as ingredient |
+| 12 | 0897540001020 | celery | "celery salt" | REAL (borderline) | celery and products thereof (EU Annex II 9); seasoning ingredient; list has only mustard |
+| 13 | 0085239029961 | sulphites | "sodium metabisulfite (preservative)" | REAL | ingredient; lists empty |
+| 14 | 5000128280976 | sulphites | "Preservative (Potassium Metabisulphite)" | REAL | ingredient; lists empty |
+| 15 | 8712566128747 | sulphites | "preservative (potassium METABISULPHITE)" | REAL | list has mustard only |
+| 16 | 0013562002566 | milk | "organic whey, organic nonfat milk, organic butter, cheddar cheese" | REAL | list has gluten only |
+| 17 | 0196633939791 | sulphites | "sodium metabisulphite" | REAL | ingredient; lists empty |
+| 18 | 0812881020400 | soy | "emulsifiers: soy lecithin" | REAL (borderline) | soy lecithin is not an Annex II exemption (only refined oil/fat, tocopherols, phytosterols); lists milk/peanuts only |
+| 19 | 0860046002211 | sulphites | "Sodium Metabisulphite" | REAL | list gluten only |
+| 20 | 0028400026734 | sulphites | "SODIUM METABISULFITE" | REAL | list has no sulphites |
+| 21 | 0011110090720 | sulphites | "SODIUM METABISULFITE" | REAL | vegan label does not affect sulphites; lists gluten/soy |
+| 22 | 0070896031884 | gluten | "wheat starch" | REAL (borderline) | wheat starch is wheat (not a maltodextrin/glucose-syrup exemption); list has soy only |
+| 23 | 0027154313404 | sulphites | "SODIUM METABISULPHITE" | REAL | list gluten only |
+| 24 | 0084617600013 | egg | "cage free eggs" | REAL | 'cage free' is not a free-from claim; no egg tag |
+| 25 | 0629241000459 | milk | "milk chocolate, salted butter" | REAL | list nuts/soy only |
+| 26 | 0054100173003 | sulphites | "potassium metabisulfite" | REAL | lists empty |
+| 27 | 0041331021623 | milk | "COCONUT MILK" | NOT REAL | coconut milk is not dairy |
+| 28 | 0044400125802 | sulphites | "sodium bisulfite (preservative)" | REAL | lists crustaceans/milk only |
+| 29 | 5012454063451 | egg | "only 'LINDT MILK CHOCOLATE EGG' (product name)" | NOT REAL | product name, no egg ingredient |
+| 30 | 4710037218601 | soy | "Sustainable Soya Flour" | REAL | list gluten only |
+| 31 | 0859584005242 | egg | "cage-free eggs" | REAL | not a free-from claim; no egg tag |
+| 32 | 0079606156336 | sulphites | "dough conditioner (sodium metabisulfite" | REAL | lists beef/gluten/soy |
+| 33 | 0028000478247 | soy | "less than 0.5% of soy lecithin" | REAL | list milk only |
+| 34 | 0070491801950 | sulphites | "sodium metabisulfite" | REAL | lists empty |
+| 35 | 4009790007950 | gluten | "only 'could contain gluten'" | NOT REAL | precaution, not an ingredient (also all its tags aside, gluten not in text as ingredient) |
+| 36 | 0851121004046 | milk | "unsalted butter" | REAL | list eggs/gluten |
+| 37 | 0071007061400 | sulphites | "sodium metabisulfite" | REAL | list gluten/milk/soy |
+| 38 | 0075450060669 | sulphites | "sodium metabisulfite (preservative)" | REAL | lists empty |
+| 39 | 0742365004766 | milk | "Organic grade a lowfat milk" | REAL | lists empty |
+| 40 | 0054100172907 | sulphites | "potassium metabisulfite" | REAL | lists empty |
+| 41 | 0380021363303 | egg | "pasteurized liquid egg" | REAL | list gluten/soy |
+| 42 | 0018894520313 | sulphites | "sodium bisulfite" | REAL | list milk only |
+| 43 | 0890985000122 | sulphites | "sodium bisulfite (as preservative)" | REAL | lists empty |
+| 44 | 0644209004560 | sulphites | "coconut with sodium metabisulfite (preservative)" | REAL | list nuts/soy |
+| 45 | 0075730305961 | mustard | "mustard seed" | REAL | list has no mustard |
+| 46 | 0099482421311 | soy | "organic soy lecithin" | REAL (borderline) | soy lecithin not exempt; list gluten only |
+| 47 | 7090046315445 | sulphites | "SODIUM METABISULPHITE" | REAL | list peach only |
+| 48 | 0607880101041 | sulphites | "sulfur dioxide (preservative)" | REAL | lists empty |
+| 49 | 0086600240718 | fish | "Light tuna" | REAL | lists empty |
+| 50 | 0038259126684 | sulphites | "sodium bisulfite (preservative)" | REAL | list milk only |
+
+#### Totals
+REAL 46, NOT REAL 4 of 50: 5000237128169, 0041331021623, 5012454063451, 4009790007950.
+
+### Checker B
+
+| # | code | missed families | ingredient words | verdict | reason |
+|---|---|---|---|---|---|
+| 1 | 0032251406942 | soy | "enzyme modified soy protein" | REAL | ingredient; allergen list has no soy |
+| 2 | 0072799036577 | soy | "emulsifier soy lecithin" | REAL | soy lecithin is soy; list lacks soy |
+| 3 | 0015400859738 | soy | "hydrolyzed soy protein" | REAL | ingredient; list lacks soy |
+| 4 | 0813224800154 | milk | "milk ingredients" | REAL | ingredient; list has no milk |
+| 5 | 5059697265716 | sulphites | "Preservative (Sodium Metabisulphite)" | REAL | listed ingredient; list only pork |
+| 6 | 0036632010735 | milk | "Cultured grade a low fat milk", "milk minerals" | REAL | milk first ingredient; lists empty |
+| 7 | 0074175322038 | sulphites | "sulfur dioxide (preservative)" | REAL | named ingredient; lists empty |
+| 8 | 8906143042445 | soy | "Cut Soy Granules" | REAL | soy ingredient; lists empty |
+| 9 | 0018207990253 | celery | "celery salt" | REAL | celery is EU Annex II; list has fish only |
+| 10 | 0004656702651 | sulphites | "sodium bisulfite" | REAL | preservative ingredient; list only milk |
+| 11 | 0011213088723 | sulphites | "dough conditioner (sodium metabisulfite)" | REAL | ingredient; list lacks sulphites |
+| 12 | 0749826125527 | tree nut | "almond butter" | REAL | almond; list has no nuts |
+| 13 | 20350864 | fish | "Wild Salmon Fillet 63%" | REAL | salmon; list has milk, mustard only |
+| 14 | 0086101210036 | sulphites | "sulfur dioxide" | REAL | named ingredient; lists empty |
+| 15 | 0753182104898 | sulphites | "diced apples (with sulfur dioxide)" | REAL | separate item from the oil list; lists lack sulphites |
+| 16 | 0688267549076 | sulphites | "sodium bisulfite preservativé" | REAL | (borderline) garbled brackets but sodium bisulfite is clearly named; list only milk |
+| 17 | 0686700101799 | sulphites | "coconut (with sodium metabisulfite [preservative])" | REAL | ingredient; list lacks sulphites |
+| 18 | 0890708001214 | sulphites | "apple {sulphur dioxide (preservative)}" | REAL | ingredient; list lacks sulphites |
+| 19 | 0852160006268 | tree nut | "hazelnut paste" | REAL | hazelnut; list has no nuts |
+| 20 | 0612227107518 | sulphites | "sodium metabisulfite" | REAL | ingredient; lists empty |
+| 21 | 0031000007430 | sulphites | "Sodium Bisulfite" | REAL | ingredient; list has no sulphites |
+| 22 | 8906005671820 | peanut | "processed on machinery that also processes peanuts" | NOT REAL | peanut appears only in a shared-machinery advice, not an ingredient |
+| 23 | 0702218350266 | egg | "enzyme modified egg yolk" | REAL | egg yolk; list only milk |
+| 24 | 0854060001725 | egg | "Cage-Free Eggs" | REAL | egg ingredient; list only gluten |
+| 25 | 0094922752567 | sulphites | "sodium metabisulphite" | REAL | ingredient; list lacks sulphites |
+| 26 | 0859061005987 | egg | "cage free eggs" | REAL | egg ingredient; list lacks egg |
+| 27 | 0036426100017 | sulphites | "potassium metabisulfite (as preservative)" | REAL | ingredient; lists empty |
+| 28 | 0070378640009 | sulphites | "sodium metabisulfite" | REAL | ingredient; list lacks sulphites |
+| 29 | 11274631 | gluten | "enriched bleached wheat flour", "durum flour" | REAL | wheat flour; list has no gluten tag |
+| 30 | 0852261007027 | peanut | "NATURAL PEANUT BUTTER" | REAL | peanut ingredient; list only milk |
+| 31 | 0017696407150 | sulphites | "dough conditioner (sodium metabisulfite" | REAL | ingredient; list lacks sulphites |
+| 32 | 4088600139739 | sulphites | "Preservative: Sodium Metabisulphite" | REAL | ingredient; list only soybeans |
+| 33 | 0072488997783 | sesame | "Seaweed Sesame Seed" | REAL | sesame seed named as ingredient; list lacks sesame |
+| 34 | 0041512103247 | sulphites | "sodium bisulfite and sodium benzoate (as preservatives)" | REAL | ingredient; lists empty |
+| 35 | 5030696400056 | sulphites | "Preservative: Sodium Sulphite" | REAL | ingredient; list lacks sulphites |
+| 36 | 5057624773075 | gluten | "Wheat Fibre" | REAL | (borderline) wheat-derived ingredient, not an Annex II exemption; lists empty |
+| 37 | 0023933682570 | sulphites | "sulfur dioxide." | REAL | named ingredient; list lacks sulphites |
+| 38 | 0023700039101 | sulphites | "sodium metabisulfite" | REAL | ingredient; neither list has sulphites |
+| 39 | 0074329123474 | sulphites | "sodium bisulfite (as preservatives)" | REAL | ingredient; no-gluten label irrelevant |
+| 40 | 0041380268055 | sulphites | "SULFUR DIOXIDE (PRESERVATIVE)" | REAL | ingredient; lists empty |
+| 41 | 0026396908287 | crustacean | "Salted Baby Shrimp" | REAL | shrimp; list has fish only |
+| 42 | 0020113002289 | sulphites | "sodium metabisulfite" | REAL | ingredient; lists empty |
+| 43 | 5700381019824 | soy | "emulsifier (e322 of soy)" | REAL | soy lecithin; traces list is eggs/nuts only |
+| 44 | 8033462320012 | egg | "egg white lysozyme" | REAL | (borderline) egg-derived lysozyme in cheese, named with "egg white"; list lacks egg |
+| 45 | 0002362708054 | mustard | "#1 grade mustard seed" | REAL | mustard seed; lists empty |
+| 46 | 0072730262065 | milk | "Grade a lowfat milk" | REAL | milk first ingredient; lists empty |
+| 47 | 0767335000845 | gluten | "semolina durum wheat flour" | REAL | wheat pasta; lists empty |
+| 48 | 0226620611604 | sulphites | "sun-dried tomatoes (tomatoes, sulfur dioxide)" | REAL | ingredient; list lacks sulphites |
+| 49 | 0853923002435 | milk | "Grade a pasteurized milk" | REAL | milk first ingredient; list only apple |
+| 50 | 0674806008241 | sulphites | "Sodium Metabisulphite (E223)" | REAL | ingredient; list only milk |
+
+#### Totals
+REAL 49, NOT REAL 1 of 50: 8906005671820.
+
+Checkers combined: 95/100.
+
+### Round 7 lead re-check
+
+The lead re-checked every NOT REAL and every borderline. The lead agrees with every call of both checkers.
+
+NOT REAL, by record:
+- 5000237128169 (milk): NOT REAL, agree. "also may contairi milk." is an OCR typo of "contain" that escapes the precaution wording.
+- 0041331021623 (milk): NOT REAL, agree. "COCONUT MILK (COCONUT MILK, WATER)": an engine bug, an `unless` phrase is masked only at its first occurrence, so the repeated "coconut milk" reads as milk (verified: scanIngredient("coconut milk") gives no hit; "coconut milk, coconut milk" gives milk).
+- 5012454063451 (egg): NOT REAL, agree. "LINDT MILK CHOCOLATE EGG: Sugar, …" is a product-name heading (a chocolate egg) inside the ingredient text.
+- 4009790007950 (gluten): NOT REAL, agree. "pecan nuts  could contain gluten, egg, soy, …": "could contain" is not in the precaution wording.
+- 8906005671820 (peanut): NOT REAL, agree. "This product was processed on machinery that also processes peanuts": that shared-machinery phrasing is not in the precaution wording.
+
+Borderline calls kept REAL, lead agrees:
+- 0074175461300 mollusc: "dried clam broth"; EU Annex II molluscs.
+- 0897540001020 celery: "celery salt".
+- 0812881020400 soy: "emulsifiers: soy lecithin".
+- 0070896031884 gluten: "wheat starch", not an exempt glucose syrup or maltodextrin.
+- 0099482421311 soy: "organic soy lecithin".
+- 0688267549076 sulphites: "sodium bisulfite" in garbled brackets.
+- 5057624773075 gluten: "Wheat Fibre".
+- 8033462320012 egg: "egg white lysozyme".
+
+### Round 7: the 5 NOT REAL, by cause
+
+| Cause | Records | Where the gap is |
+|---|---|---|
+| (a) An OCR typo of "contain" in a precaution ("also may contairi milk.") | 1 (A#10, 5000237128169) | The count's rule: the typo escapes the precaution wording |
+| (b) A repeated `unless` phrase ("COCONUT MILK (COCONUT MILK, WATER)") | 1 (A#27, 0041331021623) | Engine bug: an `unless` phrase is masked only at its first occurrence |
+| (c) A product-name heading inside the ingredient text ("LINDT MILK CHOCOLATE EGG: Sugar, …") | 1 (A#29, 5012454063451) | A chocolate egg read as egg |
+| (d) "could contain" as the precaution wording | 1 (A#35, 4009790007950) | The count's rule: "could contain" is not in the precaution wording |
+| (e) Shared-machinery phrasing ("processed on machinery that also processes peanuts") | 1 (B#22, 8906005671820) | The count's rule: that phrasing is not in the precaution wording |
+
+### Round 7 outcome
+
+Result: **95 of 100 real** (checker A 46/50, checker B 49/50; the lead agrees with every call). The 95% Wilson interval is 88.7%-97.8%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 95/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100, then 95/100.
+
+The figures are for engine `34056e1` and the Round-7 count rules. Whether the number is used anywhere public is the operator's decision.

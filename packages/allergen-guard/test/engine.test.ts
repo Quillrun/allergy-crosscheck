@@ -610,3 +610,20 @@ test("scan: miso with a soy-free composition is possible soy; otherwise soy", ()
 test("precaution: a following sentence with any other word is not part of the list", () => {
   assert.ok(labelKinds("ALLERGIES: contains almonds and may contain traces of hazelnuts. Wheat & gluten free.", "wheat").includes("contains"));
 });
+test("precaution: 'could contain' and 'processed on machinery that also …' are warnings (round-7 hand check)", () => {
+  const nuts = "pecan nuts  could contain gluten, egg, soy, milk, peanuts, sesame or other nuts";
+  assert.ok(!labelKinds(nuts, "milk").includes("contains"));
+  assert.ok(labelKinds(nuts, "milk").includes("may_contain"));
+  assert.ok(labelKinds(nuts, "tree_nut").includes("contains"));
+  for (const v of ["processed", "made", "produced"]) assert.ok(!labelKinds(`Rice. This product was ${v} on machinery that also processes peanuts`, "peanut").includes("contains"), v);
+  assert.ok(labelKinds("Rice. This product was processed on machinery that also processes peanuts", "peanut").includes("may_contain"));
+});
+test("scan: an unless phrase is masked at every occurrence, and only as the exact phrase", () => {
+  const has = (t: string, a: string) => scanIngredient(t).some((h) => h.allergen === a && h.kind === "contains");
+  assert.ok(!has("coconut milk", "milk"));
+  assert.ok(!has("coconut milk, coconut milk", "milk"));
+  assert.ok(!has("coconut milk (coconut milk, water)", "milk"));
+  assert.ok(has("coconut milk, skimmed milk", "milk"));
+  assert.ok(!has("almond milk (water, almonds), almond milk", "milk"));
+  assert.ok(has("almond milk (water, almonds), almond milk", "tree_nut"));
+});

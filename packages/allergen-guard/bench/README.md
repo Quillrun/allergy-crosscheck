@@ -105,20 +105,54 @@ The engine changes of the same round (more precaution wordings, "not from X" and
 - *Engine.* The engine changed since round 4 (commit `872b0ec`: shared-equipment sentences are precautions, plant creams and corn milk are not dairy, "cheese/prawn flavour" is "possible", UK allergy-advice boilerplate is not gluten), so the round-5 numbers differ from round 4's for engine reasons as well as rule reasons.
 - *Round-5 hand check and decision rule.* 100 records are drawn with mulberry32 seed 20261011 from the round-5 `strict_sample`, excluding every code checked in rounds 1 to 4 (`$C/run3`, `run4`, `run5`, `run6` `hc_a`/`hc_b`). Two independent checkers judge them by the hand-check protocol below (unclear = not real). The count is claimed only at 100 of 100 real; otherwise the measured precision is reported.
 
+**Round-6 rules (fixed before the run, 2026-10-09).** The round-5 hand check found 97 of 100 real; all three misses were engine readings, fixed in the engine rather than in the counting rules (commit `34056e1`, E6: "not suitable for … allergy sufferers" sentences are precautions, a may-contain list cut by a full stop stays one precaution, soy-free miso is possible soy; also `ca74f30`: the advice-line strip keeps a real allergen list, asafoetida is possible gluten, rarer plant milks are possible milk). Counting rules R1-R7 are unchanged.
+- *Sample.* The `strict_sample` reservoir seed changes from 9 to 13, so the round-6 pool differs from round 5's. The `change_sample` seed is unchanged.
+- *Round-6 hand check and decision rule.* 100 records are drawn with mulberry32 seed 20261012 from the round-6 `strict_sample`, excluding every code checked in rounds 1 to 5 (`$C/run3`, `run4`, `run5`, `run6`, `run7` `hc_a`/`hc_b`). Two independent checkers judge them by the hand-check protocol below (unclear = not real). The count is claimed only at 100 of 100 real; otherwise the measured precision is reported.
+
+**Round-7 rules (fixed before the run, 2026-10-09).** The round-6 hand check found 95 of 100 real; the five misses were gaps in the count's own rules, so the engine is unchanged (`34056e1`). Four rules are added and one existing exclusion is corrected. They work per occurrence inside the same location step as R1-R7 (the engine's source fragment is located in the whole folded English text, and each occurrence is judged there), and every earlier rule stays. A strict hit counts only if at least one occurrence of its term survives R1-R10. The rules only shrink the count; none touches the engine.
+- *R8, free-from adjacency.* An occurrence of a strict term immediately followed (hyphens are folded to spaces) by the word "free" does not count. Only that occurrence: in "lactose-free milk" the "milk" occurrence still counts. Relation to R4(b): R4(b) is item level and knows only the phrases "gluten/milk/dairy/egg/soy/soya/nut/peanut/sesame free", so it drops every occurrence in the item; R8 is a separate, narrower, per-occurrence check that works for any strict term ("lactose free", "casein free", "wheat free"). Where both apply the result is the same, so R4(b) is left unchanged rather than extended. Round-6 example: 8008698048788 "flavourings,lactose-free storage: dry".
+- *Glyceride correction (of the Round-2 exclusion).* The soy exclusion "the line mentions glycerides" matched only the plural. It now matches "glyceride" and "glycerides", so "mono and diglyceride", "mono- and diglyceride" and "diglycerides" are all covered. This corrects the existing exclusion; it is not a new rule. Round-6 example: 0085239207192 "soy mono and diglyceride".
+- *R9, precaution in the item.* An occurrence does not count when its item also contains "may contain", "may also contain", "traces" or "contain traces". Round-6 example: 0053326028074 "magnesium stearate and silica soy and may contain wheat.".
+- *R10a, base-named miso.* A soy occurrence from "miso" does not count when "miso" is directly preceded by chickpea, chick pea, adzuki, azuki, "soy free" or "soya free". Rice and barley miso still count (they are normally made with soybeans). Round-6 example: 0804879504207 "chickpea miso*".
+- *R10b, substitutes.* An occurrence does not count when the term is directly followed by replacement, replacer, substitute, alternative, analogue or analog (plural s allowed), or directly preceded by "imitation", "non dairy" or "dairy free". Round-6 example: 0075450174496 "milk replacement (soya protein, maltodextrin, ...)": the milk hit goes; a separate soy occurrence ("soya protein") is judged on its own.
+- *Engine.* Unchanged (`34056e1`).
+- *Sample.* The `strict_sample` reservoir seed changes from 13 to 17 (the only seed changed), so the round-7 pool differs from round 6's.
+- *Round-7 hand check and decision rule.* 100 records are drawn with mulberry32 seed 20261013 from the round-7 `strict_sample`, excluding every code checked in rounds 1 to 6 (`$C/run3`, `run4`, `run5`, `run6`, `run7`, `run9` `hc_a`/`hc_b`). Two independent checkers judge them by the hand-check protocol below (unclear = not real). The count is claimed only at 100 of 100 real; otherwise the measured precision is reported.
+
 **What is reported.** `strict_named` (records with a kept hit) and `strict_missed` (of those, a kept family is in neither list), with per-family counts, and `strict_missed` split into `_list_empty` and `_list_partial`. Each is given for all records and for scanned ones. A 200-record sample of `strict_missed` goes to `strict_sample.json`.
 
 **Hand-check protocol.** After the rules are frozen and the full run is done, draw 100 records from `strict_sample` with a fresh seed. Judge each on the snapshot record. A record is **real** only if the English ingredient text names, as an ingredient (not in a "may contain" or free-from statement, and not an oil or flavouring exemption), something that contains the allergen under EU Annex II or US FALCPA, and neither the allergen list nor the "may contain" list of the snapshot names it. Anything else, including unclear, counts as not real. The claim is made only if 100 of 100 are real; one miss and the rules change and the run repeats.
 
 ### Outcome
 
-Five rounds were run. Round 5 (engine `872b0ec`, count rules R1-R7 above, rules commit `4549ccd`, pre-registered before the run) found **97 of 100 real after the lead re-check** (checker A 47/50, checker B 49/50, so 96/100 by the checkers alone; the lead overrode checker A on one record, a truncated "soya lecithin"), a 95% Wilson interval of 91.5% to 99.0%. `strict_missed` is **8,551** for all records (list empty 2,098, list partial 6,453) and **2,161** for popular ones (735 and 1,426), down from 9,506 and 2,426 in round 4. **The count is not claimed.** The rule required 100 of 100, so the measured precision is reported instead. The records, verdicts and the lead's re-check are in [`handcheck-strict-2026-10-08.md`](handcheck-strict-2026-10-08.md); the run's counts are in [`results-strict-round5-2026-10-09.json`](results-strict-round5-2026-10-09.json). `A` is unchanged (3,457,538 and 826,465); `B` is 136,566 and 64,089 (137,251 and 64,333 in rounds 3 and 4); the slowest shard took 2,391 s; a re-run of shard 2 was identical apart from `seconds`.
+Seven rounds were run. Round 7 (engine `34056e1` unchanged, count rules R8-R10b and the glyceride correction, rules commit `0dc1610`, pre-registered before the run) found **95 of 100 real** (checker A 46/50, checker B 49/50; the lead agrees with every call), a 95% Wilson interval of 88.7% to 97.8%. `strict_missed` is **8,436** for all records (list empty 2,081, list partial 6,355) and **2,116** for popular ones (727 and 1,389), down from 8,516 and 2,142 in round 6. **The count is not claimed.** The rule required 100 of 100, so the measured precision is reported instead. The records, verdicts and the lead's re-check are in [`handcheck-strict-2026-10-08.md`](handcheck-strict-2026-10-08.md); the run's counts are in [`results-strict-round7-2026-10-09.json`](results-strict-round7-2026-10-09.json). `A` is unchanged (3,457,538 and 826,465); `B` is 136,562 and 64,086, equal to round 6's; the slowest shard took 2,446 s; a re-run of shard 2 was identical apart from `seconds`.
+
+The 5 records that were not real:
+- 1: an OCR typo of "contain" that escapes the precaution wording ("also may contairi milk.").
+- 1: a repeated `unless` phrase, masked only at its first occurrence ("COCONUT MILK (COCONUT MILK, WATER)"; engine bug).
+- 1: a product-name heading inside the ingredient text ("LINDT MILK CHOCOLATE EGG: Sugar, ...").
+- 1: "could contain" is not in the precaution wording.
+- 1: shared-machinery phrasing is not in the precaution wording ("processed on machinery that also processes peanuts").
+
+Round 6 (engine `34056e1`, count rules R1-R7 unchanged, rules commit `2b7ec57`, pre-registered before the run) found **95 of 100 real** (checker A 47/50, checker B 48/50; the lead agrees with every call), a 95% Wilson interval of 88.7% to 97.8%. `strict_missed` is **8,516** for all records (list empty 2,094, list partial 6,422) and **2,142** for popular ones (732 and 1,410), down from 8,551 and 2,161 in round 5. **The count is not claimed.** The rule required 100 of 100, so the measured precision is reported instead. The records, verdicts and the lead's re-check are in [`handcheck-strict-2026-10-08.md`](handcheck-strict-2026-10-08.md); the run's counts are in [`results-strict-round6-2026-10-09.json`](results-strict-round6-2026-10-09.json). `A` is unchanged (3,457,538 and 826,465); the slowest shard took 2,476.5 s; a re-run of shard 2 was identical apart from `seconds`.
+
+The 5 records that were not real:
+- 1: a free-from claim run into a storage line ("flavourings,lactose-free storage: dry"; R4(b) has no "lactose free").
+- 1: a singular "soy mono and diglyceride" (the glycerides exclusion matches "glycerides" only).
+- 1: garbled text where it is unclear whether soy is an ingredient or part of the warning.
+- 1: a miso named by its base ("chickpea miso*"), no soy named.
+- 1: a milk substitute ("milk replacement (soya protein, …)").
+
+The first attempt at the round-5 misses (`ed3c86c`) was reverted because on full data it downgraded about 7,600 family "contains" results, including real ingredients; the narrow redo is `34056e1`.
+
+Round 5 (engine `872b0ec`, count rules R1-R7 above, rules commit `4549ccd`, pre-registered before the run) found **97 of 100 real after the lead re-check** (checker A 47/50, checker B 49/50, so 96/100 by the checkers alone; the lead overrode checker A on one record, a truncated "soya lecithin"), a 95% Wilson interval of 91.5% to 99.0%. `strict_missed` is **8,551** for all records (list empty 2,098, list partial 6,453) and **2,161** for popular ones (735 and 1,426), down from 9,506 and 2,426 in round 4. **The count is not claimed.** The rule required 100 of 100, so the measured precision is reported instead. The records, verdicts and the lead's re-check are in [`handcheck-strict-2026-10-08.md`](handcheck-strict-2026-10-08.md); the run's counts are in [`results-strict-round5-2026-10-09.json`](results-strict-round5-2026-10-09.json). `A` is unchanged (3,457,538 and 826,465); `B` is 136,566 and 64,089 (137,251 and 64,333 in rounds 3 and 4); the slowest shard took 2,391 s; a re-run of shard 2 was identical apart from `seconds`.
 
 The 3 records that were not real:
 - 1: a "not suitable for … allergy sufferers" warning read as "contains" ("Not suitable for Nut, Peanut and Sesame allergy sufferers").
 - 1: a may-contain sentence cut by a stray full stop, so "egg peanuts and nuts" was read as an ingredient.
 - 1: a soy-free rice miso ("organic rice miso (organic rice, water, salt, alcohol, koji culture)").
 
-Separately from the count, the round-5 vanished-hit audit of the run found two fail-opens introduced in engine `872b0ec` (the allergy-advice strip removed a real "For allergens see cereals containing gluten, nuts, soya and sulphites"; "peanut milk" as a plant milk hid "milk" in garbled text) and asafoetida losing its only gluten signal. They are being fixed in a separate engine commit.
+Separately from the count, the round-5 vanished-hit audit of the run found two fail-opens introduced in engine `872b0ec` (the allergy-advice strip removed a real "For allergens see cereals containing gluten, nuts, soya and sulphites"; "peanut milk" as a plant milk hid "milk" in garbled text) and asafoetida losing its only gluten signal. They were fixed in engine commit `ca74f30`.
 
 Round 4 (engine `4c7c554`, count rules R1-R6, commit `b737e42`) had found 93 of 100 real (checker A 46/50, checker B 47/50), interval 86.3% to 96.6%, `strict_missed` 9,506 and 2,426 scanned; its drop from round 3 (9,547 and 2,449) came from R4-R6 (sulphites 4,640 to 4,615, gluten 789 to 771), and `B` was unchanged from round 3 (137,251 and 64,333). The 7 records that were not real:
 - 3: named flavours the flavour exclusion didn't catch, because it only matches the term directly followed by "flavour" ("artificial cheddar cheese flavor", "Prawn Cocktail Flavour", "Wheat milk flavour").
@@ -126,9 +160,9 @@ Round 4 (engine `4c7c554`, count rules R1-R6, commit `b737e42`) had found 93 of 
 - 1: a shared-equipment sentence ("shares equipment with peanuts").
 - 1: UK allergy-advice boilerplate ("For allergens see cereals containing gluten").
 
-The plant-milk, shared-equipment and advice-boilerplate causes, plus the flavour downgrade, were engine faults; the round-5 engine commit `872b0ec` fixed them. A 100/100 sample is only likely if true precision is about 99%: at 95% true precision it happens about 0.6% of the time (0.95^100). Rounds 3 to 5 put the count's precision at about 93-97%, and each round found new long-tail cases, so further rule rounds were stopped.
+The plant-milk, shared-equipment and advice-boilerplate causes, plus the flavour downgrade, were engine faults; the round-5 engine commit `872b0ec` fixed them. A 100/100 sample is only likely if true precision is about 99%: at 95% true precision it happens about 0.6% of the time (0.95^100). Rounds 3 to 7 put the count's precision at about 93-97%, and each round found new long-tail cases, so further rule rounds were stopped.
 
-History: round 1 (engine `2595749`) 73/100; round 2 (engine `1186f6e`) 90/100, interval 82.6% to 94.5%, `strict_missed` 10,730 (2,698 scanned); round 3 (engine `4c7c554`, rules `4f64c78`, `strict_missed` 9,547 and 2,449 scanned, 38.9 minutes) 95/100, interval 88.7% to 97.8%; round 4 (engine `4c7c554`, rules `b737e42`) 93/100; round 5 (engine `872b0ec`, rules `4549ccd`) 97/100, interval 91.5% to 99.0%, `strict_missed` 8,551 and 2,161 scanned.
+History: round 1 (engine `2595749`) 73/100; round 2 (engine `1186f6e`) 90/100, interval 82.6% to 94.5%, `strict_missed` 10,730 (2,698 scanned); round 3 (engine `4c7c554`, rules `4f64c78`, `strict_missed` 9,547 and 2,449 scanned, 38.9 minutes) 95/100, interval 88.7% to 97.8%; round 4 (engine `4c7c554`, rules `b737e42`) 93/100; round 5 (engine `872b0ec`, rules `4549ccd`) 97/100, interval 91.5% to 99.0%, `strict_missed` 8,551 and 2,161 scanned; round 6 (engine `34056e1`, rules `2b7ec57`) 95/100, interval 88.7% to 97.8%; round 7 (engine `34056e1`, rules `0dc1610`) 95/100, interval 88.7% to 97.8%.
 
 The foreign-text change in the engine: English ingredient text that contains a word from `FOREIGN_ALLERGEN_WORDS` now carries "Part of the ingredient list isn't in English", so `foreign_exposed` fell from 1,925 to 96 (all records) and from 930 to 57 (scanned). The remaining ones are words the engine deliberately leaves out of its list (ei, ble, mani, latte) but the bench diagnostic keeps.
 
@@ -147,8 +181,9 @@ Each round's rules are in their own commit of `measure.mjs`, so any round can be
 
   The 8 October results (`results-2026-10-08.json`, first run) also hold `cat_removed` and `unreadable`, from a second check that ran each record without `ingredients_original_tags`. That check is gone; those numbers stay archived. The strict count and the old-versus-new comparison replace it (next section, and `OLD_ENGINE` under "Run it").
 - **`categories.mjs`:** ranks the category tags that add allergens the label doesn't name (see "Category tags").
+- **Counting rules:** R1-R10 above (rounds 3 to 7) and the exclusions in "The count we claim", all in `measure.mjs`.
 - **`merge.mjs`:** adds up the shards, trims the vanished-hit groups to 300, and merges the three 200-record samples (`samples.json`, `strict_sample.json`, `change_sample.json`).
-- **Fixture check:** `fixtures.jsonl` holds 40 records with known answers. They are:
+- **Fixture check:** `fixtures.jsonl` holds 47 records with known answers. They are:
   - one with no ingredients;
   - one whose tags omit the milk in its text;
   - one in French only;
@@ -168,6 +203,7 @@ Each round's rules are in their own commit of `measure.mjs`, so any round can be
   - one "SHERRY VINEGAR (CONTAINS NATURALLY OCCURRING SULFITES)" control, which still counts (strict miss, sulphites);
   - one with Spanish words in the English field ("harina, azucar, sal"): the engine answers "can't confirm" with the not-in-English issue;
   - one "vegetable oil {palm, soybeans, rapeseed}" (`fx-r1-brace`, R1 read across the brace; not strict);
+  - R8 to R10 and the glyceride correction (one fixture each, each would count without its rule): `fx-r8` ("flavourings,lactose-free storage: dry"), `fx-glyceride` ("soy mono and diglyceride"), `fx-r9` ("silica soy and may contain wheat"), `fx-r10a` ("chickpea miso*"), `fx-r10b` ("milk replacement (maltodextrin, guar gum)"), none strict; two controls still count: `fx-r8-keep` ("lactose-free milk": milk) and `fx-r10a-keep` ("rice miso": soy);
   - R7 (`fx-r7-*`): "Wheat milk flavour", "artificial cheddar cheese flavor", "Prawn Cocktail Flavour [Salt, Wheat Flour]" and "natural flavor {contains wheat, soybeans, and celery seed}" are not strict; "natural flavour (milk)" is not strict either (the engine still reports milk there, so this one tests R7 alone); "cheddar cheese, natural flavour" is a control that still counts (milk).
 
 ## Run it
@@ -183,7 +219,7 @@ node merge.mjs . shard_*.json   # writes summary.json and samples.json
 
 To compare against an earlier engine, add `OLD_ENGINE=<package dir of a snapshot>` (the directory holding its `src/engine.ts`) to the `node` command. Per family it counts records whose hits all vanished (`vanished`) and records that lost every "contains" (`weakened`, which includes the vanished ones that had a "contains"), records that now answer "no listed allergens" (`to_none`), and the most common vanished hits (`vanished_groups`).
 
-Eight shards took about 35-40 minutes on a 10-core laptop (round 3: 38.9 minutes wall clock, the slowest shard 2,331 s; round 4: 20 minutes, the slowest shard 1,202 s; round 5: the slowest shard 2,391 s). A re-run of one shard gave identical counts apart from timing.
+Eight shards took about 35-40 minutes on a 10-core laptop (round 3: 38.9 minutes wall clock, the slowest shard 2,331 s; round 4: 20 minutes, the slowest shard 1,202 s; round 5: the slowest shard 2,391 s; round 6: the slowest shard 2,476.5 s; round 7: the slowest shard 2,446 s). A re-run of one shard gave identical counts apart from timing.
 
 ## Limits
 

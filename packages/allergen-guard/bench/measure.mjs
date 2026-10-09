@@ -34,7 +34,7 @@ const STRICT = Object.fromEntries(Object.entries({
 const CATALOGUE = new Set(TERMS.flatMap((t) => t.terms.map(normalize)));
 export const STRICT_NOT_IN_CATALOGUE = Object.entries(STRICT).flatMap(([f, set]) => [...set].filter((t) => !CATALOGUE.has(t)).map((t) => `${f}:${t}`));
 const OIL = (t) => new RegExp(`(^| )${t}(s|es)? (oil|oils|flavour|flavours|flavouring|flavourings|flavor|flavors|flavoring|flavorings|extract|extracts|aroma|aromas|essence|essences)( |$)`);
-const EXCLUDE = { gluten: /\b(glucose|dextrose|maltodextrin)\b/, fish: /\b(gelatin|gelatine|isinglass)\b/, soy: /\b(tocopherol|sterol|stanol)|glycerides/, milk: /\bculture/ };
+const EXCLUDE = { gluten: /\b(glucose|dextrose|maltodextrin)\b/, fish: /\b(gelatin|gelatine|isinglass)\b/, soy: /\b(tocopherol|sterol|stanol)|glycerides?/, milk: /\bculture/ };
 // Round 3: hit-level rules. A hit counts only if at least one occurrence of its term in its source text survives R1-R3.
 // "Item" = text between top-level commas/semicolons, brackets ( ) [ ] { } respected.
 const CTX_OIL = /\b(oil|oils|fat|fats|shortening|margarine)\b/;
@@ -53,6 +53,12 @@ const E_CODE = /(?<![a-z0-9])e22[0-8][a-z]?(?![a-z0-9])/g;
 const E_ONLY = /^[\s()\[\]{},;\/]*$/;
 const FLAVOUR = /\b(flavou?r|flavou?ring|aroma)(s)?\b/; // R7
 const CARAMEL = /\b(sulphite|sulfite) ammonia\b|\bcaustic (sulphite|sulfite)\b/;
+// Round 7. R8: term directly followed by "free". R9: precaution wording in the item. R10a: base-named miso. R10b: substitute wording next to the term.
+const FREE_AFTER = /^ ?free(?![a-z0-9])/;
+const PRECAUTION = /\bmay (also )?contain\b|\btraces\b|\bcontain traces\b/;
+const MISO_BASE = /(chick ?pea|adzuki|azuki|soya? free) $/;
+const SUBST_AFTER = /^ ?(replacements?|replacers?|substitutes?|alternatives?|analogues?|analogs?)(?![a-z0-9])/;
+const SUBST_BEFORE = /(imitation|non dairy|dairy free) $/;
 const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 let strictUnlocated = 0; // hits whose term could not be found in the folded source text: dropped, and counted
 // Items and, per position, the stack of open-bracket positions.
@@ -78,10 +84,10 @@ export function survivingOccurrences(source, term, family, full) {
   const g = off >= 0 ? ff : f, base = off >= 0 ? off : 0;
   const { items, stacks } = splitItems(g);
   const re = new RegExp(`(?<![a-z0-9])${esc(term)}(?:s|es)?(?![a-z0-9])`, "g");
-  for (const m of f.matchAll(re)) at.push(m.index);
+  for (const m of f.matchAll(re)) at.push([m.index, m[0].length]);
   if (!at.length) { strictUnlocated++; return -1; }
   let n = 0;
-  for (const p of at) {
+  for (const [p, len] of at) {
     const pos = base + p;
     const [a, b] = items.find(([x, y]) => pos >= x && pos < y);
     const item = g.slice(a, b);
@@ -97,6 +103,11 @@ export function survivingOccurrences(source, term, family, full) {
     }
     if (family === "sulphites" && CARAMEL.test(item)) continue; // R6: caramel colour
     if (FLAVOUR.test(item)) continue; // R7: flavour context
+    const after = g.slice(pos + len), before = g.slice(0, pos);
+    if (FREE_AFTER.test(after)) continue; // R8: "lactose-free": this occurrence only
+    if (PRECAUTION.test(item)) continue; // R9: "may contain" / traces in the item
+    if (term === "miso" && MISO_BASE.test(before)) continue; // R10a: chickpea / adzuki / soy-free miso
+    if (SUBST_AFTER.test(after) || SUBST_BEFORE.test(before)) continue; // R10b: replacement, substitute, imitation, non-dairy...
     n++;
   }
   return n;
@@ -126,7 +137,7 @@ const all = cut(), pop = cut();
 const rev = Object.fromEntries(FAMS.map((f) => [f, { count: 0, words: new Map() }]));
 const sample = []; let seen = 0;
 const SAMPLE_N = 200;
-const randS = rng(9), strictSample = []; let strictSeen = 0;
+const randS = rng(17), strictSample = []; let strictSeen = 0;
 const randC = rng(11), changeSample = []; let changeSeen = 0;
 const groups = new Map(); // "family|oldTerm|phrase" -> { n, ex }
 const bump = (o, f) => { o[f] = (o[f] ?? 0) + 1; };
