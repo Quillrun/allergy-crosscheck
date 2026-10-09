@@ -2,7 +2,7 @@
 
 Allergy Crosscheck tells you who at the table can eat a dish or a product, and why. A household tells Alexa who is allergic to what, guests included. It then checks recipes and packaged foods against everyone at the table, explains the risk on an Echo Show screen, suggests swaps that don't trip anyone else's allergy, and puts them on the shopping list.
 
-It is built around one rule: **when the data is missing, ambiguous or the lookup fails, the answer is "I can't confirm it's OK — treat it as unsafe", never a confident yes.** It never tells anyone a food is "safe".
+It is built around one rule: **when the data is missing, ambiguous or the lookup fails, the answer is "I can't confirm it's OK — treat it as unsafe", never a confident yes.** The server's results never call a food "safe" (the tests check that); on a real Alexa+ the spoken words are the model's.
 
 **Quick start** (Node 22.6 or newer, no build step):
 
@@ -42,11 +42,11 @@ Allergy Crosscheck:
 | A free-from claim ("egg-free mayonnaise") | **Can't confirm**: check the label |
 | Ingredient list missing, or not in English | **Can't confirm** |
 | Database offline or timing out | **Can't confirm** |
-| Product name matches several products | **Asks which one**, never guesses |
+| Product name matches several products | **Asks which one** when several match (a single match is used without asking) |
 | Nobody's allergies saved, or an unknown name in "for" | Says so |
 | Nothing found | "I didn't find *X* listed… check the label" |
 
-In the simulator, a **verdict lock** applies: after a check, the spoken answer is the tool's own sentence, so the model can't soften "avoid" into "should be fine". A **no-tool guard** covers the other way a model goes wrong: answering from memory. Without a tool call, a keyword filter blocks common verdict and action phrases ("safe", "fine", "saved"…). It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
+In the simulator, a **verdict lock** applies: after a check, the spoken answer is the tool's own sentence, so the model can't soften "avoid" into "should be fine". A **no-tool guard** covers the other way a model goes wrong: answering from memory. When no tool has returned a result, a keyword filter blocks common verdict and action phrases ("safe", "fine", "saved"…). It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
 
 ## Run it
 
@@ -94,13 +94,13 @@ The simulator in this repo stands in for steps 3 and 4.
 
 The same HTTPS host serves the phone scan page at `https://<host>/scan`; browsers only open the camera on https pages (or localhost).
 
-The screen follows the Alexa+ MCP design guide:
-- every demo screen fits one Echo Show 8 screen (measured at 944×590 in headless Chrome): long product lists are grouped by allergen, with "+N more";
-- 16px minimum text, 48px touch targets, and 4.5:1 contrast in both themes;
+The screen follows parts of the Alexa+ MCP design guide: the 48px minimum touch target, 4.5:1 text contrast, light and dark themes, and the host's theme, device class and safe-area insets from `hostContext`. It was laid out and tested at 944×590, not at the guide's 768×480 base canvas.
+- every demo screen fits the simulator's 16:10 screen frame, which measured 944×590 in headless Chrome (the frame size is the simulator's own, not an Amazon figure; not tested at the guide's 768×480 base canvas or on a real Echo Show): long product lists are grouped by allergen, with "+N more";
+- text is 16px or larger (my own choice; the guide gives no minimum text size), touch targets are at least 48px (guide: 48×48px minimum), and text contrast is at least 4.5:1 in both themes (guide: 4.5:1 for text 17px and under, 3:1 for bold or 18px and larger);
 - it applies the host's theme, device class and safe-area insets;
 - no links out of the view.
 
-Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result repeats `resourceUri`. Not-found results set `isError`.
+Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result repeats `resourceUri`. Some failures set `isError`: `save_person` (allergy not recognised, date already passed), `remove_person` (nobody by that name), `find_recipe` (recipe not found), `check_product` (nothing scanned, or no product named) and `remove_from_shopping_list` (item not on the list). A product name that finds nothing is a normal "check the label" answer, not an error.
 
 ### What Alexa+ receives
 
@@ -166,7 +166,7 @@ test/                      integration tests
 | Engine, store, MCP over real HTTP, phone scan, simulator guards | 105 automated tests, 68 of them in the engine package (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
-| The Echo Show screen and the tap-to-choose flow | Headless Chrome, at the simulator's Echo Show size, in dark and light themes; every demo button's screen measured to fit at 944×590 |
+| The screen and the tap-to-choose flow | Headless Chrome, in the simulator's 16:10 screen frame (944×590), in dark and light themes; every demo button's screen measured to fit that frame. Not tested at the guide's 768×480 base canvas or on a real Echo Show |
 | Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |
 | Amazon's Local Inspector | **Not run.** It installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4) |
 

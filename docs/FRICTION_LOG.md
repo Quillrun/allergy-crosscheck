@@ -10,7 +10,7 @@ Each entry is something that happened while building Allergy Crosscheck. Every e
 | 4. Getting the Local Inspector | Alexa+ MCP Toolkit: Local Inspector install | Medium |
 | 5. Where `_meta.ui` goes: tool definition or tool result? | Alexa+ MCP Toolkit: MCP Apps | Medium |
 | 6. Getting Alexa's own voice for a demo video | Alexa developer console: Voice & Tone | Low |
-| 7. Developer account sign-up: a name with a non-US letter | Amazon developer account registration | Low |
+| 7. Developer account sign-up: a legal name with a non-ASCII letter (a diacritic) | Amazon developer account registration | Low |
 
 ## 1. Testing on a real Alexa+ from outside the US
 
@@ -52,7 +52,7 @@ Each entry is something that happened while building Allergy Crosscheck. Every e
 - **Severity:** High. For health and safety add-ons (allergies, medication, recalls) a paraphrased verdict can hurt someone. Low for most other add-ons.
 - **Workaround:**
   - Check results lead with a `VERDICT:` line, every result carries a `Say to the user: …` line, and the tool descriptions tell the model to repeat verdicts exactly.
-  - In my simulator I added two guards that Alexa+ doesn't offer: a verdict lock (after a check, the spoken answer is the tool's sentence) and a no-tool guard (without a tool call a keyword filter blocks common verdict and action phrases).
+  - In my simulator I added two guards that Alexa+ doesn't offer: a verdict lock (after a check, the spoken answer is the tool's sentence) and a no-tool guard (when no tool has returned a result, a keyword filter blocks common verdict and action phrases).
 - **Suggestion:** to the MCP Toolkit team (tool result format, and certification):
   - Support a `_meta` hint on tool results, for example `speech: { text, verbatim: true }`, that Alexa+ honours or at least only shortens.
   - Have certification test that safety verdicts survive paraphrase.
@@ -130,15 +130,15 @@ Each entry is something that happened while building Allergy Crosscheck. Every e
 - **Time lost:** about 12 minutes, from clicking "Create Skill" (19:02 UTC) to the fifth captured line (19:14 UTC), from the session transcript's timestamps. It includes a pause of about a minute for an unrelated question.
 - **Suggestion:** to the Alexa developer console team: add an export or download button for the rendered audio in Voice & Tone, or offer a TTS preview API for developers. Document that the editor adds the closing `</speak>` tag.
 
-## 7. Developer account sign-up: a name with a non-US letter
+## 7. Developer account sign-up: a legal name with a non-ASCII letter (a diacritic)
 
 - **Task attempted:** create the Amazon developer account (7 October 2026).
 - **Steps taken:**
   1. Open https://developer.amazon.com/settings/console/registration
-  2. In the full legal name field, type a name containing a diacritic.
+  2. In the full legal name field, type a legal name containing a non-ASCII letter (a diacritic).
   3. Pick a country outside the US.
 - **Expected:** the field accepts the legal name as written.
 - **Actual:** the field rejected the diacritic. I saw this during the run. I didn't save the error text, so I can't quote it.
 - **Severity:** Low. It has a workaround.
-- **Workaround:** I typed the name with a plain "t" in place of the diacritic.
+- **Workaround:** I typed the name with the plain ASCII letter in place of the diacritic.
 - **Suggestion:** to the developer account registration form: accept Unicode letters in name fields, or say which characters are allowed next to the field.

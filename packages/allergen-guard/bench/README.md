@@ -17,7 +17,7 @@ In each of these records, a checker that trusts the allergen list would answer "
 
 The first run (8 October, earlier engine) also counted products whose English ingredient text has an allergen that their allergen list leaves out (`B` in `results-2026-10-08.json`): 191,717 of all records, 99,607 of the scanned ones. These are the figures of that run; the round-3 engine gives 137,251 for all records and 64,333 for scanned ones.
 
-**That number is not a finding.** We hand-checked 40 random hits from a 200-record sample, each against its full live Open Food Facts record: 16 were real, 16 false and 8 unclear, so about 50% precision. The false ones came from:
+**That number is not a finding.** We hand-checked 40 random hits from a 200-record sample, each against its full live Open Food Facts record: 16 of 40 were real (40%; 50% if the 8 unclear ones are set aside), 16 false and 8 unclear. The false ones came from:
 - carob or locust-bean flour read as wheat flour (4);
 - "may contain" statements inside the ingredient text read as "contains" (5);
 - "shellfish" read as both crustacean and mollusc (3);
@@ -147,7 +147,7 @@ The 7 records that were not real:
 - 1: a garbled factory warning.
 - 1: text truncated at "SOYBEAN OI" (soybean oil exemption).
 
-Round 8 (engine `ada6e5b`, count rules R11 and R12, rules commit `83507ba`, pre-registered before the run; the commits share the second 20:40:13, and the run's `start.txt` has the same second) found **98 of 100 real** (checker A 50/50, checker B 48/50; the lead agrees with every call), a 95% Wilson interval of 93.0% to 99.4%. `strict_missed` is **8,401** for all records (list empty 2,069, list partial 6,332) and **2,107** for popular ones (724 and 1,383), down from 8,436 and 2,116 in round 7. **The count is not claimed.** The rule required 100 of 100, so the measured precision is reported instead. The records, verdicts and the lead's re-check are in [`handcheck-strict-2026-10-08.md`](handcheck-strict-2026-10-08.md); the run's counts are in [`results-strict-round8-2026-10-09.json`](results-strict-round8-2026-10-09.json). `A` is unchanged (3,457,538 and 826,465); `B` is 136,440; the slowest shard took 2,591.677 s (wall clock 2,594 s); a re-run of shard 2 was identical apart from `seconds`.
+Round 8 (engine `ada6e5b`, count rules R11 and R12, rules commit `83507ba`, pre-registered before the run; the commits share the second 20:40:13, and the run's `start.txt` has the same second) found **98 of 100 real** (checker A 50/50, checker B 48/50; the lead agrees with every call), a 95% Wilson interval of 93.0% to 99.4%. `strict_missed` is **8,401** for all records (list empty 2,069, list partial 6,332) and **2,107** for popular ones (724 and 1,383), down from 8,436 and 2,116 in round 7. **The count is not claimed.** The rule required 100 of 100, so the measured precision is reported instead. The records, verdicts and the lead's re-check are in [`handcheck-strict-2026-10-08.md`](handcheck-strict-2026-10-08.md); the run's counts are in [`results-strict-round8-2026-10-09.json`](results-strict-round8-2026-10-09.json). `A` is unchanged (3,457,538 and 826,465); `B` is 136,440; the slowest shard took 2,591.677 s (wall clock 2,592 s); a re-run of shard 2 was identical apart from `seconds`.
 
 The 2 records that were not real:
 - 1: "ferrous sulfite" in an enriched flour, almost certainly a typo for ferrous sulfate (the iron fortificant); unclear counts as not real.
@@ -249,7 +249,7 @@ node merge.mjs . shard_*.json   # writes summary.json and samples.json
 
 To compare against an earlier engine, add `OLD_ENGINE=<package dir of a snapshot>` (the directory holding its `src/engine.ts`) to the `node` command. Per family it counts records whose hits all vanished (`vanished`) and records that lost every "contains" (`weakened`, which includes the vanished ones that had a "contains"), records that now answer "no listed allergens" (`to_none`), and the most common vanished hits (`vanished_groups`).
 
-Eight shards took about 35-40 minutes on a 10-core laptop (round 3: 38.9 minutes wall clock, the slowest shard 2,331 s; round 4: 20 minutes, the slowest shard 1,202 s; round 5: the slowest shard 2,391 s; round 6: the slowest shard 2,476.5 s; round 7: the slowest shard 2,446 s). A re-run of one shard gave identical counts apart from timing.
+Eight shards took between 20 and 47.5 minutes wall clock on a 10-core laptop, and later rounds took longer (round 3: 38.9 minutes wall clock, the slowest shard 2,331 s; round 4: 20 minutes, the slowest shard 1,202 s; round 5: the slowest shard 2,391 s; round 6: the slowest shard 2,476.5 s; round 7: the slowest shard 2,446 s; round 8: 2,592 s wall clock, the slowest shard 2,591.7 s; round 9: 2,848 s wall clock, the slowest shard 2,848.0 s). Apart from rounds 1, 2 and 4 (29, 34 and 20 minutes), rounds 3 and 5 to 9 took 39 to 47.5 minutes. A re-run of one shard gave identical counts apart from timing.
 
 ## Limits
 

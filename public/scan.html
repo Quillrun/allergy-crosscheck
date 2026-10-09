@@ -113,7 +113,7 @@
       $("name").textContent = body.name || "A product without a name in the data";
       $("code").textContent = body.barcode;
       $("found").hidden = false;
-      msg.textContent = "Sent to Alexa.";
+      msg.textContent = "Saved. Now ask Alexa.";
     } catch (err) {
       $("error").textContent = err.message || "That didn't work. Try again.";
       $("error").hidden = false;

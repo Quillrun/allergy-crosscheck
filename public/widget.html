@@ -142,7 +142,7 @@
     }
     if (v.items?.length) {
       // A check shows the flagged lines and summarises the rest, so the verdict, the risky
-      // ingredients and the swaps fit one Echo Show screen. A plain recipe shows the first eight.
+      // ingredients and the swaps fit the simulator's 944x590 frame. A plain recipe shows the first eight.
       const flagged = v.items.filter((i) => i.flags?.length);
       const shown = v.overall ? flagged : v.items.slice(0, 8);
       const rest = v.items.length - shown.length;

@@ -392,7 +392,7 @@ function productReply(label: string, result: CheckResult, people: Person[], stor
   });
 }
 
-// One row per distinct set of flags, so a long ingredient list still fits one Echo Show screen:
+// One row per distinct set of flags, so a long ingredient list still fits the 944x590 test frame:
 // "nonfat dry milk, whey, lactose" is one Milk row, not three. Rows that contain an allergen come first.
 function groupHits(result: CheckResult, people: Person[]): View["items"] {
   const relevant = result.hits.filter((h) => people.some((p) => p.allergies.includes(h.allergen)));
