@@ -40,8 +40,10 @@ const EXCLUDE = { gluten: /\b(glucose|dextrose|maltodextrin)\b/, fish: /\b(gelat
 const CTX_OIL = /\b(oil|oils|fat|fats|shortening|margarine)\b/;
 const CTX_ALT = /\band ?\/ ?or\b|\band or\b|\bor\b/;
 const CTX_NAT = /naturally occurring in|except for those/;
-const fold = (s) => s.replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-  .replace(/[^a-z0-9()\[\]{},;:\/]+/g, " ").replace(/\be (\d{3,4}[a-z]?)\b/g, "e$1").replace(/ +/g, " ");
+// foldM is fold with sentence ends kept as "|" (a full stop before whitespace or the end, or a line break); fold is the same text with each "|" a space, so every rule up to R13 reads exactly what it read before.
+const foldM = (s) => s.replace(/[|\u200B-\u200D\u2060\uFEFF\u00AD]/g, (c) => (c === "|" ? " " : "")).replace(/\s*(?:\.(?:\s+|$)|\n\s*)/g, "|").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+  .replace(/[^a-z0-9()\[\]{},;:\/|]+/g, " ").replace(/\be[ |](\d{3,4}[a-z]?)\b/g, "e$1").replace(/ +/g, " ").replace(/ ?\|[ |]*/g, "|");
+const fold = (s) => foldM(s).replace(/\|/g, " ");
 // Round 4 item-level rules (R7, round 5: flavour/aroma word anywhere in the item). R4b: free-from phrase for the occurrence's family. R5: E220-E228 needs a sulphite word in its item. R6: caramel colour (sulphite ammonia / caustic sulphite).
 const FREE_PHRASE = {
   gluten: /\bgluten free\b/, milk: /\b(milk|dairy) free\b/, egg: /\begg free\b/, soy: /\bsoya? free\b/,
@@ -64,6 +66,11 @@ const OCR_PRECAUTION = /\bmay (?:also )?cont[a-z]*/;
 const HEADING_AFTER = /^ *:/;
 // Round 9. R13: a sulphite term directly preceded by "ferrous" (the iron fortificant, "ferrous sulfite" is a typo for ferrous sulfate).
 const FERROUS_BEFORE = /ferrous $/;
+// Round 10. R9 (extended): factory wording in the item is a precaution too. R1 (extended): a term followed by a prefix of "oil" ("o", "oi") at the very end of the text is a truncated oil.
+const FACTORY = /\bmade in a\b|\bfacility\b|\bfactory\b|\bmanufactured (?:in|on)\b/;
+const TRUNCATED_OIL = /^ (?:o|oi) *$/;
+// Round 10. R14: a term inside a "contains" declaration is not an ingredient entry. The declaration starts at the word "contains" opening a sentence (up to three label words before it: "allergy advice: contains", "dried contains") or an item, outside brackets, and runs to the end of the sentence. "contains less than 2% of", "contains 2% or less", "contains no", "contains one or more of the following" and "contains only" open ingredient lists, not declarations.
+const DECLARATION = /(?:^|[,;|] ?)(?:[a-z0-9]+:? ){0,3}contains\b(?! ?:? ?(?:less|no\b|only|up to|\d|<|one or more|the following))/g;
 const esc = (t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 let strictUnlocated = 0; // hits whose term could not be found in the folded source text: dropped, and counted
 // Items and, per position, the stack of open-bracket positions.
@@ -80,6 +87,15 @@ function splitItems(f) {
   items.push([start, f.length]);
   return { items, stacks };
 }
+// R14 helper: is the position inside a "contains" declaration? gM is the folded text with sentence ends as "|".
+function inDeclaration(gM, stacks, pos) {
+  const start = gM.lastIndexOf("|", pos - 1) + 1;
+  for (const m of gM.slice(start, pos).matchAll(DECLARATION)) {
+    const at = start + m.index + m[0].length - m[0].match(/contains\b$/)[0].length; // position of "contains"
+    if (!(stacks[at] ?? []).length) return true;
+  }
+  return false;
+}
 // The engine reports a hit's source as a fragment of the text (e.g. "and celery seed}"), so an item can reach beyond it.
 // `full` is the record's whole English text: the fragment is located in it (first match) and each occurrence's item, bracket stack and R1-R7 context are read there.
 // Not found: the fragment's own text is used (the pre-round-5 behaviour).
@@ -87,6 +103,7 @@ export function survivingOccurrences(source, term, family, full) {
   const f = fold(source), at = [];
   const ff = full ? fold(full) : "", off = ff ? ff.indexOf(f) : -1;
   const g = off >= 0 ? ff : f, base = off >= 0 ? off : 0;
+  const gM = off >= 0 ? foldM(full) : foldM(source); // g with sentence ends as "|", same length
   const { items, stacks } = splitItems(g);
   const re = new RegExp(`(?<![a-z0-9])${esc(term)}(?:s|es)?(?![a-z0-9])`, "g");
   for (const m of f.matchAll(re)) at.push([m.index, m[0].length]);
@@ -98,6 +115,7 @@ export function survivingOccurrences(source, term, family, full) {
     const item = g.slice(a, b);
     if (CTX_OIL.test(item)) continue; // R1: oil or fat in the item
     if ((stacks[pos] ?? []).some((o) => CTX_OIL.test(g.slice(Math.max(0, g.slice(0, o).search(/[^,;()\[\]{}]*$/)), o)))) continue; // R1: inside brackets whose head names an oil or fat
+    if (TRUNCATED_OIL.test(g.slice(pos + len))) continue; // R1: "soybean oi" cut off at the end of the text
     if (CTX_ALT.test(item)) continue; // R2: alternatives
     const nat = item.search(CTX_NAT);
     if (nat >= 0 && pos - a > nat) continue; // R3: after "naturally occurring in" / "except for those"
@@ -110,10 +128,11 @@ export function survivingOccurrences(source, term, family, full) {
     if (FLAVOUR.test(item)) continue; // R7: flavour context
     const after = g.slice(pos + len), before = g.slice(0, pos);
     if (FREE_AFTER.test(after)) continue; // R8: "lactose-free": this occurrence only
-    if (PRECAUTION.test(item)) continue; // R9: "may contain" / traces in the item
+    if (PRECAUTION.test(item) || FACTORY.test(item)) continue; // R9: "may contain" / traces / "made in a" / facility / factory / "manufactured in|on" in the item
     if (OCR_PRECAUTION.test(item)) continue; // R11: "may contairi milk" and other OCR-damaged precautions in the item
     if (HEADING_AFTER.test(after)) continue; // R12: "MILK CHOCOLATE EGG:" is a heading: this occurrence only
     if (family === "sulphites" && FERROUS_BEFORE.test(before)) continue; // R13: "ferrous sulfite" is the iron fortificant, not a sulphite
+    if (inDeclaration(gM, stacks, pos)) continue; // R14: "Contains: milk, soy." names an allergen but is not an ingredient entry
     if (term === "miso" && MISO_BASE.test(before)) continue; // R10a: chickpea / adzuki / soy-free miso
     if (SUBST_AFTER.test(after) || SUBST_BEFORE.test(before)) continue; // R10b: replacement, substitute, imitation, non-dairy...
     n++;
@@ -145,7 +164,7 @@ const all = cut(), pop = cut();
 const rev = Object.fromEntries(FAMS.map((f) => [f, { count: 0, words: new Map() }]));
 const sample = []; let seen = 0;
 const SAMPLE_N = 200;
-const randS = rng(23), strictSample = []; let strictSeen = 0;
+const randS = rng(29), strictSample = []; let strictSeen = 0;
 const randC = rng(11), changeSample = []; let changeSeen = 0;
 const groups = new Map(); // "family|oldTerm|phrase" -> { n, ex }
 const bump = (o, f) => { o[f] = (o[f] ?? 0) + 1; };

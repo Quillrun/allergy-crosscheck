@@ -635,3 +635,52 @@ test("precaution: 'manufactured on equipment exposed to' is a warning (round-8 h
   }
   assert.ok(labelKinds(t, "milk").includes("contains"));
 });
+
+// Round-9 hand check: seven records the strict count took for real allergens.
+test("engine: vegetable and vanaspati ghee are plant fat (milk possible); ghee alone and butter stay milk", () => {
+  for (const t of ["Green Chilli Vegetable Ghee", "vanaspati ghee", "Vegetable Ghee"]) assert.deepEqual(labelKinds(t, "milk"), ["possible"], t);
+  assert.deepEqual(labelKinds("ghee", "milk"), ["contains"]);
+  assert.deepEqual(labelKinds("pure cow ghee, salt", "milk"), ["contains"]);
+  assert.deepEqual(labelKinds("butter", "milk"), ["contains"]);
+  assert.deepEqual(labelKinds("vegetable ghee, butter", "milk"), ["contains", "possible"]);
+});
+test("precaution: 'may not be suitable for … allergy' is a precaution sentence; 'not suitable for vegetarians' is not", () => {
+  const t = "Tomato sauce, peanut oil. This product contains pea protein. It may not be suitable for those with peanut allergy.";
+  assert.ok(labelKinds(t, "peanut").includes("may_contain"));
+  assert.ok(labelKinds(t, "peanut").includes("contains")); // the peanut oil in the list is still read
+  const only = "Rice, pea protein. It may not be suitable for those with peanut allergy.";
+  assert.deepEqual(labelKinds(only, "peanut"), ["may_contain"]);
+  assert.deepEqual(labelKinds("Rice. Might not be suitable for peanut allergy sufferers.", "peanut"), ["may_contain"]);
+  assert.deepEqual(labelKinds("Rice. May not be suitable for peanut allergic people.", "peanut"), ["may_contain"]);
+  assert.deepEqual(labelKinds("Rice, peanut. It may not be suitable for vegetarians.", "peanut"), ["contains"]);
+  assert.deepEqual(labelKinds("Rice, peanut. Not suitable for vegetarians.", "peanut"), ["contains"]);
+  assert.deepEqual(labelKinds("Rice. Peanut, it may not be suitable for vegetarians.", "peanut"), ["contains"]);
+});
+// Round-10 exploratory sweep: "Allergy advice: Not suitable for customers with an allergy to soya due to manufacturing methods."
+test("precaution: 'Not suitable for … allergy' after an 'Allergy advice:' label is a precaution", () => {
+  const t = "Rice flour, salt. Allergy advice: Not suitable for customers with an allergy to soya due to manufacturing methods.";
+  assert.deepEqual(labelKinds(t, "soy"), ["may_contain"]);
+  assert.deepEqual(labelKinds("Rice. Allergen information: May not be suitable for peanut allergy sufferers.", "peanut"), ["may_contain"]);
+  assert.deepEqual(labelKinds("Rice, soya. Allergy advice: Not suitable for customers with an allergy to soya.", "soy"), ["contains", "may_contain"]); // the listed soya stays
+  assert.deepEqual(labelKinds("Rice, soya. Allergy advice: not suitable for vegetarians.", "soy"), ["contains"]);
+  assert.deepEqual(labelKinds("Rice, soya. Allergy advice: contains soya.", "soy"), ["contains"]); // a plain contains-statement is not a precaution
+});
+test("engine: 'shell fish' in two words reads as shellfish, not fish; fish sauce stays fish", () => {
+  const k = kindsOf("CLAM EXTRACT (SHELL FISH).");
+  assert.equal(k.crustacean, "contains");
+  assert.equal(k.mollusc, "contains");
+  assert.equal(k.fish, undefined);
+  assert.equal(kindsOf("fish sauce").fish, "contains");
+  assert.equal(kindsOf("salt, fish, shell fish").fish, "contains");
+});
+test("engine: a superscript footnote mark does not hide 'butter beans' from the dairy-butter exclusion", () => {
+  for (const t of ["Butter Beans³ (7%)", "Butter Beans¹", "butter beans", "Butter Bean²"]) assert.equal(kindsOf(t).milk, undefined, t);
+  assert.equal(kindsOf("Butter² (milk)").milk, "contains");
+  assert.equal(kindsOf("Wheat¹, salt").wheat, "contains");
+});
+test("engine: macadamia milk is a rare plant milk (milk possible, the nut contains)", () => {
+  const k = kindsOf("Macadamia milk (filtered water, macadamias)");
+  assert.equal(k.tree_nut, "contains");
+  assert.equal(k.milk, "possible");
+  assert.equal(kindsOf("milk, macadamia milk").milk, "contains");
+});

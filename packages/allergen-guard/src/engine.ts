@@ -126,8 +126,8 @@ const PRECAUTION = new RegExp(
   "gi",
 );
 
-// "Not suitable for Nut, Peanut and Sesame allergy sufferers.": a sentence of its own, only a precaution when it speaks of allergy.
-const NOT_SUITABLE = /(?<=^|[.\n]\s*)(?:not suitable|unsuitable) for\b(?=(?:[^.\n]|\.(?!\s|$))*\ballerg(?:y|ic|ies)\b)/gi;
+// "Not suitable for Nut, Peanut and Sesame allergy sufferers.", "It may not be suitable for those with peanut allergy.", "Allergy advice: Not suitable for customers with an allergy to soya.": a sentence of its own (or the text after an allergy-advice label), only a precaution when it speaks of allergy.
+const NOT_SUITABLE = /(?<=^|[.\n]\s*|\ballerg(?:y|en|ens|ic) (?:advice|information|warning|note)\s*:\s*)(?:(?:(?:it|this|this product|the product) )?(?:may|might) not be suitable|not suitable|unsuitable) for\b(?=(?:[^.\n]|\.(?!\s|$))*\ballerg(?:y|ic|ies)\b)/gi;
 const SENTENCE_END = /\.(?=\s|$)|\n/;
 
 /** True for a sentence made only of allergen terms joined by spaces, commas, "and", "or", "&" ("egg peanuts and nuts"). */
@@ -147,7 +147,7 @@ function splitPrecautions(text: string): { ingredients: string; warnings: string
   for (const m of found) {
     if (m.index < at) continue;
     let end = text.length, next = end;
-    if (/^(?:not suitable|unsuitable)/i.test(m[0])) {
+    if (/\bsuitable\b/i.test(m[0])) {
       const stop = SENTENCE_END.exec(text.slice(m.index));
       if (stop) { end = m.index + stop.index; next = end + stop[0].length; }
     } else {

@@ -135,6 +135,7 @@ export function resolveAllergies(names: string[]): { ids: AllergenId[]; unknown:
 export function normalize(text: string): string {
   return text
     .replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, "") // zero-width characters and soft hyphens can't split a word
+    .replace(/[\u00B2\u00B3\u00B9\u2070-\u2079]+/g, " ") // a superscript footnote mark ("Butter Beans³") must not become a digit glued to the word
     .normalize("NFKD") // fullwidth and other compatibility forms become plain letters
 
     .replace(/[̀-ͯ]/g, "")
@@ -168,7 +169,9 @@ export type Term = {
 
 const PLANT_MILKS = ["almond milk", "oat milk", "soy milk", "soya milk", "rice milk", "coconut milk", "cashew milk", "hemp milk", "pea milk", "plant milk"];
 // Rarer, and also what OCR makes of "contains nuts, peanut, milk": masked from dairy milk but still possible milk (the nut term flags the nut).
-const RARE_PLANT_MILKS = ["corn milk", "peanut milk", "walnut milk", "hazelnut milk"];
+const RARE_PLANT_MILKS = ["corn milk", "peanut milk", "walnut milk", "hazelnut milk", "macadamia milk"];
+// Plant fat sold as ghee: not dairy, but it is the product people swap in for ghee, so milk stays possible.
+const VEGETABLE_GHEE = ["vegetable ghee", "vanaspati ghee"];
 const NOT_DAIRY_BUTTER = ["peanut butter", "cocoa butter", "shea butter", "apple butter", "nut butter", "almond butter", "cashew butter", "seed butter", "sunflower butter", "sunflower seed butter", "butter bean", "butter beans", "coconut butter", "cacao butter", "mango butter", "kokum butter", "butter flavour", "butter flavor", "butter flavouring", "butter flavoring", "parkii butter", "butyrospermum parkii butter",
   "hazelnut butter", "pecan butter", "pistachio butter", "walnut butter", "macadamia butter", "brazil nut butter", "pumpkin seed butter", "sesame butter", "soy butter", "soynut butter", "fruit butter"];
 const NOT_WHEAT_FLOUR = [
@@ -207,7 +210,8 @@ export const TERMS: Term[] = [
   // milk
   { terms: ["milk", "buttermilk", "milk powder", "milkfat"], contains: ["milk"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS, "milk thistle"] },
   { terms: RARE_PLANT_MILKS, contains: [], possible: ["milk"] },
-  { terms: ["butter", "ghee", "butterfat"], contains: ["milk"], unless: NOT_DAIRY_BUTTER },
+  { terms: ["butter", "ghee", "butterfat"], contains: ["milk"], unless: [...NOT_DAIRY_BUTTER, ...VEGETABLE_GHEE] },
+  { terms: VEGETABLE_GHEE, contains: [], possible: ["milk"] },
   { terms: ["cream", "sour cream", "creme fraiche", "half and half"], contains: ["milk"], unless: ["cream of tartar", "coconut cream", "ice cream", "cream soda", "cream crackers", "oat cream", "soy cream", "soya cream", "cashew cream", "almond cream", "rice cream", "plant cream", "vegan cream"] },
   {
     terms: ["cheese", "parmesan", "parmigiano", "pecorino", "mozzarella", "cheddar", "ricotta", "feta", "mascarpone", "gouda", "brie",
@@ -267,13 +271,14 @@ export const TERMS: Term[] = [
       "pollock", "hake", "herring", "sea bass", "swordfish", "snapper", "plaice", "pangasius", "catfish", "carp", "perch", "eel",
       "caviar", "roe", "surimi", "fish sauce", "nam pla", "bonito", "codfish", "saltfish", "barramundi", "bacalao", "baccala", "salmo salar", "theragra chalcogramma", "gadus", "katsuwonus pelamis", "thunnus"],
     contains: ["fish"],
+    unless: ["shell fish"], // two words, the shellfish entry below
   },
   { terms: ["worcestershire"], contains: ["fish"], possible: ["gluten"] },
   { terms: ["caesar dressing"], contains: ["fish"], possible: ["egg", "milk"] },
   { terms: ["dashi"], contains: [], possible: ["fish"] },
   // crustaceans and molluscs
   { terms: ["shrimp", "prawn", "crab", "lobster", "crayfish", "crawfish", "langoustine", "krill", "scampi", "crustacean", "crustacea", "crabmeat"], contains: ["crustacean"] },
-  { terms: ["shellfish"], contains: ["crustacean", "mollusc"] },
+  { terms: ["shellfish", "shell fish"], contains: ["crustacean", "mollusc"] },
   { terms: ["clam", "mussel", "oyster", "scallop", "squid", "calamari", "octopus", "snail", "escargot", "cuttlefish", "abalone", "whelk", "cockle", "conch", "mollusc", "mollusk", "cephalopod"], contains: ["mollusc"], unless: ["oyster mushroom", "king oyster mushroom"] },
   // celery, mustard, lupin, sulphites
   { terms: ["celery", "celeriac", "celery salt", "celery seed"], contains: ["celery"] },
