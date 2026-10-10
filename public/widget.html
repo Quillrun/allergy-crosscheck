@@ -10,7 +10,7 @@
      is not read), so nothing below is sized per device. Layout uses no viewport-width breakpoints except the phone fallback:
      under zoom a media query still sees the host's pixels. */
   :root {
-    --t-display5: 24px; --t-headline1: 20px; --t-headline2: 18px; --t-body1: 16px; --t-body2: 14px;
+    --t-display2: 40px; --t-display3: 32px; --t-display4: 28px; --t-display5: 24px; --t-headline1: 20px; --t-headline2: 18px; --t-body1: 16px; --t-body2: 14px;
     --s-4xs: 2px; --s-2xs: 6px; --s-xs: 8px; --s-sm: 12px; --s-md: 16px;
     --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
     --bg: #0f1419; --panel: #1a2129; --text: #f2f4f6; --muted: #a7b0ba; --line: #2b343e;
@@ -25,35 +25,43 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--text); font: var(--t-body1)/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   main { padding: calc(var(--s-sm) + var(--inset-top, 0px)) calc(var(--s-md) + var(--inset-right, 0px)) calc(var(--s-xs) + var(--inset-bottom, 0px)) calc(var(--s-md) + var(--inset-left, 0px)); }
-  h1 { font-size: var(--t-headline1); line-height: 1.2; margin: 0 0 var(--s-2xs); font-weight: 650; }
-  .banner { border-radius: var(--r-lg); padding: var(--s-xs) var(--s-md); margin-bottom: var(--s-xs); display: flex; gap: var(--s-sm); align-items: center; }
-  .banner .icon { font-size: var(--t-display5); line-height: 1; }
-  .banner .label { font-size: var(--t-display5); line-height: 1.15; font-weight: 750; letter-spacing: .2px; white-space: nowrap; }
-  .banner .sub { color: var(--muted); font-size: var(--t-body2); flex: 1; }
+  h1 { font-size: var(--t-display4); line-height: 1.15; margin: 0 0 var(--s-xs); font-weight: 700; }
+  .banner { border-radius: var(--r-lg); padding: var(--s-sm) var(--s-md); margin-bottom: var(--s-xs); display: flex; gap: var(--s-sm); align-items: center; }
+  .banner .icon { font-size: var(--t-display3); line-height: 1; }
+  .banner .label { font-size: var(--t-display2); line-height: 1.05; font-weight: 800; white-space: nowrap; }
+  .banner .ctx { flex: 1; min-width: 0; }
+  .banner h1 { font-size: var(--t-headline1); line-height: 1.2; margin: 0; font-weight: 650; color: var(--text); }
+  .banner .sub { color: var(--muted); font-size: var(--t-body2); }
   .unsafe { background: var(--unsafe-bg); border: 2px solid var(--unsafe); } .unsafe .label { color: var(--unsafe); }
   .cannot_confirm { background: var(--confirm-bg); border: 2px solid var(--confirm); } .cannot_confirm .label { color: var(--confirm); }
   .no_listed_allergens { background: var(--none-bg); border: 2px solid var(--none); } .no_listed_allergens .label { color: var(--none); }
   /* Two columns; a recipe check puts who's eating and the risky lines left, the swaps right. */
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-xs); align-items: start; }
   .grid.one { grid-template-columns: minmax(0, 1fr); }
+  .grid.one .person .name { font-size: var(--t-display5); }
+  .grid.one .person .why, .grid.one li { font-size: var(--t-headline2); }
+  .grid.one .chip { font-size: var(--t-body1); }
+  .grid.one button.choice { font-size: var(--t-headline1); }
   .grid.recipe { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); grid-template-areas: "who swaps" "watch swaps"; }
   .grid.recipe .who { grid-area: who; } .grid.recipe .watch { grid-area: watch; } .grid.recipe .swaps { grid-area: swaps; }
+  @media (max-width: 560px) { .banner { flex-wrap: wrap; } .banner .ctx { flex-basis: 100%; } }
   @media (max-width: 560px) { .grid, .grid.recipe { grid-template-columns: minmax(0, 1fr); grid-template-areas: none; } .grid.recipe > * { grid-area: auto; } }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-xs) var(--s-sm); }
   .card h2 { font-size: var(--t-body2); text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 var(--s-4xs); font-weight: 600; }
   .person { display: grid; grid-template-columns: 1fr auto; column-gap: var(--s-xs); align-items: start; padding: var(--s-2xs) 0; border-top: 1px solid var(--line); }
   .person .why { grid-column: 1 / -1; }
   .person:first-of-type { border-top: 0; }
-  .person .name { font-weight: 650; font-size: var(--t-headline2); }
-  .person .why { color: var(--muted); font-size: var(--t-body2); }
-  .pill { font-size: var(--t-body2); font-weight: 700; border-radius: var(--r-lg); padding: 0 var(--s-sm); white-space: nowrap; align-self: flex-start; }
-  .pill.unsafe { color: var(--unsafe); border-width: 1px; } .pill.cannot_confirm { color: var(--confirm); border-width: 1px; } .pill.no_listed_allergens { color: var(--none); border-width: 1px; }
+  .person .name { font-weight: 650; font-size: var(--t-headline1); }
+  .person .why { color: var(--text); font-size: var(--t-body1); }
+  .pill { font-size: var(--t-body1); font-weight: 750; border-radius: var(--r-lg); padding: var(--s-4xs) var(--s-sm); white-space: nowrap; align-self: flex-start; }
+  .pill.unsafe, .pill.cannot_confirm { color: var(--bg); border: 0; }
+  .pill.unsafe { background: var(--unsafe); } .pill.cannot_confirm { background: var(--confirm); } .pill.no_listed_allergens { background: transparent; color: var(--none); border: 1px solid var(--none); }
   ul { margin: 0; padding: 0; list-style: none; }
   li { padding: var(--s-2xs) 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: var(--s-4xs) var(--s-2xs); align-items: center; }
   li:first-child { border-top: 0; }
   .flagged { font-weight: 650; }
   .chip { background: var(--chip); border-radius: var(--r-sm); padding: 0 var(--s-xs); font-size: var(--t-body2); color: var(--muted); }
-  .chip.contains, .chip.may_contain { color: var(--unsafe); } .chip.possible, .chip.unknown { color: var(--confirm); }
+  .chip.contains, .chip.may_contain, .chip.possible, .chip.unknown { color: var(--text); }
   .swap .arrow { color: var(--muted); }
   button.choice { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; min-height: 48px; padding: var(--s-sm) var(--s-md); margin-top: var(--s-xs); border-radius: var(--r-md); background: var(--chip); font-size: var(--t-body1); }
   button.choice:first-of-type { margin-top: 0; }
@@ -144,10 +152,9 @@
 
   function render(v) {
     if (!v) return;
-    const parts = [`<h1>${esc(v.title)}</h1>`];
-    if (v.overall) {
-      parts.push(`<div class="banner ${v.overall}" role="status"><span class="icon" aria-hidden="true">${ICON[v.overall]}</span><span class="label">${LABEL[v.overall]}</span><span class="sub">${SUB[v.overall]}</span></div>`);
-    }
+    const parts = v.overall
+      ? [`<div class="banner ${v.overall}" role="status"><span class="icon" aria-hidden="true">${ICON[v.overall]}</span><span class="label">${LABEL[v.overall]}</span><div class="ctx"><h1>${esc(v.title)}</h1><div class="sub">${SUB[v.overall]}</div></div></div>`]
+      : [`<h1>${esc(v.title)}</h1>`];
     const cards = [];
     if (v.people?.length && v.kind !== "shopping") {
       const rows = v.people.map((p) => {
@@ -159,7 +166,7 @@
         const why = v.overall ? [...new Set(reasons)].map(esc).join(v.kind === "recipe_check" ? ", " : "<br>") : esc((p.allergies ?? []).join(", "));
         return `<div class="person"><div class="name">${esc(p.name)}</div>${right}<div class="why">${why}</div></div>`;
       }).join("");
-      cards.push(`<section class="card who"><h2>${v.overall ? "Who's eating" : "Household"}</h2>${rows}</section>`);
+      cards.push(`<section class="card who">${v.overall ? "<h2>Who's eating</h2>" : ""}${rows}</section>`);
     }
     if (v.items?.length) {
       // A check shows the flagged lines and summarises the rest, with a cap of eight lines; a plain
@@ -184,12 +191,12 @@
     }
     if (v.candidates?.length) {
       const rows = v.candidates.map((c) => `<button class="choice" data-barcode="${esc(c.barcode)}">${esc(c.name)}${c.brand ? ` <span class="chip">${esc(c.brand)}</span>` : ""}</button>`).join("");
-      cards.push(`<section class="card"><h2>Which one?</h2>${rows}</section>`);
+      cards.push(`<section class="card">${rows}</section>`);
     }
     if (v.shopping) {
       // Shows at most eight lines, then "and N more".
       const rows = v.shopping.length ? v.shopping.slice(0, 8).map((s) => `<li>${esc(s.item)}${s.note ? `<span class="chip">${esc(s.note)}</span>` : ""}</li>`).join("") + (v.shopping.length > 8 ? `<li class="more">and ${v.shopping.length - 8} more</li>` : "") : `<li>Empty</li>`;
-      cards.push(`<section class="card"><h2>Shopping list</h2><ul>${rows}</ul></section>`);
+      cards.push(`<section class="card"><ul>${rows}</ul></section>`);
     }
     if (!v.overall && !cards.length) parts.push(`<div class="card">${esc(v.speech)}</div>`);
     parts.push(`<div class="grid${cards.length === 3 && v.swaps?.length ? " recipe" : cards.length === 1 ? " one" : ""}">${cards.join("")}</div>`);
