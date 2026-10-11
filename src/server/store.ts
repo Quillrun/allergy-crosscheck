@@ -27,6 +27,11 @@ export class Store {
     return this.state.people.filter((p) => !p.until || p.until >= today);
   }
 
+  /** Guests whose last day has passed: still saved, no longer checked unless asked for by name. */
+  expiredPeople(today = localDate()): Profile[] {
+    return this.state.people.filter((p) => p.until && p.until < today);
+  }
+
   allPeople(): Profile[] {
     return [...this.state.people];
   }

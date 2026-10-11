@@ -38,7 +38,7 @@ export type View = {
   title: string;
   speech: string;
   overall?: Verdict;
-  people?: { name: string; verdict: Verdict; reasons: string[]; guest?: boolean; allergies?: string[]; until?: string }[];
+  people?: { name: string; verdict: Verdict; reasons: string[]; guest?: boolean; expired?: boolean; allergies?: string[]; until?: string }[];
   items?: { text: string; flags: { allergen: string; kind: string }[] }[];
   swaps?: Swap[];
   candidates?: { barcode: string; name: string; brand?: string }[];
@@ -185,7 +185,7 @@ function registerListPeople(server: McpServer, { store }: Deps): void {
         kind: "people",
         title: "Household",
         speech: all.length
-          ? all.map((p) => `${p.name}${p.guest ? " (guest)" : ""}: ${spokenList(p.allergies)}`).join(". ") + "."
+          ? all.map((p) => `${p.name}${guestTag(p)}: ${spokenList(p.allergies)}`).join(". ") + "."
           : "Nobody's saved yet. Tell me who eats here and what they're allergic to.",
         people: peopleRows(all),
         disclaimer: DISCLAIMER,
@@ -242,7 +242,7 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
       _meta: ui("Checking the recipe…", "Recipe checked"),
     },
     async ({ ingredients, dish, recipe_name, for: names }) => {
-      const { people, missing } = pick(store, names);
+      const { people, missing, expired } = pick(store, names);
       let source: View["source"];
       let note = "";
       let nameLine: string | undefined;
@@ -275,7 +275,7 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
         kind: "recipe_check",
         title: recipe_name ? `${recipe_name}` : "Recipe check",
         overall: result.overall,
-        speech: withMissing(result, missing) + note + (swaps.length ? " I've put swaps on the screen." : ""),
+        speech: withMissing(result, missing, expired) + note + (swaps.length ? " I've put swaps on the screen." : ""),
         people: verdictRows(result, store),
         items: result.lines
           .map((l) => ({
@@ -310,7 +310,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
       _meta: ui("Checking the product…", "Product checked"),
     },
     async ({ barcode, name, scanned, for: names }) => {
-      const { people, missing } = pick(store, names);
+      const { people, missing, expired } = pick(store, names);
       let code = barcode?.trim();
       if (scanned && !code) {
         const scan = store.recentScan();
@@ -325,9 +325,9 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
         }
         const found = await sources.searchProducts(name);
         if (found.error || !found.candidates) {
-          return productReply(name, checkProduct(null, people, found.error), people, store, missing);
+          return productReply(name, checkProduct(null, people, found.error), people, store, missing, expired);
         }
-        if (found.candidates.length === 0) return productReply(name, checkProduct(null, people), people, store, missing);
+        if (found.candidates.length === 0) return productReply(name, checkProduct(null, people), people, store, missing, expired);
         if (found.candidates.length > 1) {
           return reply({
             kind: "needs_choice",
@@ -341,7 +341,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
         code = found.candidates[0].barcode;
       }
       const { product, error } = await sources.product(code);
-      return productReply(product?.product_name ?? name ?? code, checkProduct(product ?? null, people, error), people, store, missing, product ? { label: "Open Food Facts" } : undefined);
+      return productReply(product?.product_name ?? name ?? code, checkProduct(product ?? null, people, error), people, store, missing, expired, product ? { label: "Open Food Facts" } : undefined);
     },
   );
 }
@@ -392,12 +392,12 @@ function registerRemoveFromShoppingList(server: McpServer, { store }: Deps): voi
   );
 }
 
-function productReply(label: string, result: CheckResult, people: Person[], store: Store, missing: string[], source?: View["source"]) {
+function productReply(label: string, result: CheckResult, people: Person[], store: Store, missing: string[], expired: Profile[], source?: View["source"]) {
   return reply({
     kind: "product_check",
     title: label,
     overall: result.overall,
-    speech: withMissing(result, missing),
+    speech: withMissing(result, missing, expired),
     people: verdictRows(result, store),
     items: groupHits(result, people),
     dataIssues: result.dataIssues,
@@ -428,9 +428,9 @@ function groupHits(result: CheckResult, people: Person[]): View["items"] {
   });
 }
 
-/** Resolve "for" names to saved people. Unknown names are reported, never silently skipped. */
-function pick(store: Store, names?: string[]): { people: Person[]; missing: string[] } {
-  if (!names?.length) return { people: store.activePeople(), missing: [] };
+/** Resolve "for" names to saved people. Unknown names are reported, never silently skipped; so are guests whose visit has ended. */
+function pick(store: Store, names?: string[]): { people: Person[]; missing: string[]; expired: Profile[] } {
+  if (!names?.length) return { people: store.activePeople(), missing: [], expired: store.expiredPeople() };
   const people: Person[] = [];
   const missing: string[] = [];
   for (const n of names) {
@@ -438,13 +438,17 @@ function pick(store: Store, names?: string[]): { people: Person[]; missing: stri
     if (p) people.push(p);
     else missing.push(n);
   }
-  return { people, missing };
+  return { people, missing, expired: [] };
 }
 
-function withMissing(result: CheckResult, missing: string[]): string {
-  if (!missing.length) return result.speech;
-  const note = `I don't have allergies saved for ${joinWords(missing)}, so I couldn't check for them.`;
-  return result.people.length ? `${note} ${result.speech}` : note;
+function withMissing(result: CheckResult, missing: string[], expired: Profile[] = []): string {
+  const notes = [
+    ...expired.map((p) => `${p.name}'s visit ended on ${spokenDate(p.until!)}, so I didn't check for them.`),
+    ...(missing.length ? [`I don't have allergies saved for ${joinWords(missing)}, so I couldn't check for them.`] : []),
+  ];
+  if (!notes.length) return result.speech;
+  if (result.people.length) return `${notes.join(" ")} ${result.speech}`;
+  return expired.length ? `${notes.join(" ")} Tell me who's eating and what they're allergic to.` : notes.join(" ");
 }
 
 function verdictRows(result: CheckResult, store: Store): View["people"] {
@@ -461,8 +465,11 @@ function whichOne(candidates: { name: string; brand?: string }[]): string {
   return distinct ? `Which one: ${joinWords(labels, "or")}? Or read me the barcode.` : "Pick one on the screen, or read me the barcode.";
 }
 
+const isExpired = (p: Profile) => Boolean(p.until && p.until < localDate());
+const guestTag = (p: Profile) => (!p.guest ? "" : isExpired(p) ? ` (guest, visit ended ${spokenDate(p.until!)})` : " (guest)");
+
 function peopleRows(all: Profile[]): View["people"] {
-  return all.map((p) => ({ name: p.name, verdict: "no_listed_allergens" as Verdict, reasons: [], guest: p.guest, until: p.until, allergies: p.allergies.map((a) => ALLERGENS[a].label) }));
+  return all.map((p) => ({ name: p.name, verdict: "no_listed_allergens" as Verdict, reasons: [], guest: p.guest, ...(isExpired(p) ? { expired: true } : {}), until: p.until, allergies: p.allergies.map((a) => ALLERGENS[a].label) }));
 }
 
 function reply(view: View, isError = false) {
@@ -477,7 +484,7 @@ function reply(view: View, isError = false) {
 const spokenDate = (iso: string) => {
   const [y, m, d] = iso.split("-").map(Number);
   const date = new Date(y, m - 1, d);
-  const soon = date.getTime() - Date.now() < 300 * 86_400_000; // within the coming months, the weekday says enough
+  const soon = Math.abs(date.getTime() - Date.now()) < 300 * 86_400_000; // within a few months either way, the weekday says enough
   return date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", ...(soon ? {} : { year: "numeric" }) });
 };
 

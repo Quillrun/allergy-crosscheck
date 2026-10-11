@@ -12,30 +12,29 @@
   :root {
     --t-display2: 40px; --t-display3: 32px; --t-display4: 28px; --t-display5: 24px; --t-headline1: 20px; --t-headline2: 18px; --t-body1: 16px; --t-body2: 14px;
     --s-4xs: 2px; --s-2xs: 6px; --s-xs: 8px; --s-sm: 12px; --s-md: 16px;
-    --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
-    --bg: #0f1419; --panel: #1a2129; --text: #f2f4f6; --muted: #a7b0ba; --line: #2b343e;
-    --unsafe: #ff7a7e; --unsafe-bg: #3b1214; --confirm: #f5a524; --confirm-bg: #3a2a0c;
-    --none: #8ea4bd; --none-bg: #1d2836; --chip: #26303b;
+    --r-xs: 4px; --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+    --face-display: "Helvetica Neue", "Roboto Condensed", "sans-serif-condensed", "Arial Narrow", sans-serif;
+    --face-text: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    --stock: #1a1a1a; --ink: #f5f5f5; --ink-2: #b3b3b3; --rule: #6e6e6e; --hair: #3d3d3d;
+    --unsafe: #ff7a7e; --confirm: #f5a524; --none: #8ea4bd;
   }
   :root[data-theme="light"] {
-    --bg: #f7f8fa; --panel: #ffffff; --text: #14181d; --muted: #59636e; --line: #dfe3e8;
-    --unsafe: #c7262c; --unsafe-bg: #fde8e8; --confirm: #8a4f00; --confirm-bg: #fff3dc;
-    --none: #3f5d7d; --none-bg: #e8eef5; --chip: #eef1f4;
+    --stock: #ffffff; --ink: #000000; --ink-2: #4d4d4d; --rule: #000000; --hair: #b8b8b8;
+    --unsafe: #c7262c; --confirm: #8a4f00; --none: #3f5d7d;
   }
+  .unsafe { --v: var(--unsafe); } .cannot_confirm { --v: var(--confirm); } .no_listed_allergens { --v: var(--none); }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--text); font: var(--t-body1)/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  html, body { margin: 0; background: var(--stock); color: var(--ink); font: var(--t-body1)/1.3 var(--face-text); }
   main { padding: calc(var(--s-sm) + var(--inset-top, 0px)) calc(var(--s-md) + var(--inset-right, 0px)) calc(var(--s-xs) + var(--inset-bottom, 0px)) calc(var(--s-md) + var(--inset-left, 0px)); }
-  h1 { font-size: var(--t-display4); line-height: 1.15; margin: 0 0 var(--s-xs); font-weight: 700; }
-  .banner { border-radius: var(--r-lg); padding: var(--s-sm) var(--s-md); margin-bottom: var(--s-xs); display: flex; gap: var(--s-sm); align-items: center; }
-  .banner .icon { font-size: var(--t-display3); line-height: 1; }
-  .banner .label { font-size: var(--t-display2); line-height: 1.05; font-weight: 800; white-space: nowrap; }
+  h1, h2, .banner .label, .person .name, .pill, .empty { font-family: var(--face-display); font-stretch: condensed; }
+  main > h1 { font-size: var(--t-display4); line-height: 1.15; margin: 0 0 var(--s-xs); padding-bottom: var(--s-4xs); font-weight: 900; border-bottom: 10px solid var(--rule); }
+  .banner { display: flex; gap: var(--s-sm); align-items: center; padding: 0 0 var(--s-xs); margin-bottom: var(--s-xs); border-bottom: 10px solid var(--v); }
+  .banner .icon { width: 32px; height: 32px; flex: none; color: var(--v); }
+  .banner .icon svg { display: block; width: 100%; height: 100%; }
+  .banner .label { font-size: var(--t-display2); line-height: 1.05; font-weight: 900; white-space: nowrap; color: var(--v); }
   .banner .ctx { flex: 1; min-width: 0; }
-  .banner h1 { font-size: var(--t-headline1); line-height: 1.2; margin: 0; font-weight: 650; color: var(--text); }
-  .banner .sub { color: var(--muted); font-size: var(--t-body2); }
-  .unsafe { background: var(--unsafe-bg); border: 2px solid var(--unsafe); } .unsafe .label { color: var(--unsafe); }
-  .cannot_confirm { background: var(--confirm-bg); border: 2px solid var(--confirm); } .cannot_confirm .label { color: var(--confirm); }
-  .no_listed_allergens { background: var(--none-bg); border: 2px solid var(--none); } .no_listed_allergens .label { color: var(--none); }
-  /* Two columns; a recipe check puts who's eating and the risky lines left, the swaps right. */
+  .banner h1 { font-size: var(--t-headline1); line-height: 1.2; margin: 0; font-weight: 800; }
+  .banner .sub { color: var(--ink-2); font-size: var(--t-body2); }
   .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-xs); align-items: start; }
   .grid.one { grid-template-columns: minmax(0, 1fr); }
   .grid.one .person .name { font-size: var(--t-display5); }
@@ -46,30 +45,32 @@
   .grid.recipe .who { grid-area: who; } .grid.recipe .watch { grid-area: watch; } .grid.recipe .swaps { grid-area: swaps; }
   @media (max-width: 560px) { .banner { flex-wrap: wrap; } .banner .ctx { flex-basis: 100%; } }
   @media (max-width: 560px) { .grid, .grid.recipe { grid-template-columns: minmax(0, 1fr); grid-template-areas: none; } .grid.recipe > * { grid-area: auto; } }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s-xs) var(--s-sm); }
-  .card h2 { font-size: var(--t-body2); text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 var(--s-4xs); font-weight: 600; }
-  .person { display: grid; grid-template-columns: 1fr auto; column-gap: var(--s-xs); align-items: start; padding: var(--s-2xs) 0; border-top: 1px solid var(--line); }
+  .card { border: 2px solid var(--rule); border-radius: var(--r-sm); padding: calc(var(--s-xs) - 1px) calc(var(--s-sm) - 1px); }
+  .card.picks { border: 0; padding: 0; }
+  .card h2 { font-size: var(--t-headline2); line-height: 1; font-weight: 800; margin: 0; padding-bottom: var(--s-4xs); border-bottom: 3px solid var(--rule); }
+  .person { display: grid; grid-template-columns: 1fr auto; column-gap: var(--s-xs); align-items: start; padding: var(--s-2xs) 0; border-top: 1px solid var(--hair); }
   .person .why { grid-column: 1 / -1; }
   .person:first-of-type { border-top: 0; }
-  .person .name { font-weight: 650; font-size: var(--t-headline1); }
-  .person .why { color: var(--text); font-size: var(--t-body1); }
-  .pill { font-size: var(--t-body1); font-weight: 750; border-radius: var(--r-lg); padding: var(--s-4xs) var(--s-sm); white-space: nowrap; align-self: flex-start; }
-  .pill.unsafe, .pill.cannot_confirm { color: var(--bg); border: 0; }
-  .pill.unsafe { background: var(--unsafe); } .pill.cannot_confirm { background: var(--confirm); } .pill.no_listed_allergens { background: transparent; color: var(--none); border: 1px solid var(--none); }
+  .person .name { font-weight: 800; font-size: var(--t-headline1); }
+  .pill { font-size: var(--t-body1); line-height: 1.3; font-weight: 800; border-radius: var(--r-xs); padding: var(--s-4xs) var(--s-xs); white-space: nowrap; align-self: flex-start; }
+  .pill.unsafe, .pill.cannot_confirm { background: var(--v); color: var(--stock); }
+  .pill.no_listed_allergens { color: var(--v); box-shadow: inset 0 0 0 2px var(--v); }
   ul { margin: 0; padding: 0; list-style: none; }
-  li { padding: var(--s-2xs) 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: var(--s-4xs) var(--s-2xs); align-items: center; }
+  li { padding: var(--s-2xs) 0; border-top: 1px solid var(--hair); display: flex; flex-wrap: wrap; gap: var(--s-4xs) var(--s-2xs); align-items: baseline; }
   li:first-child { border-top: 0; }
-  .flagged { font-weight: 650; }
-  .chip { background: var(--chip); border-radius: var(--r-sm); padding: 0 var(--s-xs); font-size: var(--t-body2); color: var(--muted); }
-  .chip.contains, .chip.may_contain, .chip.possible, .chip.unknown { color: var(--text); }
-  .swap .arrow { color: var(--muted); }
-  button.choice { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; min-height: 48px; padding: var(--s-sm) var(--s-md); margin-top: var(--s-xs); border-radius: var(--r-md); background: var(--chip); font-size: var(--t-body1); }
+  .chip { font-size: var(--t-body2); color: var(--ink-2); }
+  .chip.contains, .chip.may_contain, .chip.possible, .chip.unknown { color: var(--ink); font-size: var(--t-body1); }
+  .chip b { font-weight: 800; }
+  .chip.contains::before, .chip.may_contain::before, .chip.possible::before, .chip.unknown::before { content: "("; }
+  .chip.contains::after, .chip.may_contain::after, .chip.possible::after, .chip.unknown::after { content: ")"; }
+  .swap .arrow { color: var(--ink-2); }
+  button.choice { all: unset; box-sizing: border-box; cursor: pointer; display: block; width: 100%; min-height: 48px; padding: calc(var(--s-sm) - 2px) calc(var(--s-md) - 2px); margin-top: var(--s-xs); border: 2px solid var(--rule); border-radius: var(--r-sm); font-size: var(--t-body1); }
   button.choice:first-of-type { margin-top: 0; }
-  button.choice:focus-visible { outline: 3px solid var(--none); }
+  button.choice:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
   .issues { color: var(--confirm); font-size: var(--t-body2); margin-top: var(--s-xs); }
-  footer { color: var(--muted); font-size: var(--t-body2); margin-top: var(--s-xs); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--s-sm); }
-  .more { color: var(--muted); font-size: var(--t-body2); }
-  .empty { color: var(--muted); padding: 40px 0; text-align: center; font-size: var(--t-headline1); }
+  footer { color: var(--ink-2); font-size: var(--t-body2); margin-top: var(--s-xs); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--s-sm); }
+  .more { color: var(--ink-2); font-size: var(--t-body2); }
+  .empty { color: var(--ink-2); padding: 40px 0; text-align: center; font-size: var(--t-display5); font-weight: 800; }
 </style>
 </head>
 <body>
@@ -83,7 +84,11 @@
     cannot_confirm: "Data is missing, or an ingredient isn't recognised or can hide an allergen. Treat as unsafe.",
     no_listed_allergens: "Nothing listed for these allergies. Still check the label.",
   };
-  const ICON = { unsafe: "⛔", cannot_confirm: "⚠️", no_listed_allergens: "🏷️" };
+  const ICON = {
+    unsafe: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7.4 1h9.2L23 7.4v9.2L16.6 23H7.4L1 16.6V7.4z"/><path d="M6.5 12h11" style="stroke:var(--stock)" stroke-width="3.2"/></svg>',
+    cannot_confirm: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5 23.5 22H.5z"/><path d="M12 8.5v6.5M12 18.4v.1" style="stroke:var(--stock)" stroke-width="2.8" stroke-linecap="round"/></svg>',
+    no_listed_allergens: '<svg viewBox="0 0 24 24"><path d="M2.5 3.5h9l10 10-8 8-11-11z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><circle cx="7.5" cy="8.5" r="2" fill="currentColor"/></svg>',
+  };
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   // MCP Apps (2026-01-26) over postMessage: JSON-RPC between this view and its host.
@@ -160,7 +165,7 @@
       const rows = v.people.map((p) => {
         const right = v.overall
           ? `<span class="pill ${p.verdict}">${LABEL[p.verdict]}</span>`
-          : `<span class="chip">${p.guest ? `guest${p.until ? ` · until ${esc(day(p.until))}` : ""}` : "household"}</span>`;
+          : `<span class="chip">${p.guest ? `guest${p.until ? ` · ${p.expired ? "ended" : "until"} ${esc(day(p.until))}` : ""}` : "household"}</span>`;
         // On a recipe the "Watch out for" card names the ingredients, so a person's row keeps only the allergen.
         const reasons = v.kind === "recipe_check" ? (p.reasons ?? []).map((r) => r.split(":")[0]) : p.reasons ?? [];
         const why = v.overall ? [...new Set(reasons)].map(esc).join(v.kind === "recipe_check" ? ", " : "<br>") : esc((p.allergies ?? []).join(", "));
@@ -178,7 +183,7 @@
         // One chip per kind ("may hide Peanuts, Milk"), so a row's flags take one line.
         const byKind = new Map();
         for (const f of dedupe(i.flags ?? [])) byKind.set(f.kind, [...(byKind.get(f.kind) ?? []), f.allergen]);
-        const chips = [...byKind].map(([kind, names]) => `<span class="chip ${kind}">${kind === "possible" ? "may hide " : kind === "may_contain" ? "may contain " : ""}${names.map(esc).join(", ")}</span>`).join("");
+        const chips = [...byKind].map(([kind, names]) => `<span class="chip ${kind}">${kind === "possible" ? "may hide " : kind === "may_contain" ? "may contain " : ""}<b>${names.map(esc).join(", ")}</b></span>`).join("");
         return `<li><span class="${i.flags?.length ? "flagged" : ""}">${esc(i.text)}</span>${chips}</li>`;
       });
       if (rest > 0) rows.push(`<li class="more">${v.overall ? `${shown.length ? "+ " : ""}${rest} ${shown.length ? "other " : ""}ingredient${rest === 1 ? "" : "s"}: nothing listed for these allergies` : `and ${rest} more`}</li>`);
@@ -191,7 +196,7 @@
     }
     if (v.candidates?.length) {
       const rows = v.candidates.map((c) => `<button class="choice" data-barcode="${esc(c.barcode)}">${esc(c.name)}${c.brand ? ` <span class="chip">${esc(c.brand)}</span>` : ""}</button>`).join("");
-      cards.push(`<section class="card">${rows}</section>`);
+      cards.push(`<section class="card picks">${rows}</section>`);
     }
     if (v.shopping) {
       // Shows at most eight lines, then "and N more".
