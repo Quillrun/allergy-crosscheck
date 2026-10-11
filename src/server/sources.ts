@@ -5,7 +5,7 @@
 import type { OffProduct } from "../../packages/allergen-guard/src/index.ts";
 
 export type Fetcher = typeof fetch;
-export type Candidate = { barcode: string; name: string; brand?: string };
+export type Candidate = { barcode: string; name: string; brand?: string; size?: string };
 export type Recipe = { name: string; ingredients: string[] };
 
 const USER_AGENT = "AllergyCrosscheck/0.1 (+https://github.com/quillrun)";
@@ -32,11 +32,14 @@ export class Sources {
 
   async searchProducts(query: string): Promise<{ candidates?: Candidate[]; error?: string }> {
     const q = encodeURIComponent(query.trim());
-    const res = await this.json(`https://search.openfoodfacts.org/search?q=${q}&page_size=5&fields=code,product_name,brands`);
+    const res = await this.json(`https://search.openfoodfacts.org/search?q=${q}&page_size=5&fields=code,product_name,brands,quantity`);
     if (res.error) return { error: res.error };
-    const hits = ((res.value as { hits?: { code?: string; product_name?: string; brands?: string | string[] }[] }).hits ?? [])
+    const hits = ((res.value as { hits?: { code?: string; product_name?: string; brands?: string | string[]; quantity?: string }[] }).hits ?? [])
       .filter((h) => h.code && h.product_name)
-      .map((h) => ({ barcode: h.code as string, name: h.product_name as string, brand: Array.isArray(h.brands) ? h.brands[0] : h.brands }));
+      .map((h) => ({
+        barcode: h.code as string, name: h.product_name as string, brand: Array.isArray(h.brands) ? h.brands[0] : h.brands,
+        ...(h.quantity?.trim() ? { size: h.quantity.trim() } : {}),
+      }));
     return { candidates: hits };
   }
 

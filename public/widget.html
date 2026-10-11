@@ -195,7 +195,7 @@
       cards.push(`<section class="card swaps"><h2>Swaps</h2><ul>${rows}</ul></section>`);
     }
     if (v.candidates?.length) {
-      const rows = v.candidates.map((c) => `<button class="choice" data-barcode="${esc(c.barcode)}">${esc(c.name)}${c.brand ? ` <span class="chip">${esc(c.brand)}</span>` : ""}</button>`).join("");
+      const rows = v.candidates.map((c) => `<button class="choice" data-barcode="${esc(c.barcode)}">${esc(c.name)}${[c.brand, c.size, c.ref && `barcode ${c.ref}`].filter(Boolean).map((t) => ` <span class="chip">${esc(t)}</span>`).join("")}</button>`).join("");
       cards.push(`<section class="card picks">${rows}</section>`);
     }
     if (v.shopping) {

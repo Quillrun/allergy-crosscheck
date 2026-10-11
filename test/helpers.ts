@@ -30,6 +30,17 @@ export const fakeFetch: Fetcher = (async (input: string | URL | Request) => {
   if (url.includes("search.openfoodfacts.org") && url.includes("q=spread")) {
     return json({ hits: [{ code: "1", product_name: "Spread", brands: ["Acme"] }, { code: "2", product_name: "spread", brands: ["Acme"] }] });
   }
+  // The live 'hot cocoa mix' search (2026-10-11): three of five have no brand and no size.
+  if (url.includes("search.openfoodfacts.org") && url.includes("q=hot%20cocoa%20mix")) {
+    return json({ hits: [
+      { code: "0015700051443", product_name: "Swiss Miss Dark Chocolate", brands: ["Swiss Miss"], quantity: "(8 x 1.25 oz) 10 oz (283 g)" },
+      { code: "0758108109865", product_name: "Hot cocoa mix" },
+      { code: "0078742154657", product_name: "Hot Cocoa Mix", brands: ["Walmart"], quantity: "40 oz" },
+      { code: "0070980171977", product_name: "Hot cocoa mix" },
+      { code: "0011161153443", product_name: "Hot cocoa mix" },
+    ] });
+  }
+  if (url.includes("search.openfoodfacts.org") && url.includes("q=Ferrero")) return json({ hits: [{ code: "3017624010701", product_name: "Nutella", brands: ["Ferrero"] }] });
   if (url.includes("search.openfoodfacts.org") && url.includes("q=offline")) throw new TypeError("fetch failed");
   if (url.includes("search.openfoodfacts.org")) return json({ hits: [] });
   if (url.includes("themealdb.com") && url.includes("s=lasagne")) {

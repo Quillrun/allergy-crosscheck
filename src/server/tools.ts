@@ -41,7 +41,8 @@ export type View = {
   people?: { name: string; verdict: Verdict; reasons: string[]; guest?: boolean; expired?: boolean; allergies?: string[]; until?: string }[];
   items?: { text: string; flags: { allergen: string; kind: string }[] }[];
   swaps?: Swap[];
-  candidates?: { barcode: string; name: string; brand?: string }[];
+  /** `ref`: the barcode's tail, only on choices that would otherwise look the same on screen. */
+  candidates?: { barcode: string; name: string; brand?: string; size?: string; ref?: string }[];
   /** The people the check was limited to, so a tap on a choice checks the same people. */
   for?: string[];
   shopping?: { item: string; note?: string }[];
@@ -114,6 +115,14 @@ function registerSavePerson(server: McpServer, { store }: Deps): void {
           kind: "message",
           title: "No allergy heard",
           speech: `I didn't catch an allergy for ${name.trim()}, so I haven't ${store.find(name) ? `changed ${store.find(name)!.name}'s list` : "saved them"}. Which foods can't they have?`,
+          disclaimer: DISCLAIMER,
+        }, true);
+      }
+      if (until && !isCalendarDate(until)) {
+        return reply({
+          kind: "message",
+          title: "That isn't a date",
+          speech: `I couldn't make a date out of ${until}, so I haven't saved ${name.trim()}. Tell me the last day they'll be eating with you.`,
           disclaimer: DISCLAIMER,
         }, true);
       }
@@ -238,7 +247,7 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
         recipe_name: z.string().optional().describe("A name to show for the recipe, e.g. 'Grandma's pesto'"),
         for: z.array(z.string()).optional().describe("Only check for these people; default is everyone currently saved"),
       },
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, openWorldHint: true }, // looks a dish up on TheMealDB
       _meta: ui("Checking the recipe…", "Recipe checked"),
     },
     async ({ ingredients, dish, recipe_name, for: names }) => {
@@ -312,6 +321,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
     async ({ barcode, name, scanned, for: names }) => {
       const { people, missing, expired } = pick(store, names);
       let code = barcode?.trim();
+      let checked: string | undefined; // the one product a name search matched, so the speech can say which
       if (scanned && !code) {
         const scan = store.recentScan();
         if (!scan) {
@@ -333,15 +343,17 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
             kind: "needs_choice",
             title: `Which ${name}?`,
             speech: `I found ${found.candidates.length} products called ${name}, and they're not the same. ${whichOne(found.candidates)}`,
-            candidates: found.candidates.slice(0, 5),
+            candidates: tellApart(found.candidates.slice(0, 5)),
             ...(names?.length ? { for: names } : {}),
             disclaimer: DISCLAIMER,
           });
         }
         code = found.candidates[0].barcode;
+        checked = found.candidates[0].name;
       }
       const { product, error } = await sources.product(code);
-      return productReply(product?.product_name ?? name ?? code, checkProduct(product ?? null, people, error), people, store, missing, expired, product ? { label: "Open Food Facts" } : undefined);
+      const label = product?.product_name ?? name ?? code;
+      return productReply(label, checkProduct(product ?? null, people, error), people, store, missing, expired, product ? { label: "Open Food Facts" } : undefined, checked ? `Checked ${product?.product_name ?? checked}: ` : "");
     },
   );
 }
@@ -356,8 +368,16 @@ function registerAddToShoppingList(server: McpServer, { store }: Deps): void {
       _meta: ui("Adding to the list…", "List updated"),
     },
     async ({ items, note }) => {
-      const list = store.addItems(items, note);
-      return reply({ kind: "shopping", title: "Shopping list", speech: `Added ${joinWords(items)}. You have ${list.length} item${list.length === 1 ? "" : "s"} on the list.`, shopping: list, disclaimer: DISCLAIMER });
+      const wanted = distinct(items);
+      if (!wanted.length) {
+        return reply({ kind: "shopping", title: "Shopping list", speech: "I didn't catch any items, so I haven't added anything. Tell me what to put on the list.", shopping: store.shopping(), disclaimer: DISCLAIMER }, true);
+      }
+      const onList = new Set(store.shopping().map((i) => i.item.trim().toLowerCase()));
+      const fresh = wanted.filter((i) => !onList.has(i.toLowerCase()));
+      const already = wanted.filter((i) => onList.has(i.toLowerCase()));
+      const list = store.addItems(fresh, note);
+      const said = [fresh.length ? `Added ${joinWords(fresh)}.` : "", already.length ? `${joinWords(already)} ${already.length === 1 ? "was" : "were"} already on the list.` : ""].filter(Boolean).join(" ");
+      return reply({ kind: "shopping", title: "Shopping list", speech: `${said} You have ${list.length} item${list.length === 1 ? "" : "s"} on the list.`, shopping: list, disclaimer: DISCLAIMER });
     },
   );
 }
@@ -392,12 +412,12 @@ function registerRemoveFromShoppingList(server: McpServer, { store }: Deps): voi
   );
 }
 
-function productReply(label: string, result: CheckResult, people: Person[], store: Store, missing: string[], expired: Profile[], source?: View["source"]) {
+function productReply(label: string, result: CheckResult, people: Person[], store: Store, missing: string[], expired: Profile[], source?: View["source"], lead = "") {
   return reply({
     kind: "product_check",
     title: label,
     overall: result.overall,
-    speech: withMissing(result, missing, expired),
+    speech: lead + withMissing(result, missing, expired),
     people: verdictRows(result, store),
     items: groupHits(result, people),
     dataIssues: result.dataIssues,
@@ -430,10 +450,11 @@ function groupHits(result: CheckResult, people: Person[]): View["items"] {
 
 /** Resolve "for" names to saved people. Unknown names are reported, never silently skipped; so are guests whose visit has ended. */
 function pick(store: Store, names?: string[]): { people: Person[]; missing: string[]; expired: Profile[] } {
-  if (!names?.length) return { people: store.activePeople(), missing: [], expired: store.expiredPeople() };
+  const asked = distinct(names ?? []); // ["maya", "MAYA"] is one person
+  if (!asked.length) return { people: store.activePeople(), missing: [], expired: store.expiredPeople() };
   const people: Person[] = [];
   const missing: string[] = [];
-  for (const n of names) {
+  for (const n of asked) {
     const p = store.find(n);
     if (p) people.push(p);
     else missing.push(n);
@@ -458,13 +479,32 @@ function verdictRows(result: CheckResult, store: Store): View["people"] {
   });
 }
 
+// Choices that look the same on screen (same name, brand and size) get the shortest barcode tail, from 4 digits, that tells them apart.
+function tellApart<T extends { barcode: string; name: string; brand?: string; size?: string }>(candidates: T[]): (T & { ref?: string })[] {
+  const look = (c: T) => [c.name, c.brand ?? "", c.size ?? ""].join("|").toLowerCase();
+  return candidates.map((c) => {
+    const twins = candidates.filter((o) => look(o) === look(c));
+    if (twins.length < 2) return c;
+    let n = 4;
+    while (n < c.barcode.length && twins.some((o) => o !== c && o.barcode.endsWith(c.barcode.slice(-n)))) n++;
+    return { ...c, ref: `…${c.barcode.slice(-n)}` };
+  });
+}
+
 // Read the choices out only when they sound different; five products all called "Nutella" can't be told apart by ear.
 function whichOne(candidates: { name: string; brand?: string }[]): string {
-  const labels = candidates.slice(0, 3).map((c) => (c.brand && c.brand.toLowerCase() !== c.name.toLowerCase() ? `${c.name} by ${c.brand}` : c.name));
-  const distinct = new Set(labels.map((l) => l.toLowerCase())).size === labels.length;
+  const all = candidates.slice(0, 5).map((c) => (c.brand && c.brand.toLowerCase() !== c.name.toLowerCase() ? `${c.name} by ${c.brand}` : c.name));
+  const labels = all.slice(0, 3);
+  // Every choice on the screen counts: "Hot cocoa mix" read out is no answer when three products have that name.
+  const distinct = new Set(all.map((l) => l.toLowerCase())).size === all.length;
   return distinct ? `Which one: ${joinWords(labels, "or")}? Or read me the barcode.` : "Pick one on the screen, or read me the barcode.";
 }
 
+/** Trimmed, non-blank values, the first spelling of each kept; case-insensitive. */
+const distinct = (xs: string[]) => {
+  const seen = new Set<string>();
+  return xs.map((x) => x.trim()).filter((x) => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase()));
+};
 const isExpired = (p: Profile) => Boolean(p.until && p.until < localDate());
 const guestTag = (p: Profile) => (!p.guest ? "" : isExpired(p) ? ` (guest, visit ended ${spokenDate(p.until!)})` : " (guest)");
 
@@ -479,6 +519,13 @@ function reply(view: View, isError = false) {
   if (view.swaps?.length) lines.push(`Swaps: ${view.swaps.map((s) => `${s.replace} -> ${s.options.join(" / ")}`).join("; ")}`);
   return { content: [{ type: "text" as const, text: lines.filter(Boolean).join("\n") }], structuredContent: view as unknown as Record<string, unknown>, isError, _meta: RESULT_META };
 }
+
+/** "2099-13-45" fits YYYY-MM-DD but is not a day. */
+const isCalendarDate = (iso: string) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
+};
 
 // "2026-10-10" -> "Saturday 10 October": dates are heard, not read.
 const spokenDate = (iso: string) => {

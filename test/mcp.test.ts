@@ -150,6 +150,16 @@ test("choices that sound the same aren't read out", async () => {
   assert.match(r.structuredContent.speech, /Pick one on the screen, or read me the barcode\.$/);
 });
 
+test("choices that look the same on screen get a barcode tail; the others don't", async () => {
+  const r = await call("check_product", { name: "hot cocoa mix" });
+  const c: View[] = r.structuredContent.candidates;
+  const shown = c.map((x) => [x.name, x.brand, x.size, x.ref].filter(Boolean).join(" ").toLowerCase());
+  assert.equal(new Set(shown).size, 5);
+  assert.deepEqual(c.map((x) => x.ref), [undefined, "…9865", undefined, "…1977", "…3443"]);
+  assert.equal(c[2].size, "40 oz");
+  assert.match(r.structuredContent.speech, /Pick one on the screen, or read me the barcode\.$/);
+});
+
 test("product by barcode: reads the ingredient text, not just the tags", async () => {
   const r = await call("check_product", { barcode: "3017624010701" });
   const leo = r.structuredContent.people.find((p: View) => p.name === "Leo");
