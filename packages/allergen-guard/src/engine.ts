@@ -69,7 +69,7 @@ export function scanIngredient(line: string, kind: "contains" | "may_contain" = 
   // "egg-free mayonnaise", "free from milk": a free-from claim can't be verified here, so "check the label", not "contains".
   // "lactose free milk" is still milk.
   // Also "not from milk", "not derived from milk", and the same word in other languages ("sans gluten", "ohne ei").
-  const claimed = [...text.matchAll(/\b(?:([a-z]+) free|free (?:from|of) ([a-z]+)|not (?:derived |made )?from ([a-z]+)|(?:sans|sin|senza|ohne|uten|zonder) ([a-z]+))\b/g)].map((m) => m[1] ?? m[2] ?? m[3] ?? m[4]).filter((w) => w !== "lactose");
+  const claimed = [...text.matchAll(/\b(?:([a-z]+) free(?! range)|free (?:from|of) ([a-z]+)|not (?:derived |made )?from ([a-z]+)|(?:sans|sin|senza|ohne|uten|zonder) ([a-z]+))\b/g)].map((m) => m[1] ?? m[2] ?? m[3] ?? m[4]).filter((w) => w !== "lactose");
   const freeFrom = new Set(resolveAllergies(claimed).ids);
   return dedupe(hits.map((h) => (h.kind === "contains" && freeFrom.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));
 }
@@ -279,7 +279,7 @@ export function evaluate(hits: Hit[], people: Person[], dataIssues: string[] = [
     const reasons: string[] = [
       ...[...new Set(contains.map((h) => h.allergen))].map((a) => `Contains ${ALLERGENS[a].spoken}: ${unique(contains.filter((h) => h.allergen === a).map((h) => h.source)).join(", ")}`),
       ...mayContain.map((h) => `May contain ${ALLERGENS[h.allergen].spoken}`),
-      ...possible.map((h) => (h.unknown ? `I don't know what's in "${h.term}"` : `${cap(h.term)} can contain ${ALLERGENS[h.allergen].spoken}`)),
+      ...possible.map((h) => (h.unknown ? `I don't know what's in "${h.term}"` : selfNamed(h) ? `The wording about ${ALLERGENS[h.allergen].spoken} is unclear` : `${cap(h.term)} can contain ${ALLERGENS[h.allergen].spoken}`)),
       ...(contains.length || mayContain.length || possible.length ? [] : dataIssues),
     ];
     let verdict: Verdict = "no_listed_allergens";
@@ -308,10 +308,12 @@ function speak(p: Person, verdict: Verdict, contains: Hit[], may: Hit[], possibl
     return `${p.name} should avoid this: ${parts.join(", and ")}.`;
   }
   if (verdict === "cannot_confirm") {
-    const hiding = possible.filter((h) => !h.unknown);
+    const hiding = possible.filter((h) => !h.unknown && !selfNamed(h));
+    const named = possible.filter((h) => !h.unknown && selfNamed(h));
     const odd = unique(possible.filter((h) => h.unknown).map((h) => h.term)).slice(0, 2);
     const parts = [
       ...(hiding.length ? [`${join(unique(hiding.map((h) => h.term)).slice(0, 2))} can contain ${list(hiding)}`] : []),
+      ...(named.length ? [`the wording about ${list(named)} is unclear`] : []),
       ...(odd.length ? [`I don't know what's in ${join(odd)}`] : []),
     ];
     const why = parts.length
@@ -332,6 +334,9 @@ function merged(ordered: PersonResult[], templates: Map<string, string>): string
   }
   return [...groups].map(([t, names]) => t.replace(NAME, join(names))).join(" ");
 }
+
+/** A possible hit whose term already names the allergen ("egg" for egg, after "egg-free"): "egg can contain egg" says nothing. */
+const selfNamed = (h: Hit) => resolveAllergies([h.term]).ids.includes(h.allergen);
 
 const unique = <T,>(xs: T[]) => [...new Set(xs)];
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

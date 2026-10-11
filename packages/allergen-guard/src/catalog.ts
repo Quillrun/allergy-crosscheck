@@ -44,6 +44,8 @@ const ALIASES: Record<string, AllergenId[]> = {
   peanut: ["peanut"],
   peanuts: ["peanut"],
   groundnut: ["peanut"],
+  "ground nut": ["peanut"],
+  "ground nuts": ["peanut"],
   "tree nut": ["tree_nut"],
   "tree nuts": ["tree_nut"],
   nut: ["tree_nut", "peanut"],
@@ -172,7 +174,7 @@ const PLANT_MILKS = ["almond milk", "oat milk", "soy milk", "soya milk", "rice m
 const RARE_PLANT_MILKS = ["corn milk", "peanut milk", "walnut milk", "hazelnut milk", "macadamia milk"];
 // Plant fat sold as ghee: not dairy, but it is the product people swap in for ghee, so milk stays possible.
 const VEGETABLE_GHEE = ["vegetable ghee", "vanaspati ghee"];
-const NOT_DAIRY_BUTTER = ["peanut butter", "cocoa butter", "shea butter", "apple butter", "nut butter", "almond butter", "cashew butter", "seed butter", "sunflower butter", "sunflower seed butter", "butter bean", "butter beans", "coconut butter", "cacao butter", "mango butter", "kokum butter", "butter flavour", "butter flavor", "butter flavouring", "butter flavoring", "parkii butter", "butyrospermum parkii butter",
+const NOT_DAIRY_BUTTER = ["vegan butter", "plant butter", "plant based butter", "palm butter", "butter lettuce", "peanut butter", "cocoa butter", "shea butter", "apple butter", "nut butter", "almond butter", "cashew butter", "seed butter", "sunflower butter", "sunflower seed butter", "butter bean", "butter beans", "coconut butter", "cacao butter", "mango butter", "kokum butter", "butter flavour", "butter flavor", "butter flavouring", "butter flavoring", "parkii butter", "butyrospermum parkii butter",
   "hazelnut butter", "pecan butter", "pistachio butter", "walnut butter", "macadamia butter", "brazil nut butter", "pumpkin seed butter", "sesame butter", "soy butter", "soynut butter", "fruit butter"];
 const NOT_WHEAT_FLOUR = [
   "rice flour", "corn flour", "cornflour", "maize flour", "almond flour", "coconut flour", "chickpea flour", "gram flour",
@@ -184,6 +186,7 @@ const NOT_WHEAT_FLOUR = [
   "sunflower seed flour", "seed flour", "hemp flour", "pumpkin seed flour", "tigernut flour", "tiger nut flour", "yam flour", "cauliflower flour",
   "citrus flour", "cashew flour", "almonds flour", "chestnut flour", "hazelnut flour", "walnut flour", "flour treatment agent", "flour treatment",
 ];
+const VEGAN_CHEESE = ["vegan cheese", "vegan cream cheese", "vegan parmesan", "vegan mozzarella", "vegan cheddar", "vegan feta", "plant based cheese", "plant cheese"];
 const NOT_WHEAT_PASTA = ["rice pasta", "gluten free pasta", "chickpea pasta", "lentil pasta", "corn pasta", "rice lasagne", "gluten free lasagne"];
 const CULTURES = ["yogurt culture", "yoghurt culture", "cheese culture", "kefir culture"];
 const SULPHITE_CARAMEL = ["sulphite ammonia caramel", "sulfite ammonia caramel", "caustic sulphite caramel", "caustic sulfite caramel"];
@@ -193,20 +196,21 @@ export const GLUTEN_FREE_MAY_CONTAIN: AllergenId[] = ["milk", "egg", "soy", "tre
 
 export const TERMS: Term[] = [
   // peanut
-  { terms: ["peanut", "groundnut", "arachis", "arachis hypogaea", "monkey nut", "satay"], contains: ["peanut"] },
+  { terms: ["peanut", "groundnut", "ground nut", "arachis", "arachis hypogaea", "monkey nut", "satay"], contains: ["peanut"] },
   // tree nuts
   {
     terms: ["almond", "hazelnut", "filbert", "walnut", "cashew", "pecan", "pistachio", "brazil nut", "macadamia", "pine nut",
       "prunus amygdalus", "prunus dulcis", "corylus avellana", "juglans regia", "anacardium occidentale", "bertholletia excelsa", "pistacia vera",
       "tree nut", "treenut", "chesnut", "pignoli", "pinoli", "praline", "marzipan", "frangipane", "gianduja", "nutella", "chestnut"],
     contains: ["tree_nut"],
-    unless: ["water chestnut", "chestnut mushroom"],
+    unless: ["water chestnut", "chestnut mushroom", "cashew apple"],
   },
-  { terms: ["nut"], contains: ["tree_nut"], possible: ["peanut"], unless: ["pine nut", "brazil nut", "monkey nut", "tree nut", "nutmeg nut"] },
+  // "ground nut oil" is peanut oil (the peanut entry above); bare "ground nut(s)" stays a tree nut too, since it can mean crushed nuts.
+  { terms: ["nut"], contains: ["tree_nut"], possible: ["peanut"], unless: ["pine nut", "brazil nut", "monkey nut", "tree nut", "nutmeg nut", "tiger nut", "ground nut oil"] },
   { terms: ["pesto"], contains: ["tree_nut", "milk"], possible: ["peanut"] },
   { terms: ["nougat"], contains: [], possible: ["tree_nut", "peanut", "egg", "milk"] },
   { terms: ["amaretti", "macaron", "orgeat", "romesco", "baklava", "dukkah"], contains: ["tree_nut"], possible: ["egg", "wheat", "gluten", "sesame"] },
-  { terms: ["amaretto", "frangelico", "nocino", "biscotti", "mole", "nut oil"], contains: [], possible: ["tree_nut", "peanut"] },
+  { terms: ["amaretto", "frangelico", "nocino", "biscotti", "mole", "nut oil"], contains: [], possible: ["tree_nut", "peanut"], unless: ["ground nut oil"] },
   // milk
   { terms: ["milk", "buttermilk", "milk powder", "milkfat"], contains: ["milk"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS, "milk thistle"] },
   { terms: RARE_PLANT_MILKS, contains: [], possible: ["milk"] },
@@ -217,8 +221,13 @@ export const TERMS: Term[] = [
     terms: ["cheese", "parmesan", "parmigiano", "pecorino", "mozzarella", "cheddar", "ricotta", "feta", "mascarpone", "gouda", "brie",
       "camembert", "gruyere", "halloumi", "paneer", "burrata", "quark", "skyr"],
     contains: ["milk"],
-    unless: ["cheese culture"],
+    unless: ["cheese culture", ...VEGAN_CHEESE],
   },
+  // Plant-based butter and cheese are not dairy, but they are made from soy or nuts.
+  { terms: ["vegan butter", "plant butter", "plant based butter", ...VEGAN_CHEESE], contains: [], possible: ["soy", "tree_nut"] },
+  // Not eggs, but usually starch with soy or wheat.
+  { terms: ["vegan mayonnaise", "vegan mayo", "vegan aioli"], contains: [], possible: ["soy", "mustard"] },
+  { terms: ["egg replacer", "egg replacement", "egg substitute", "vegan egg"], contains: [], possible: ["soy", "wheat", "gluten"] },
   { terms: ["milkshake", "cappuccino", "flat white", "macchiato", "frappuccino", "hot chocolate"], contains: ["milk"], possible: ["soy", "tree_nut"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS] },
   { terms: ["mocha"], contains: [], possible: ["milk"] },
   { terms: ["barley grass", "wheat grass"], contains: [], possible: ["gluten", "wheat"] }, // young leaves, gluten only if seeds get in
@@ -230,9 +239,9 @@ export const TERMS: Term[] = [
   { terms: ["curd"], contains: ["milk"], unless: ["bean curd", "lemon curd"] },
   { terms: ["lemon curd"], contains: ["milk", "egg"] },
   // egg
-  { terms: ["egg", "yolk", "albumen", "albumin", "ovalbumin", "lysozyme", "meringue", "hollandaise", "eggnog"], contains: ["egg"], unless: ["egg plant", "egg noodle free", "egg roll"] },
+  { terms: ["egg", "yolk", "albumen", "albumin", "ovalbumin", "lysozyme", "meringue", "hollandaise", "eggnog"], contains: ["egg"], unless: ["egg plant", "egg noodle free", "egg roll", "egg replacer", "egg replacement", "egg substitute", "vegan egg"] },
   { terms: ["egg roll"], contains: [], possible: ["egg", "wheat", "gluten"] },
-  { terms: ["mayonnaise", "mayo", "aioli"], contains: ["egg"], possible: ["mustard"] },
+  { terms: ["mayonnaise", "mayo", "aioli"], contains: ["egg"], possible: ["mustard"], unless: ["vegan mayonnaise", "vegan mayo", "vegan aioli"] },
   // wheat and gluten
   { terms: ["wheat", "semolina", "durum", "spelt", "kamut", "farro", "einkorn", "emmer", "couscous", "bulgur", "bulgar", "freekeh", "seitan", "graham", "wheatflour", "wheatgerm"], contains: ["wheat", "gluten"], unless: ["wheat grass", "rice semolina", "corn semolina", "maize semolina"] },
   { terms: ["gluten", "cereals containing gluten"], contains: ["gluten"], possible: ["wheat"], unless: ["corn gluten", "maize gluten"] },
@@ -251,7 +260,18 @@ export const TERMS: Term[] = [
   { terms: ["soba"], contains: [], possible: ["wheat", "gluten"] },
   { terms: ["noodle"], contains: [], possible: ["wheat", "gluten", "egg"], unless: ["rice noodle", "glass noodle", "rice vermicelli"] },
   { terms: ["soy sauce", "teriyaki"], contains: ["soy", "wheat", "gluten"] },
-  { terms: ["barley", "rye", "oat", "oatmeal", "malt", "malt vinegar", "malt extract", "brewer s yeast", "beer", "ale", "lager", "triticale", "bran"], contains: ["gluten"], unless: ["rice bran", "maize bran", "corn bran", "mustard bran", "soy bran", "barley grass", "wheat grass"] },
+  // Fermented bean pastes (doubanjiang, doenjang, douchi) are soy, and often wheat too. Mung, red and vanilla "bean paste" are not.
+  { terms: ["bean paste", "fermented black bean", "salted black bean", "black bean sauce", "black bean paste", "douchi", "dou chi"], contains: ["soy"], possible: ["wheat", "gluten"], unless: ["mung bean paste", "red bean paste", "adzuki bean paste", "azuki bean paste", "white bean paste", "vanilla bean paste"] },
+  // Mixed seeds nearly always include sesame; the label decides.
+  { terms: ["mixed seed", "seed mix", "seed mixture", "seed blend", "mixed seed blend"], contains: [], possible: ["sesame"] },
+  // Plain pastes and spice seeds: named here so they stay recognised now that "paste" and "seed" alone are not filler.
+  { terms: [
+    "tomato paste", "garlic paste", "ginger paste", "ginger garlic paste", "tamarind paste", "galangal paste", "lemongrass paste", "chilli paste", "chili paste", "red pepper paste",
+    "achiote paste", "annatto paste", "onion paste", "mung bean paste", "red bean paste", "adzuki bean paste", "azuki bean paste", "white bean paste", "vanilla bean paste", "vanilla paste", "date paste",
+    "coriander seed", "cumin seed", "fennel seed", "caraway seed", "poppy seed", "achiote seed", "annatto seed", "nigella seed", "fenugreek seed", "anise seed", "aniseed", "dill seed", "cardamom seed",
+    "pumpkin seed", "sunflower seed", "chia seed", "flax seed", "flaxseed", "linseed", "hemp seed", "melon seed", "pomegranate seed", "vanilla seed",
+  ], contains: [] },
+  { terms: ["barley", "rye", "oat", "oatmeal", "malt", "malt vinegar", "malt extract", "brewer s yeast", "beer", "ale", "lager", "triticale", "bran"], contains: ["gluten"], unless: ["rice bran", "maize bran", "corn bran", "mustard bran", "soy bran", "barley grass", "wheat grass", "ginger ale", "ginger beer", "root beer", "birch beer"] },
   { terms: ["gluten free"], contains: [], possible: GLUTEN_FREE_MAY_CONTAIN },
   // soy
   { terms: ["soy", "soya", "soybean", "soyabean", "soja", "tofu", "bean curd", "tempeh", "edamame", "miso", "shoyu", "tamari", "natto", "textured vegetable protein", "tvp", "glycine max"], contains: ["soy"] },
@@ -271,13 +291,13 @@ export const TERMS: Term[] = [
       "pollock", "hake", "herring", "sea bass", "swordfish", "snapper", "plaice", "pangasius", "catfish", "carp", "perch", "eel",
       "caviar", "roe", "surimi", "fish sauce", "nam pla", "bonito", "codfish", "saltfish", "barramundi", "bacalao", "baccala", "salmo salar", "theragra chalcogramma", "gadus", "katsuwonus pelamis", "thunnus"],
     contains: ["fish"],
-    unless: ["shell fish"], // two words, the shellfish entry below
+    unless: ["shell fish", "roe deer"], // "shell fish" is two words, the shellfish entry below
   },
   { terms: ["worcestershire"], contains: ["fish"], possible: ["gluten"] },
   { terms: ["caesar dressing"], contains: ["fish"], possible: ["egg", "milk"] },
   { terms: ["dashi"], contains: [], possible: ["fish"] },
   // crustaceans and molluscs
-  { terms: ["shrimp", "prawn", "crab", "lobster", "crayfish", "crawfish", "langoustine", "krill", "scampi", "crustacean", "crustacea", "crabmeat"], contains: ["crustacean"] },
+  { terms: ["shrimp", "prawn", "crab", "lobster", "crayfish", "crawfish", "langoustine", "krill", "scampi", "crustacean", "crustacea", "crabmeat"], contains: ["crustacean"], unless: ["crab apple"] },
   { terms: ["shellfish", "shell fish"], contains: ["crustacean", "mollusc"] },
   { terms: ["clam", "mussel", "oyster", "scallop", "squid", "calamari", "octopus", "snail", "escargot", "cuttlefish", "abalone", "whelk", "cockle", "conch", "mollusc", "mollusk", "cephalopod"], contains: ["mollusc"], unless: ["oyster mushroom", "king oyster mushroom"] },
   // celery, mustard, lupin, sulphites
@@ -317,7 +337,7 @@ export const TERMS: Term[] = [
   { terms: ["soup", "bouquet garni", "v8", "bloody mary"], contains: [], possible: ["celery", "milk", "wheat", "gluten", "mustard"] },
   { terms: ["piccalilli", "sarson", "mustard seed", "mustard greens"], contains: ["mustard"] },
   { terms: ["vinaigrette", "chutney", "relish", "wasabi", "horseradish", "pickling spice", "tonkatsu", "remoulade"], contains: [], possible: ["mustard", "sulphites", "egg", "celery"] },
-  { terms: ["orzo", "roux", "okonomiyaki", "gnocchi", "pastry", "pie", "tart", "cake", "biscuit", "cookie", "muffin", "scone", "crumble", "batter", "dumpling"], contains: ["wheat", "gluten"], possible: ["milk", "egg", "tree_nut", "peanut", "soy"], unless: ["tart cherry", "tart cherries", "rice cake", "shepherd s pie", "cottage pie", "fish pie"] },
+  { terms: ["orzo", "roux", "okonomiyaki", "gnocchi", "pastry", "pie", "tart", "cake", "biscuit", "cookie", "muffin", "scone", "crumble", "batter", "dumpling"], contains: ["wheat", "gluten"], possible: ["milk", "egg", "tree_nut", "peanut", "soy"], unless: ["tart apple", "tart cherry", "tart cherries", "rice cake", "shepherd s pie", "cottage pie", "fish pie"] },
   { terms: ["vegan burger", "veggie burger", "plant based burger", "meat substitute"], contains: [], possible: ["soy", "wheat", "gluten", "lupin", "mustard", "celery", "sesame"] },
   // a few words from other languages that name an allergen outright
   { terms: ["dulce de leche", "mozarella", "millk"], contains: ["milk"] },
@@ -437,11 +457,11 @@ export const FILLER_WORDS: string[] = (
   "all purpose self raising frying dry thinly ounce ounces pound pounds tinned canned sprinkling sprinking spinkling kosher cut " +
   "granulated clear soft boiling dusting litre litres liter liters milliliters millilitres required brushing one two three four five six " +
   "parts part cooking instant top flaked flakes handfull freshly steamed fry skinned summer floury mashed wash back separated seperated " +
-  "unwaxed bottle bottles grain pitted full sized size tips wild stir paper fried filled chilled cuts high heat concentrate inch inches " +
+  "unwaxed bottle bottles pitted full sized size tips wild stir paper fried filled chilled cuts high heat concentrate inch inches " +
   "strong english greek chinese italian mexican swiss jamaican turkish french spanish thai indian japanese korean american " +
   "fast action powdered desiccated whipping clotted condensed evaporated tubs tub tiger birds eye fat pot savoury rolled smoky vine " +
   "food pulp crumbs wholemeal skimmed semi greasing grating baked hard mature mild very split thickness neutral dissolved thumb bashed " +
-  "coarsely strained stewing waxy jumbo square cured flat sun pounded fermented brine " +
-  "seed seeds spice spices sea grams gram mix meat natural de chips " +
-  "puree paste pink purple strips strip chunks chunk florets floret wedges wedge rings ring sauce-free unsalted salted sweetened unsweetened"
+  "coarsely strained stewing waxy jumbo square cured flat sun pounded brine " +
+  "spice spices sea grams gram meat natural de chips " +
+  "puree pink purple strips strip chunks chunk florets floret wedges wedge rings ring sauce-free unsalted salted sweetened unsweetened"
 ).split(" ").filter(Boolean);

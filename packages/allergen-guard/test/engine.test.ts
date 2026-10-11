@@ -704,3 +704,50 @@ test("engine: product text in a script we can't read, or a foreign precaution na
   assert.equal(checkProduct({ ingredients_text_en: "sugar, 5µg vitamin D. May contain milk" }, p).overall, "no_listed_allergens");
   assert.equal(checkProduct({ ingredients_text_en: "sugar. Kann Spuren von Milch enthalten" }, [person("X", "milk")]).overall, "unsafe"); // read as usual when it names an allergen we know
 });
+
+test("engine: 'free range' is not a free-from claim, and an allergen never 'can contain' itself", () => {
+  for (const line of ["Eggs (free range)", "free range eggs", "6 free range eggs"]) assert.equal(verdict(line, "egg"), "unsafe", line);
+  for (const [line, allergen] of [["gluten-free flour", "gluten"], ["egg-free mayonnaise", "egg"], ["milk free", "milk"], ["wheat free bread", "wheat"]] as const) {
+    const r = checkIngredients([line], [person("X", allergen)]).people[0];
+    assert.equal(r.verdict, "cannot_confirm", line); // a free-from claim still can't be verified
+    assert.doesNotMatch(r.reasons.join(" ") + r.speech, /(\w+) can contain \1\b/i, line);
+    assert.match(r.speech, /the wording about/, line);
+  }
+  // A real hiding place is still named.
+  assert.match(checkIngredients(["egg-free mayonnaise"], [person("X", "egg")]).people[0].speech, /mayonnaise can contain egg/);
+});
+
+test("engine: generic filler words no longer wave through soy pastes, mixed seeds or mixed grains", () => {
+  for (const line of ["chilli bean paste", "bean paste", "fermented black beans", "douchi"]) assert.equal(verdict(line, "soy"), "unsafe", line);
+  for (const line of ["mixed seeds", "1 packet mixed seeds", "seed mix"]) assert.equal(verdict(line, "sesame"), "cannot_confirm", line);
+  for (const line of ["mixed grains", "whole grain", "ancient grains"]) {
+    assert.equal(verdict(line, "gluten"), "cannot_confirm", line);
+    assert.equal(verdict(line, "wheat"), "cannot_confirm", line);
+  }
+  // Pastes and seeds that are plainly one food stay recognised, and so do plain black beans.
+  for (const line of ["2 tbsp tomato paste", "ginger garlic paste", "tamarind paste", "mung bean paste", "vanilla bean paste", "cumin seeds", "poppy seeds", "pumpkin seeds", "1 can black beans"]) {
+    assert.equal(checkIngredients([line], [person("X", "soy", "sesame", "gluten")]).people[0].verdict, "no_listed_allergens", line);
+  }
+});
+
+test("engine: names that only look like an allergen (ginger ale, crab apple, roe deer, ...) are not it", () => {
+  const none: [string, AllergenId][] = [
+    ["ginger ale", "gluten"], ["ginger beer", "gluten"], ["root beer", "gluten"],
+    ["vegan butter", "milk"], ["vegan cheese", "milk"], ["plant butter", "milk"], ["plant-based butter", "milk"], ["palm butter", "milk"], ["butter lettuce", "milk"],
+    ["vegan mayonnaise", "egg"], ["egg replacer", "egg"],
+    ["crab apple", "crustacean"], ["tart apple", "wheat"], ["tart apple", "gluten"], ["roe deer", "fish"],
+    ["cashew apple", "tree_nut"], ["tiger nut", "tree_nut"], ["tiger nuts", "tree_nut"], ["Ground Nut Oil", "tree_nut"],
+  ];
+  for (const [line, allergen] of none) assert.equal(scanIngredient(line).filter((h) => h.allergen === allergen).length, 0, `${line} flagged ${allergen}`);
+  // Plant-based swaps for dairy and egg are made from soy and nuts, so they are not waved through for those.
+  assert.equal(verdict("vegan butter", "soy"), "cannot_confirm");
+  assert.equal(verdict("vegan cheese", "tree_nut"), "cannot_confirm");
+  assert.equal(verdict("vegan mayonnaise", "soy"), "cannot_confirm");
+  // "Ground nut" is a peanut, and the real thing next to a lookalike is still caught.
+  assert.equal(verdict("Ground Nut Oil", "peanut"), "unsafe");
+  assert.equal(verdict("ground nuts", "peanut"), "unsafe");
+  assert.deepEqual(resolveAllergies(["ground nuts"]).ids, ["peanut"]);
+  for (const [line, allergen] of [["crab apple, 200g crab", "crustacean"], ["roe deer and salmon roe", "fish"], ["ale", "gluten"], ["pale ale", "gluten"], ["butter, vegan butter", "milk"], ["tiger nut and walnut", "tree_nut"], ["tart apple pie", "wheat"]] as const) {
+    assert.equal(verdict(line, allergen), "unsafe", line);
+  }
+});
