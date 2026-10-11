@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ALL_ALLERGENS, SWAP_OPTIONS, checkIngredients, checkProduct, resolveAllergies, scanIngredient, suggestSwaps } from "../src/index.ts";
+import { unrecognised } from "../src/engine.ts";
 import type { AllergenId, Person } from "../src/index.ts";
 
 const person = (name: string, ...allergies: AllergenId[]): Person => ({ name, allergies });
@@ -781,4 +782,83 @@ test("swaps: with a peanut, soy or lupin allergy in the house no legume is offer
   assert.ok(tofu.length && tofu.every((o) => !/chickpea|bean|lentil|pea\b|lupin|peanut/i.test(o)), tofu.join(", "));
   // The egg swaps are not named after egg.
   assert.ok(optionsFor("2 eggs", [person("A", "egg")]).every((o) => !/\begg\b/i.test(o)));
+});
+
+test("product: Open Food Facts allergen ids for a specific nut, soy, egg, sesame or shellfish are read, not treated as unknown", () => {
+  const tagged = (tag: string, a: AllergenId, field: "allergens_tags" | "traces_tags" = "allergens_tags") =>
+    checkProduct({ product_name: "X", [field]: [tag], ingredients_text_en: "water" }, [person("X", a)]).overall;
+  for (const [tag, a] of [
+    ["en:almonds", "tree_nut"], ["en:hazelnuts", "tree_nut"], ["en:walnuts", "tree_nut"], ["en:cashew", "tree_nut"], ["en:tree-nuts", "tree_nut"],
+    ["en:sesame", "sesame"], ["en:soy", "soy"], ["en:egg", "egg"], ["en:crustacea", "crustacean"], ["en:shellfish", "crustacean"], ["en:shellfish", "mollusc"], ["en:mollusks", "mollusc"],
+  ] as [string, AllergenId][]) {
+    assert.equal(tagged(tag, a), "unsafe", `${tag} for ${a}`);
+    assert.equal(tagged(tag, a, "traces_tags"), "unsafe", `${tag} as a trace for ${a}`);
+  }
+  // Known tags settle the matter for everyone else: no "unrecognised" block, so an unrelated allergy is not held up by them.
+  assert.equal(tagged("en:almonds", "milk"), "no_listed_allergens");
+});
+
+test("product: an unrecognised allergen tag is never spoken raw", () => {
+  const r = checkProduct({ product_name: "X", allergens_tags: ["fr:lait"], traces_tags: ["en:almonds", "de:erdnuss"], ingredients_text_en: "water" }, [person("Maya", "milk")]);
+  assert.equal(r.overall, "cannot_confirm");
+  assert.match(r.speech, /I don't know what's in an unrecognised allergen label/);
+  assert.doesNotMatch(r.speech + JSON.stringify(r.people), /fr:lait|de:erdnuss|en:almonds/);
+  assert.match(r.people[0].reasons.join(" "), /^I don't know what's in an unrecognised allergen label$/);
+});
+
+// Words real labels use that the dictionary lacked: in product mode they read as "no listed allergens"; each must now fire its allergen.
+const VOCABULARY: [string, AllergenId][] = [
+  ["pine kernels", "tree_nut"],
+  ["pollack", "fish"], ["hoki", "fish"], ["sprat", "fish"], ["pilchard", "fish"], ["whitebait", "fish"], ["monkfish", "fish"],
+  ["emmental", "milk"], ["stilton", "milk"], ["gorgonzola", "milk"], ["edam", "milk"], ["provolone", "milk"], ["manchego", "milk"],
+  ["ghi", "milk"], ["butteroil", "milk"], ["lactoglobulin", "milk"],
+  ["eggwhite", "egg"], ["ovomucoid", "egg"], ["livetin", "egg"], ["E1105", "egg"],
+  ["matzo", "wheat"], ["chapati", "wheat"], ["roti", "wheat"], ["paratha", "wheat"], ["rusk", "wheat"], ["farina", "wheat"], ["triticum", "wheat"],
+  ["matzo", "gluten"], ["roti", "gluten"], ["stout", "gluten"],
+  ["soymilk", "soy"], ["yuba", "soy"], ["kinako", "soy"], ["E322i", "soy"], ["E322(i)", "soy"],
+  ["gingelly oil", "sesame"], ["til", "sesame"], ["teel", "sesame"],
+  ["pastries", "wheat"], ["2 fruit pastries", "gluten"],
+];
+
+test("vocabulary gaps: these words are never 'no listed allergens', in product mode or as recipe lines", () => {
+  for (const [word, a] of VOCABULARY) {
+    const product = checkProduct({ product_name: "X", allergens_tags: [], traces_tags: [], ingredients_text_en: `water, ${word}, salt` }, [person("X", a)]);
+    assert.notEqual(product.overall, "no_listed_allergens", `${word} passed for ${a} (product)`);
+    assert.ok(product.hits.some((h) => h.allergen === a && h.term !== "water"), `${word} gave no ${a} hit`);
+    assert.notEqual(verdict(word, a), "no_listed_allergens", `${word} passed for ${a} (recipe)`);
+  }
+  for (const [word, a] of VOCABULARY.filter(([w]) => !/^E\d|pastr/.test(w) && w !== "til")) {
+    assert.equal(checkProduct({ product_name: "X", ingredients_text_en: word }, [person("X", a)]).overall, "unsafe", `${word} for ${a}`);
+  }
+});
+
+test("plurals in -ies are read (pastries), without catching words that only look alike; shea stays out of tree nuts", () => {
+  assert.equal(scanIngredient("pastries").some((h) => h.allergen === "wheat" && h.kind === "contains"), true);
+  assert.equal(unrecognised("pastries").length, 0);
+  assert.equal(scanIngredient("soies").length, 0); // soy is vowel+y: no -ies plural
+  assert.equal(verdict("shea butter", "tree_nut", "milk"), "no_listed_allergens");
+});
+
+test("'Contains no nuts' and 'Free from nuts' are wording to check, not 'Contains tree nuts'", () => {
+  for (const text of ["sugar. Contains no nuts.", "sugar, Free from nuts.", "sugar. Free from nuts", "Does not contain nuts"]) {
+    const r = checkProduct({ product_name: "X", ingredients_text_en: text }, [person("Maya", "tree_nut")]);
+    assert.equal(r.overall, "cannot_confirm", text);
+    assert.deepEqual(r.people[0].reasons, ["The wording about tree nuts is unclear"], text);
+    assert.doesNotMatch(r.people[0].reasons.join(" "), /^Contains/, text);
+  }
+  // A real nut next to the claim still counts in full.
+  assert.equal(checkProduct({ product_name: "X", ingredients_text_en: "hazelnuts. Contains no almonds." }, [person("Maya", "tree_nut")]).overall, "unsafe");
+});
+
+test("'Processed in a factory handling peanuts' is a may-contain warning even after 'Contains peanuts:'", () => {
+  for (const text of ["sugar. Contains peanuts: Processed in a factory handling peanuts", "sugar (Contains peanuts: processed in a factory handling peanuts)", "sugar, contains peanuts. Made in a facility using peanuts"]) {
+    const r = checkProduct({ product_name: "X", ingredients_text_en: text }, [person("Maya", "peanut")]);
+    assert.equal(r.overall, "unsafe", text);
+    const warning = r.hits.filter((h) => /factory handling|facility using/i.test(h.source));
+    assert.deepEqual(warning.map((h) => h.kind), ["may_contain"], text);
+    assert.ok(r.hits.every((h) => h.kind !== "contains" || !/factory|facility/i.test(h.source)), `${text}: the warning's words were read as an ingredient`);
+  }
+  // Tree-nut person: only the warning names tree nuts, and it is labelled "may contain".
+  const r = checkProduct({ product_name: "X", ingredients_text_en: "sugar. Contains peanuts: Processed in a factory handling nuts" }, [person("Leo", "tree_nut")]);
+  assert.deepEqual(r.people[0].reasons, ["May contain tree nuts"]);
 });

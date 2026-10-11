@@ -201,7 +201,7 @@ export const TERMS: Term[] = [
   {
     terms: ["almond", "hazelnut", "filbert", "walnut", "cashew", "pecan", "pistachio", "brazil nut", "macadamia", "pine nut",
       "prunus amygdalus", "prunus dulcis", "corylus avellana", "juglans regia", "anacardium occidentale", "bertholletia excelsa", "pistacia vera",
-      "tree nut", "treenut", "chesnut", "pignoli", "pinoli", "praline", "marzipan", "frangipane", "gianduja", "nutella", "chestnut"],
+      "tree nut", "treenut", "pine kernel", "chesnut", "pignoli", "pinoli", "praline", "marzipan", "frangipane", "gianduja", "nutella", "chestnut"],
     contains: ["tree_nut"],
     unless: ["water chestnut", "chestnut mushroom", "cashew apple"],
   },
@@ -212,14 +212,15 @@ export const TERMS: Term[] = [
   { terms: ["amaretti", "macaron", "orgeat", "romesco", "baklava", "dukkah"], contains: ["tree_nut"], possible: ["egg", "wheat", "gluten", "sesame"] },
   { terms: ["amaretto", "frangelico", "nocino", "biscotti", "mole", "nut oil"], contains: [], possible: ["tree_nut", "peanut"], unless: ["ground nut oil"] },
   // milk
-  { terms: ["milk", "buttermilk", "milk powder", "milkfat"], contains: ["milk"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS, "milk thistle"] },
+  { terms: ["milk", "buttermilk", "milk powder", "milkfat", "lactoglobulin"], contains: ["milk"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS, "milk thistle"] },
   { terms: RARE_PLANT_MILKS, contains: [], possible: ["milk"] },
-  { terms: ["butter", "ghee", "butterfat"], contains: ["milk"], unless: [...NOT_DAIRY_BUTTER, ...VEGETABLE_GHEE] },
+  { terms: ["butter", "ghee", "ghi", "butterfat", "butteroil"], contains: ["milk"], unless: [...NOT_DAIRY_BUTTER, ...VEGETABLE_GHEE] },
   { terms: VEGETABLE_GHEE, contains: [], possible: ["milk"] },
   { terms: ["cream", "sour cream", "creme fraiche", "half and half"], contains: ["milk"], unless: ["cream of tartar", "coconut cream", "ice cream", "cream soda", "cream crackers", "oat cream", "soy cream", "soya cream", "cashew cream", "almond cream", "rice cream", "plant cream", "vegan cream"] },
   {
     terms: ["cheese", "parmesan", "parmigiano", "pecorino", "mozzarella", "cheddar", "ricotta", "feta", "mascarpone", "gouda", "brie",
-      "camembert", "gruyere", "halloumi", "paneer", "burrata", "quark", "skyr"],
+      "camembert", "gruyere", "halloumi", "paneer", "burrata", "quark", "skyr",
+      "emmental", "stilton", "gorgonzola", "edam", "provolone", "manchego"],
     contains: ["milk"],
     unless: ["cheese culture", ...VEGAN_CHEESE],
   },
@@ -239,11 +240,11 @@ export const TERMS: Term[] = [
   { terms: ["curd"], contains: ["milk"], unless: ["bean curd", "lemon curd"] },
   { terms: ["lemon curd"], contains: ["milk", "egg"] },
   // egg
-  { terms: ["egg", "yolk", "albumen", "albumin", "ovalbumin", "lysozyme", "meringue", "hollandaise", "eggnog"], contains: ["egg"], unless: ["egg plant", "egg noodle free", "egg roll", "egg replacer", "egg replacement", "egg substitute", "vegan egg"] },
+  { terms: ["egg", "eggwhite", "yolk", "albumen", "albumin", "ovalbumin", "ovomucoid", "livetin", "lysozyme", "e1105", "meringue", "hollandaise", "eggnog"], contains: ["egg"], unless: ["egg plant", "egg noodle free", "egg roll", "egg replacer", "egg replacement", "egg substitute", "vegan egg"] },
   { terms: ["egg roll"], contains: [], possible: ["egg", "wheat", "gluten"] },
   { terms: ["mayonnaise", "mayo", "aioli"], contains: ["egg"], possible: ["mustard"], unless: ["vegan mayonnaise", "vegan mayo", "vegan aioli"] },
   // wheat and gluten
-  { terms: ["wheat", "semolina", "durum", "spelt", "kamut", "farro", "einkorn", "emmer", "couscous", "bulgur", "bulgar", "freekeh", "seitan", "graham", "wheatflour", "wheatgerm"], contains: ["wheat", "gluten"], unless: ["wheat grass", "rice semolina", "corn semolina", "maize semolina"] },
+  { terms: ["wheat", "semolina", "durum", "spelt", "kamut", "farro", "einkorn", "emmer", "couscous", "bulgur", "bulgar", "freekeh", "seitan", "graham", "wheatflour", "wheatgerm", "triticum", "farina", "matzo", "matzah", "chapati", "roti", "paratha", "rusk"], contains: ["wheat", "gluten"], unless: ["wheat grass", "rice semolina", "corn semolina", "maize semolina"] },
   { terms: ["gluten", "cereals containing gluten"], contains: ["gluten"], possible: ["wheat"], unless: ["corn gluten", "maize gluten"] },
   { terms: ["flour"], contains: ["wheat", "gluten"], unless: NOT_WHEAT_FLOUR },
   {
@@ -271,24 +272,24 @@ export const TERMS: Term[] = [
     "coriander seed", "cumin seed", "fennel seed", "caraway seed", "poppy seed", "achiote seed", "annatto seed", "nigella seed", "fenugreek seed", "anise seed", "aniseed", "dill seed", "cardamom seed",
     "pumpkin seed", "sunflower seed", "chia seed", "flax seed", "flaxseed", "linseed", "hemp seed", "melon seed", "pomegranate seed", "vanilla seed",
   ], contains: [] },
-  { terms: ["barley", "rye", "oat", "oatmeal", "malt", "malt vinegar", "malt extract", "brewer s yeast", "beer", "ale", "lager", "triticale", "bran"], contains: ["gluten"], unless: ["rice bran", "maize bran", "corn bran", "mustard bran", "soy bran", "barley grass", "wheat grass", "ginger ale", "ginger beer", "root beer", "birch beer"] },
+  { terms: ["barley", "rye", "oat", "oatmeal", "malt", "malt vinegar", "malt extract", "brewer s yeast", "beer", "ale", "lager", "triticale", "bran", "stout"], contains: ["gluten"], unless: ["rice bran", "maize bran", "corn bran", "mustard bran", "soy bran", "barley grass", "wheat grass", "ginger ale", "ginger beer", "root beer", "birch beer"] },
   { terms: ["gluten free"], contains: [], possible: GLUTEN_FREE_MAY_CONTAIN },
   // soy
-  { terms: ["soy", "soya", "soybean", "soyabean", "soja", "tofu", "bean curd", "tempeh", "edamame", "miso", "shoyu", "tamari", "natto", "textured vegetable protein", "tvp", "glycine max"], contains: ["soy"] },
+  { terms: ["soy", "soya", "soybean", "soyabean", "soja", "tofu", "bean curd", "tempeh", "edamame", "miso", "shoyu", "tamari", "natto", "textured vegetable protein", "tvp", "glycine max", "soymilk", "yuba", "kinako"], contains: ["soy"] },
   // HVP with no named source is soy, wheat or corn; the sourced forms ("hydrolyzed wheat protein") match their own source term
   { terms: ["hydrolyzed vegetable protein", "hydrolysed vegetable protein", "hydrolyzed plant protein", "hydrolysed plant protein", "hvp"], contains: [], possible: ["gluten", "wheat", "soy"] },
   // commercial asafoetida (hing) is routinely compounded with wheat flour
   { terms: ["asafoetida", "asafetida", "hing"], contains: [], possible: ["gluten", "wheat"] },
-  { terms: ["lecithin", "e322", "vegetable protein"], contains: [], possible: ["soy"] },
+  { terms: ["lecithin", "e322", "e322i", "e322 i", "e322ii", "e322 ii", "vegetable protein"], contains: [], possible: ["soy"] },
   { terms: ["emulsifier"], contains: [], possible: ["soy", "egg"] },
   { terms: ["margarine", "vegetable spread"], contains: [], possible: ["milk", "soy"] },
   { terms: ["vegetable oil"], contains: [], possible: ["soy", "peanut"] },
   // sesame
-  { terms: ["sesame", "sesamum indicum", "tahini", "tahina", "halva", "halvah", "halwa", "gomasio", "benne", "hummus", "houmous", "za atar", "zaatar"], contains: ["sesame"] },
+  { terms: ["sesame", "sesamum indicum", "tahini", "tahina", "halva", "halvah", "halwa", "gomasio", "benne", "gingelly", "til", "teel", "hummus", "houmous", "za atar", "zaatar"], contains: ["sesame"] },
   // fish
   {
     terms: ["fish", "salmon", "tuna", "cod", "anchovy", "anchovies", "sardine", "haddock", "trout", "mackerel", "tilapia", "halibut",
-      "pollock", "hake", "herring", "sea bass", "swordfish", "snapper", "plaice", "pangasius", "catfish", "carp", "perch", "eel",
+      "pollock", "pollack", "hoki", "sprat", "pilchard", "whitebait", "monkfish", "hake", "herring", "sea bass", "swordfish", "snapper", "plaice", "pangasius", "catfish", "carp", "perch", "eel",
       "caviar", "roe", "surimi", "fish sauce", "nam pla", "bonito", "codfish", "saltfish", "barramundi", "bacalao", "baccala", "salmo salar", "theragra chalcogramma", "gadus", "katsuwonus pelamis", "thunnus"],
     contains: ["fish"],
     unless: ["shell fish", "roe deer"], // "shell fish" is two words, the shellfish entry below
@@ -381,6 +382,18 @@ export const OFF_ALLERGEN_TAGS: Record<string, AllergenId[]> = {
   "en:lupin": ["lupin"],
   "en:sulphur-dioxide-and-sulphites": ["sulphites"],
   "en:red-caviar": ["fish"],
+  // Other ids Open Food Facts records use for the same allergens (contributors enter the specific food, not the regulated group).
+  ...Object.fromEntries(
+    ["almonds", "hazelnuts", "walnuts", "cashew", "cashews", "tree-nuts", "brazil-nuts", "pecan-nuts", "pecans", "pistachios", "pistachio-nuts", "macadamia-nuts", "pine-nuts"].map((t) => [`en:${t}`, ["tree_nut"] as AllergenId[]]),
+  ),
+  "en:peanut": ["peanut"],
+  "en:egg": ["egg"],
+  "en:sesame": ["sesame"],
+  "en:soy": ["soy"],
+  "en:soya": ["soy"],
+  "en:crustacea": ["crustacean"],
+  "en:shellfish": ["crustacean", "mollusc"], // the stricter reading, as in the aliases
+  "en:mollusks": ["mollusc"],
   // OFF allergen ids for things this engine doesn't track: no hit. Any other unknown tag still blocks a clean answer.
   ...Object.fromEntries(
     ["none", "pork", "beef", "chicken", "apple", "banana", "peach", "orange", "kiwi", "gelatin", "yamaimo", "matsutake"].map((t) => [`en:${t}`, [] as AllergenId[]]),

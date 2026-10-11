@@ -26,7 +26,7 @@ export const worst = (a: Verdict, b: Verdict): Verdict => (RANK[a] >= RANK[b] ? 
 
 type Compiled = { term: string; re: RegExp; entry: Term; unless: RegExp[] };
 // The trailing space is a lookahead, not consumed, so a phrase repeated after a single space ("coconut milk coconut milk") matches both times.
-const wordRe = (phrase: string) => new RegExp(`(^| )${phrase.split(" ").join(" ")}(s|es)?(?= |$)`);
+const wordRe = (phrase: string) => new RegExp(`(^| )${/[^aeiou]y$/.test(phrase) ? `${phrase.slice(0, -1)}(?:y|ies|ys)` : `${phrase}(?:s|es)?`}(?= |$)`);
 const COMPILED: Compiled[] = TERMS.flatMap((entry) =>
   entry.terms.map((t) => {
     const term = normalize(t);
@@ -46,6 +46,9 @@ const hasSoyFreeMiso = (line: string) => {
 
 /** Find allergen hits in one ingredient line ("2 tbsp tahini", "skimmed milk powder 8.7%"). */
 export function scanIngredient(line: string, kind: "contains" | "may_contain" = "contains"): Hit[] {
+  // A claim ("Contains no almonds.") belongs to its own sentence: it must not downgrade a hit in the one before it.
+  const sentences = line.split(/(?<=[.!?])\s+(?=\S)/);
+  if (sentences.length > 1) return dedupe(sentences.flatMap((s) => scanIngredient(s, kind)));
   const text = normalize(line);
   if (!text) return [];
   const hits: Hit[] = [];
@@ -68,8 +71,8 @@ export function scanIngredient(line: string, kind: "contains" | "may_contain" = 
   }
   // "egg-free mayonnaise", "free from milk": a free-from claim can't be verified here, so "check the label", not "contains".
   // "lactose free milk" is still milk.
-  // Also "not from milk", "not derived from milk", and the same word in other languages ("sans gluten", "ohne ei").
-  const claimed = [...text.matchAll(/\b(?:([a-z]+) free(?! range)|free (?:from|of) ([a-z]+)|not (?:derived |made )?from ([a-z]+)|(?:sans|sin|senza|ohne|uten|zonder) ([a-z]+))\b/g)].map((m) => m[1] ?? m[2] ?? m[3] ?? m[4]).filter((w) => w !== "lactose");
+  // Also "not from milk", "not derived from milk", "contains no nuts", and the same word in other languages ("sans gluten", "ohne ei").
+  const claimed = [...text.matchAll(/\b(?:([a-z]+) free(?! range| (?:from|of)\b)|free (?:from|of) ([a-z]+)|not (?:derived |made )?from ([a-z]+)|(?:sans|sin|senza|ohne|uten|zonder) ([a-z]+)|contains? no ([a-z]+)|(?:does not|do not|doesn t|don t) contain ([a-z]+))\b/g)].map((m) => m[1] ?? m[2] ?? m[3] ?? m[4] ?? m[5] ?? m[6]).filter((w) => w !== "lactose");
   const freeFrom = new Set(resolveAllergies(claimed).ids);
   return dedupe(hits.map((h) => (h.kind === "contains" && freeFrom.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));
 }
@@ -111,11 +114,12 @@ export function splitIngredients(input: string | string[]): string[] {
 // "may contain traces of nuts", "made in a factory that also handles milk": a warning, not an ingredient.
 const PRECAUTION_EN = [
     "may (?:also )?contain", "could contain", "contains traces of", "traces of", "may be present",
-    "(?:made|produced|manufactured|packed|processed|prepared) (?:in|at) (?:an? |the |our )?(?:\\w+ ){0,2}(?:factory|facility|site|kitchen|environment) that (?:also )?(?:handles|uses|processes)",
+    "(?:made|produced|manufactured|packed|processed|prepared) (?:in|at) (?:an? |the |our )?(?:\\w+ ){0,2}(?:factory|facility|site|kitchen|environment) (?:that (?:also )?(?:handles|uses|processes)|(?:also )?(?:handling|using|processing))",
     "made on (?:shared )?equipment", "shares (?:the same )?(?:equipment|facility|production line|line) with", "produced on equipment shared with", "made on a line that also", "processed on shared equipment",
     "(?:made|produced|processed|manufactured) on machinery that also (?:processes|handles)",
     "(?:manufactured|made|produced|processed|packed|packaged) on equipment exposed to",
     "\\b(?:plant|factory|facility|site|line|lines|equipment|premises|bakery|kitchen|environment) (?:that|which|where) (?:also )?(?:processes|handles|uses|manufactures|packs|produces|makes)",
+    "\\b(?:plant|factory|facility|site|line|lines|equipment|premises|bakery|kitchen|environment) (?:also )?(?:handling|processing|using)\\b",
     "(?:in|on) the same (?:facility|equipment|line|lines|premises)", "shared (?:equipment|facility|line)", "may also use", "contains one or more of",
 ];
 // The same warnings in other languages: found, but the allergens after them are only read when they are words the catalogue knows.
@@ -227,12 +231,12 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
   for (const tag of product.allergens_tags ?? []) {
     const ids = OFF_ALLERGEN_TAGS[tag];
     if (ids) ids.forEach((a) => hits.push({ allergen: a, kind: "contains", source: "allergen list", term: tag }));
-    else ALL_ALLERGENS.forEach((a) => hits.push({ allergen: a, kind: "possible", source: "allergen list", term: tag }));
+    else ALL_ALLERGENS.forEach((a) => hits.push({ allergen: a, kind: "possible", source: "allergen list", term: tag, unknown: true }));
   }
   for (const tag of product.traces_tags ?? []) {
     const ids = OFF_ALLERGEN_TAGS[tag];
     if (ids) ids.forEach((a) => hits.push({ allergen: a, kind: "may_contain", source: "may contain", term: tag }));
-    else ALL_ALLERGENS.forEach((a) => hits.push({ allergen: a, kind: "possible", source: "may contain", term: tag }));
+    else ALL_ALLERGENS.forEach((a) => hits.push({ allergen: a, kind: "possible", source: "may contain", term: tag, unknown: true }));
   }
   const english = stripAdvice(product.ingredients_text_en ?? "").trim();
   const original = product.ingredients_original_tags?.length ? product.ingredients_original_tags : undefined;
@@ -279,7 +283,7 @@ export function evaluate(hits: Hit[], people: Person[], dataIssues: string[] = [
     const reasons: string[] = [
       ...[...new Set(contains.map((h) => h.allergen))].map((a) => `Contains ${ALLERGENS[a].spoken}: ${unique(contains.filter((h) => h.allergen === a).map((h) => h.source)).join(", ")}`),
       ...mayContain.map((h) => `May contain ${ALLERGENS[h.allergen].spoken}`),
-      ...possible.map((h) => (h.unknown ? `I don't know what's in "${h.term}"` : selfNamed(h) ? `The wording about ${ALLERGENS[h.allergen].spoken} is unclear` : `${cap(h.term)} can contain ${ALLERGENS[h.allergen].spoken}`)),
+      ...possible.map((h) => (h.unknown ? `I don't know what's in ${isTag(h) ? heard(h) : `"${h.term}"`}` : selfNamed(h) ? `The wording about ${ALLERGENS[h.allergen].spoken} is unclear` : `${cap(h.term)} can contain ${ALLERGENS[h.allergen].spoken}`)),
       ...(contains.length || mayContain.length || possible.length ? [] : dataIssues),
     ];
     let verdict: Verdict = "no_listed_allergens";
@@ -310,7 +314,7 @@ function speak(p: Person, verdict: Verdict, contains: Hit[], may: Hit[], possibl
   if (verdict === "cannot_confirm") {
     const hiding = possible.filter((h) => !h.unknown && !selfNamed(h));
     const named = possible.filter((h) => !h.unknown && selfNamed(h));
-    const odd = unique(possible.filter((h) => h.unknown).map((h) => h.term)).slice(0, 2);
+    const odd = unique(possible.filter((h) => h.unknown).map(heard)).slice(0, 2);
     const parts = [
       ...(hiding.length ? [`${join(unique(hiding.map((h) => h.term)).slice(0, 2))} can contain ${list(hiding)}`] : []),
       ...(named.length ? [`the wording about ${list(named)} is unclear`] : []),
@@ -334,6 +338,10 @@ function merged(ordered: PersonResult[], templates: Map<string, string>): string
   }
   return [...groups].map(([t, names]) => t.replace(NAME, join(names))).join(" ");
 }
+
+/** What an unknown hit is called aloud: a database tag ("fr:lait") is never read out raw. */
+const isTag = (h: Hit) => h.source === "allergen list" || h.source === "may contain";
+const heard = (h: Hit) => (isTag(h) ? "an unrecognised allergen label" : h.term);
 
 /** A possible hit whose term already names the allergen ("egg" for egg, after "egg-free"): "egg can contain egg" says nothing. */
 const selfNamed = (h: Hit) => resolveAllergies([h.term]).ids.includes(h.allergen);
