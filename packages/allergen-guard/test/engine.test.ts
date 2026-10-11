@@ -722,6 +722,32 @@ test("engine: a whole ingredient list in another language, filed as English, is 
   }
 });
 
+test("engine: allergen words in ten more languages mark English text as partly foreign; words that are also English don't", () => {
+  const p = [person("X", "peanut")];
+  for (const text of [
+    "Vollmilch, Zucker, Kakaobutter, Mandeln, Butterreinfett, Molkenpulver, Emulgator: Sojalecithine, Sesam", "sucre, farine de blé, noix", "zucchero, mandorle, burro",
+    "suiker, boter, kaas", "azúcar, anacardos", "cukr, máslo, sýr", "zahăr, unt, făină", "şeker, tereyağı, peynir", "sokeri, juusto, ohra", "socker, smör, ost",
+  ]) {
+    assert.ok(checkProduct({ ingredients_text_en: text }, p).dataIssues.includes(NOT_ENGLISH), text);
+  }
+  for (const text of ["sugar, creme brulee pieces", "sugar, panna cotta", "lupini beans, water, salt", "glycine soja oil", "rice, kala namak"]) {
+    assert.deepEqual(checkProduct({ ingredients_text_en: text }, p).dataIssues, [], text);
+  }
+});
+
+test("engine: product text that is not an ingredient list (placeholder, numbers, a list of unknown foreign words) can't be confirmed", () => {
+  const p = [person("X", ...ALL_ALLERGENS)];
+  for (const text of ["-", ".", "?", "n/a", "see pack", "Ingredients not listed", "100%", "1586 2", "Storfekjøtt", "Fløde 13% fedt, stabilisator (carrageenan), laktaseenzym", "PLÁTANO, ACEITE DE PALMA, SAL"]) {
+    const r = checkProduct({ ingredients_text_en: text }, p);
+    assert.equal(r.overall, "cannot_confirm", text);
+    assert.deepEqual(r.dataIssues, ["I couldn't read the ingredient list."], text);
+  }
+  // A list of English words the catalogue doesn't know is not this issue; a known word anywhere makes the list readable.
+  for (const text of ["xylitol", "Soursop, ascorbic acid", "Sour cherries, Sugar, Water, Citric acid.", "Water"]) {
+    assert.deepEqual(checkProduct({ ingredients_text_en: text }, p).dataIssues, [], text);
+  }
+});
+
 test("engine: foreign precautions found in English-labelled Open Food Facts text (2026-10-11 scan) are not 'none listed'", () => {
   const p = [person("X", "tree_nut")];
   for (const text of [
@@ -765,16 +791,24 @@ test("engine: generic filler words no longer wave through soy pastes, mixed seed
 test("engine: names that only look like an allergen (ginger ale, crab apple, roe deer, ...) are not it", () => {
   const none: [string, AllergenId][] = [
     ["ginger ale", "gluten"], ["ginger beer", "gluten"], ["root beer", "gluten"],
-    ["vegan butter", "milk"], ["vegan cheese", "milk"], ["plant butter", "milk"], ["plant-based butter", "milk"], ["palm butter", "milk"], ["butter lettuce", "milk"],
-    ["vegan mayonnaise", "egg"], ["egg replacer", "egg"],
+    ["palm butter", "milk"], ["butter lettuce", "milk"], ["nata de coco", "milk"],
+    ["vegan mayonnaise", "egg"],
     ["crab apple", "crustacean"], ["tart apple", "wheat"], ["tart apple", "gluten"], ["roe deer", "fish"],
     ["tiger nut", "tree_nut"], ["tiger nuts", "tree_nut"], ["Ground Nut Oil", "tree_nut"],
   ];
   for (const [line, allergen] of none) assert.equal(scanIngredient(line).filter((h) => h.allergen === allergen).length, 0, `${line} flagged ${allergen}`);
   // Plant-based swaps for dairy and egg are made from soy and nuts, so they are not waved through for those.
+  // Vegan butter and cheese are not dairy, but milk stays possible (vegan-labelled products have had undeclared-milk recalls).
+  for (const line of ["vegan butter", "vegan cheese", "plant butter", "plant-based butter"]) {
+    assert.equal(scanIngredient(line).some((h) => h.allergen === "milk" && h.kind === "contains"), false, line);
+    assert.equal(verdict(line, "milk"), "cannot_confirm", line);
+  }
   assert.equal(verdict("vegan butter", "soy"), "cannot_confirm");
   assert.equal(verdict("vegan cheese", "tree_nut"), "cannot_confirm");
   assert.equal(verdict("vegan mayonnaise", "soy"), "cannot_confirm");
+  // An egg substitute is not egg for sure, but some are made from egg whites.
+  assert.equal(checkIngredients("1/2 cup egg substitute", [person("X", "egg")]).people[0].verdict, "cannot_confirm");
+  assert.equal(scanIngredient("egg replacer").some((h) => h.allergen === "egg" && h.kind === "contains"), false);
   // Cashew apple is the fruit, not the nut, but it is processed with the nut.
   assert.equal(verdict("cashew apple", "tree_nut"), "cannot_confirm");
   assert.equal(scanIngredient("cashew apple").filter((h) => h.kind === "contains").length, 0);
@@ -850,7 +884,7 @@ const VOCABULARY: [string, AllergenId][] = [
   ["matzo", "wheat"], ["chapati", "wheat"], ["roti", "wheat"], ["paratha", "wheat"], ["rusk", "wheat"], ["farina", "wheat"], ["triticum", "wheat"],
   ["matzo", "gluten"], ["roti", "gluten"], ["stout", "gluten"],
   ["soymilk", "soy"], ["yuba", "soy"], ["kinako", "soy"], ["E322i", "soy"], ["E322(i)", "soy"],
-  ["gingelly oil", "sesame"], ["til", "sesame"], ["teel", "sesame"],
+  ["gingelly oil", "sesame"], ["til", "sesame"], ["teel", "sesame"], ["til seeds", "sesame"], ["til oil", "sesame"], ["teel seed", "sesame"], ["teel oil", "sesame"],
   ["pastries", "wheat"], ["2 fruit pastries", "gluten"],
 ];
 
@@ -864,6 +898,11 @@ test("vocabulary gaps: these words are never 'no listed allergens', in product m
   for (const [word, a] of VOCABULARY.filter(([w]) => !/^E\d|pastr/.test(w) && w !== "til")) {
     assert.equal(checkProduct({ product_name: "X", ingredients_text_en: word }, [person("X", a)]).overall, "unsafe", `${word} for ${a}`);
   }
+});
+
+test("'til' in method text ('cook til golden', \"fry 'til crisp\") is 'until', not sesame; as an item of its own it is sesame", () => {
+  for (const line of ["cook til golden", "fry 'til crisp", "simmer til thick, then serve"]) assert.equal(scanIngredient(line).some((h) => h.allergen === "sesame"), false, line);
+  for (const line of ["til", "2 tbsp til", "Til", "100g teel", "til seeds", "teel oil"]) assert.equal(scanIngredient(line).some((h) => h.allergen === "sesame" && h.kind === "contains"), true, line);
 });
 
 test("plurals in -ies are read (pastries), without catching words that only look alike; shea stays out of tree nuts", () => {

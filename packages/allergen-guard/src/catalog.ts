@@ -150,10 +150,12 @@ export function normalize(text: string): string {
 /**
  * Allergen words from other languages that are not English words. English ingredient text
  * containing one of these is partly untranslated, so a clean scan of it can't be trusted.
- * Left out on purpose: "ei", "ble", "mani", "latte" (English words or too short to be safe).
+ * Left out on purpose (English words, by /usr/share/dict/words or by use in English ingredient text, 2026-10-11 check):
+ * "ei", "mani", "latte", "soja", "milch", "noisette", "apio", "susan", "nodder", "pinda", "soju", "ovo", "creme", "coque", "burro",
+ * "panna", "lupini", "vis", "haver", "avena", "zer", "peste", "kala", "rag", "syr". Food words among them are still read as allergen terms.
  */
 export const FOREIGN_ALLERGEN_WORDS: ReadonlySet<string> = new Set(
-  ("trigo, hvete, hvetemel, weizen, weizenmehl, tarwe, harina, farine, lait, leche, melk, milch, huevo, huevos, eier, oeuf, oeufs, uovo, soja, soia, cacahuete, cacahuetes, erdnuss, almendra, almendras, avellana, avellanas, noisette, noisettes, haselnuss, haselnusse, nocciole, sesamo, ajonjoli, apio, selleri, sellerie, moutarde, senf, mostaza, sulfitos, solfiti, pescado, poisson, fisk, pesce, " +
+  ("trigo, hvete, hvetemel, weizen, weizenmehl, tarwe, harina, farine, lait, leche, melk, huevo, huevos, eier, oeuf, oeufs, uovo, soia, cacahuete, cacahuetes, erdnuss, almendra, almendras, avellana, avellanas, noisettes, haselnuss, haselnusse, nocciole, sesamo, ajonjoli, selleri, sellerie, moutarde, senf, mostaza, sulfitos, solfiti, pescado, poisson, fisk, pesce, " +
   // 2026-10-11 scan (bench/README.md): whole ingredient lists in other languages filed as English came out "none listed". Their words
   // for "ingredients", and allergen words with common inflections, accent-folded as normalize() does.
   "skladniki, osszetevok, slozeni, zlozenie, sestavine, sastojci, sastav, sudedamosios, ainesosat, koostisosad, sastavdalas, icindekiler, ingredienser, zutaten, ingredienti, ingredientes, ingredienten, ingrediente, " +
@@ -161,17 +163,23 @@ export const FOREIGN_ALLERGEN_WORDS: ReadonlySet<string> = new Set(
   "psenicna, psenicne, psenice, psenicny, psenicni, psenica, psenicno, mlecna, mlecne, mlecny, mlecni, orechy, oriesky, arasidy, arasidove, arasidi, sojove, sojova, sojin, vejce, vajecny, vajce, jajca, jajcni, horcice, gorcica, celer, oreski, lesniki, " +
   "mlijeko, mlijeka, mlijecni, mlijecna, mlijecne, riblji, sojino, soje, brasno, bjelancevine, belancevine, orasasti, ljesnjaci, ljesnjak, lesnik, kikiriki, jaje, gorusica, " +
   "buza, buzaliszt, tejpor, tejsavo, tejszin, tejfeherje, mogyoro, mogyorot, foldimogyoro, foldimogyorot, diofelek, diofeleket, mandula, szoja, szojalecitin, tojas, tojasfeherje, tojaspor, szezam, mustar, zeller, " +
-  "grau, lapte, nuci, alune, arahide, oua, susan, telina, " +
-  "kvietiniai, kvieciu, kvietiniu, pienas, pieno, pieniskas, riesutai, riesutu, lazdynu, sojos, soju, kiausiniai, kiausiniu, sezamo, garstyciu, salieru, " +
+  "grau, lapte, nuci, alune, arahide, oua, telina, " +
+  "kvietiniai, kvieciu, kvietiniu, pienas, pieno, pieniskas, riesutai, riesutu, lazdynu, sojos, kiausiniai, kiausiniu, sezamo, garstyciu, salieru, " +
   "kviesu, piens, piena, rieksti, riekstu, zemesrieksti, zemesriekstu, sojas, sinepes, selerijas, " +
   "nisu, nisujahu, piim, piima, piimapulber, taispiim, pahklid, pahkleid, maapahkel, maapahklid, munapulber, seesam, sinep, " +
   "vehna, vehnajauho, vehnajauhot, maito, maitoa, maitojauhe, pahkina, pahkinoita, hasselpahkina, maapahkina, maapahkinaa, cashewpahkina, manteli, soija, soijaa, kananmuna, kananmunaa, seesami, sinappi, " +
-  "vete, vetemjol, mjolk, mjolkpulver, mjolkprotein, mjolkchoklad, helmjolkspulver, agg, aggula, senapsfro, rismjol, hvede, hvedemel, maelk, maelkepulver, notter, nodder, hasselnotter, jordnotter, jordnodder, sesamfro, senap, sennep, sennepsfro, " +
+  "vete, vetemjol, mjolk, mjolkpulver, mjolkprotein, mjolkchoklad, helmjolkspulver, agg, aggula, senapsfro, rismjol, hvede, hvedemel, maelk, maelkepulver, notter, hasselnotter, jordnotter, jordnodder, sesamfro, senap, sennep, sennepsfro, " +
   "bugday, sut, suttozu, yumurta, findik, ceviz, susam, hardal, kereviz, " +
   "erdnusse, erdnussen, haselnussen, milchpulver, vollmilchpulver, magermilchpulver, sahne, eigelb, volleipulver, senfsaat, sojalecithin, weizengluten, roggen, gerste, hafer, " +
-  "mosterd, mosterdzaad, pinda, pindas, hazelnoten, eieren, melkpoeder, tarwebloem, tarwemeel, selderij, sesamzaad, " +
+  "mosterd, mosterdzaad, pindas, hazelnoten, eieren, melkpoeder, tarwebloem, tarwemeel, selderij, sesamzaad, " +
   "arachide, arachides, lactoserum, froment, seigle, frumento, uova, nocciola, arachidi, senape, sedano, segale, " +
-  "leite, ovo, ovos, amendoim, avela, nozes, cevada, centeno, mostarda, aipo, gergelim, cacahuate, nueces, lacteos").split(",").map((w) => normalize(w)),
+  "leite, ovos, amendoim, avela, nozes, cevada, centeno, mostarda, aipo, gergelim, cacahuate, nueces, lacteos, " +
+  // Words that carried an independent review's misses (2026-10-11): de, fr, it, nl, es, cs, ro, tr, fi, sv.
+  "mandeln, nusse, nussen, schalenfruchte, vollmilch, molke, molkenpulver, vollei, huhnerei, weizenstarke, butterreinfett, " +
+  "noix, amandes, pistaches, ble, celeri, crustaces, mollusques, mandorle, noci, pistacchi, anacardi, glutine, crostacei, molluschi, " +
+  "noten, amandelen, walnoten, boter, kaas, schaaldieren, weekdieren, gerst, rogge, sesam, anacardos, pistachos, cebada, crustaceos, moluscos, " +
+  "mandle, maslo, smetana, syrovatka, lepek, ryby, unt, branza, faina, crustacee, moluste, orz, lactoza, badem, fistik, tereyagi, peynir, balik, arpa, " +
+  "juusto, hera, ohra, ruis, kaura, gluteeni, mandel, smor, ost, vassle, aeg, korn, skaldjur").split(",").map((w) => normalize(w)),
 );
 
 /**
@@ -244,11 +252,13 @@ export const TERMS: Term[] = [
     contains: ["milk"],
     unless: ["cheese culture", ...VEGAN_CHEESE],
   },
-  // Plant-based butter and cheese are not dairy, but they are made from soy or nuts.
-  { terms: ["vegan butter", "plant butter", "plant based butter", ...VEGAN_CHEESE], contains: [], possible: ["soy", "tree_nut"] },
+  // Plant-based butter and cheese are not dairy, but they are made from soy or nuts, and vegan-labelled spreads and cheeses
+  // have been recalled for undeclared milk: milk stays possible.
+  { terms: ["vegan butter", "plant butter", "plant based butter", ...VEGAN_CHEESE], contains: [], possible: ["milk", "soy", "tree_nut"] },
   // Not eggs, but usually starch with soy or wheat.
   { terms: ["vegan mayonnaise", "vegan mayo", "vegan aioli"], contains: [], possible: ["soy", "mustard"] },
-  { terms: ["egg replacer", "egg replacement", "egg substitute", "vegan egg"], contains: [], possible: ["soy", "wheat", "gluten"] },
+  // Some egg substitutes are made from egg whites (US liquid "egg substitute" is mostly egg white): egg stays possible.
+  { terms: ["egg replacer", "egg replacement", "egg substitute", "vegan egg"], contains: [], possible: ["egg", "soy", "wheat", "gluten"] },
   { terms: ["milkshake", "cappuccino", "flat white", "macchiato", "frappuccino", "hot chocolate"], contains: ["milk"], possible: ["soy", "tree_nut"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS] },
   { terms: ["mocha"], contains: [], possible: ["milk"] },
   { terms: ["barley grass", "wheat grass"], contains: [], possible: ["gluten", "wheat"] }, // young leaves, gluten only if seeds get in
@@ -304,8 +314,8 @@ export const TERMS: Term[] = [
   { terms: ["emulsifier"], contains: [], possible: ["soy", "egg"] },
   { terms: ["margarine", "vegetable spread"], contains: [], possible: ["milk", "soy"] },
   { terms: ["vegetable oil"], contains: [], possible: ["soy", "peanut"] },
-  // sesame
-  { terms: ["sesame", "sesamum indicum", "tahini", "tahina", "halva", "halvah", "halwa", "gomasio", "benne", "gingelly", "til", "teel", "hummus", "houmous", "za atar", "zaatar"], contains: ["sesame"] },
+  // sesame ("til" or "teel" on its own is read in engine.ts: it is also English for "until")
+  { terms: ["sesame", "sesamum indicum", "tahini", "tahina", "halva", "halvah", "halwa", "gomasio", "benne", "gingelly", "til seed", "til oil", "teel seed", "teel oil", "hummus", "houmous", "za atar", "zaatar"], contains: ["sesame"] },
   // fish
   {
     terms: ["fish", "salmon", "tuna", "cod", "anchovy", "anchovies", "sardine", "haddock", "trout", "mackerel", "tilapia", "halibut",
@@ -368,7 +378,7 @@ export const TERMS: Term[] = [
   { terms: ["kielbasa", "morcilla", "kabanos", "black pudding", "haggis"], contains: [], possible: ["wheat", "gluten", "milk", "soy", "mustard", "celery", "sulphites"] },
   { terms: ["ketchup", "barbecue", "barbeque", "bbq", "hot sauce", "hotsauce", "sriracha", "salsa"], contains: [], possible: ["celery", "mustard", "sulphites", "soy", "wheat", "gluten"] },
   { terms: ["turkish delight", "baklawa"], contains: [], possible: ["tree_nut", "wheat", "gluten"] },
-  { terms: ["fromage", "kase", "queso", "formaggio", "lait", "leche", "latte", "milch", "sahne", "nata", "beurre", "mantequilla"], contains: ["milk"] },
+  { terms: ["fromage", "kase", "queso", "formaggio", "lait", "leche", "latte", "milch", "sahne", "nata", "beurre", "mantequilla"], contains: ["milk"], unless: ["nata de coco"] }, // nata de coco is coconut gel
   { terms: ["oeuf", "oeufs", "huevo", "huevos", "uovo", "uova", "ei", "eier"], contains: ["egg"] },
   { terms: ["cacahuete", "cacahuate", "erdnuss", "arachide"], contains: ["peanut"] },
   { terms: ["altramuz", "altramuces"], contains: ["lupin"] },

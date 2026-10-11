@@ -69,6 +69,8 @@ export function scanIngredient(line: string, kind: "contains" | "may_contain" = 
     const possible = c.entry.possible === "all" ? ALL_ALLERGENS : (c.entry.possible ?? []);
     for (const a of possible) hits.push({ allergen: a, kind: "possible", source: line.trim(), term: c.term });
   }
+  // "til"/"teel" is sesame in Hindi, and "until" in English ("fry 'til golden"): on its own, it is sesame only as a whole item ("til", "2 tbsp til").
+  if (/^(?:\d[a-z0-9]* )*(?:(?:g|kg|oz|lb|tsp|tbsp|cup|cups) )?(?:til|teel)$/.test(text)) hits.push({ allergen: "sesame", kind, source: line.trim(), term: text.split(" ").pop()! });
   // "egg-free mayonnaise", "free from milk": a free-from claim can't be verified here, so "check the label", not "contains".
   // "lactose free milk" is still milk.
   // Also "not from milk", "not derived from milk", "contains no nuts", and the same word in other languages ("sans gluten", "ohne ei").
@@ -95,6 +97,25 @@ export function unrecognised(line: string): string[] {
   let text = ` ${normalize(line)} `;
   for (const re of PHRASES) text = text.replace(new RegExp(re.source, "g"), "  ");
   return text.split(" ").filter((w) => w && !known(w));
+}
+
+// Words of a placeholder where the list should be ("see pack", "ingredients not listed", "n/a").
+const PLACEHOLDER = new Set("see refer to label back side packaging package ingredient ingredients not listed available applicable na none unknown tbc tba".split(" "));
+
+/**
+ * False for text that is not a list we can read: no word but numbers, single letters and filler ("-", "100%", "n/a"), only placeholder words
+ * ("see pack"), or a list whose every word is unknown and that has letters English doesn't use ("Storfekjøtt", "Menthe poivrée").
+ * A list of unknown English words ("xylitol", "soursop, ascorbic acid") is left to the other checks.
+ */
+function readable(text: string): boolean {
+  const content: string[] = [];
+  const odd = new Set<string>();
+  for (const line of splitIngredients(text)) {
+    content.push(...normalize(line).split(" ").filter((w) => w.length > 1 && !/^\d+$/.test(w) && !FILLER.has(w)));
+    unrecognised(line).forEach((w) => odd.add(w));
+  }
+  if (!content.length || content.every((w) => PLACEHOLDER.has(w))) return false;
+  return content.some((w) => !odd.has(w)) || !/[^\x00-\x7f]/.test(text.replace(/[^\p{L}]/gu, ""));
 }
 
 /** The food a line names, without quantities and preparation words ("2 tbsp garam masala" -> "garam masala"). */
@@ -253,6 +274,8 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
     .filter((t) => !original || original.includes(t) || !GENERIC_CATEGORIES.has(t.slice(3).replace(/-/g, " ")))
     .map((t) => t.slice(3).replace(/-/g, " "));
   const { ingredients, warnings } = splitPrecautions(english);
+  // "-", "n/a", "see pack", "100%", or a whole list in another language: text with no word the catalogue knows is not a clean list.
+  if (english && !readable(ingredients)) dataIssues.push("I couldn't read the ingredient list.");
   const claimed = new Set((product.labels_tags ?? []).flatMap((t) => FREE_FROM_LABELS[t] ?? []));
   const fromLabel: Hit[] = [];
   splitIngredients(ingredients).forEach((l) => fromLabel.push(...scanIngredient(l)));
