@@ -148,11 +148,12 @@ export function normalize(text: string): string {
 }
 
 /**
- * Allergen words from other languages that are not English words. English ingredient text
- * containing one of these is partly untranslated, so a clean scan of it can't be trusted.
- * Left out on purpose (English words, by /usr/share/dict/words or by use in English ingredient text, 2026-10-11 check):
- * "ei", "mani", "latte", "soja", "milch", "noisette", "apio", "susan", "nodder", "pinda", "soju", "ovo", "creme", "coque", "burro",
- * "panna", "lupini", "vis", "haver", "avena", "zer", "peste", "kala", "rag", "syr". Food words among them are still read as allergen terms.
+ * Words from other languages, mostly allergen words, that English ingredient text doesn't use. Text containing
+ * one of these is partly untranslated, so a clean scan of it can't be trusted. A word that is rare in English
+ * stays: a collision only costs "can't confirm", dropping it costs a miss (run 15: dropping "apio", "pinda",
+ * "ovo", "noisette" and "susan" turned 21 untranslated records to "none listed").
+ * Left out on purpose (common in English ingredient text, 2026-10-11 check): "ei", "mani", "latte", "creme",
+ * "coque", "burro", "panna", "lupini", "vis", "haver", "avena", "zer", "peste", "kala", "rag", "syr".
  */
 export const FOREIGN_ALLERGEN_WORDS: ReadonlySet<string> = new Set(
   ("trigo, hvete, hvetemel, weizen, weizenmehl, tarwe, harina, farine, lait, leche, melk, huevo, huevos, eier, oeuf, oeufs, uovo, soia, cacahuete, cacahuetes, erdnuss, almendra, almendras, avellana, avellanas, noisettes, haselnuss, haselnusse, nocciole, sesamo, ajonjoli, selleri, sellerie, moutarde, senf, mostaza, sulfitos, solfiti, pescado, poisson, fisk, pesce, " +
@@ -179,7 +180,9 @@ export const FOREIGN_ALLERGEN_WORDS: ReadonlySet<string> = new Set(
   "noix, amandes, pistaches, ble, celeri, crustaces, mollusques, mandorle, noci, pistacchi, anacardi, glutine, crostacei, molluschi, " +
   "noten, amandelen, walnoten, boter, kaas, schaaldieren, weekdieren, gerst, rogge, sesam, anacardos, pistachos, cebada, crustaceos, moluscos, " +
   "mandle, maslo, smetana, syrovatka, lepek, ryby, unt, branza, faina, crustacee, moluste, orz, lactoza, badem, fistik, tereyagi, peynir, balik, arpa, " +
-  "juusto, hera, ohra, ruis, kaura, gluteeni, mandel, smor, ost, vassle, aeg, korn, skaldjur").split(",").map((w) => normalize(w)),
+  "juusto, hera, ohra, ruis, kaura, gluteeni, mandel, smor, ost, vassle, aeg, korn, skaldjur, soja, milch, noisette, apio, susan, nodder, pinda, soju, ovo, " +
+  // Norwegian and Danish words that carry no allergen but mark an untranslated list ("Til 100 g ferdig vare er anvendt … kjøtt av svin, vann, salt"; run 15).
+  "og, av, anvendt, vann, kjott, kjottandel, svin, storfe, spekk, krydder, rapsolje, sukker, hvitlok").split(",").map((w) => normalize(w)),
 );
 
 /**

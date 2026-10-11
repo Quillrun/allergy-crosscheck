@@ -722,15 +722,17 @@ test("engine: a whole ingredient list in another language, filed as English, is 
   }
 });
 
-test("engine: allergen words in ten more languages mark English text as partly foreign; words that are also English don't", () => {
+test("engine: allergen words in ten more languages mark English text as partly foreign; words common in English ingredient text don't", () => {
   const p = [person("X", "peanut")];
   for (const text of [
     "Vollmilch, Zucker, Kakaobutter, Mandeln, Butterreinfett, Molkenpulver, Emulgator: Sojalecithine, Sesam", "sucre, farine de blé, noix", "zucchero, mandorle, burro",
     "suiker, boter, kaas", "azúcar, anacardos", "cukr, máslo, sýr", "zahăr, unt, făină", "şeker, tereyağı, peynir", "sokeri, juusto, ohra", "socker, smör, ost",
+    // Run 15: dropping these as "English" turned untranslated records to none listed; Norwegian lists name no allergen word at all.
+    "CARNE DE CERDO, AGUA, SAL Y EXTRACTO DE APIO", "suiker, pinda's, zout", "Til 100 g ferdig vare er anvendt 110 g skinke av svin, vann, salt",
   ]) {
     assert.ok(checkProduct({ ingredients_text_en: text }, p).dataIssues.includes(NOT_ENGLISH), text);
   }
-  for (const text of ["sugar, creme brulee pieces", "sugar, panna cotta", "lupini beans, water, salt", "glycine soja oil", "rice, kala namak"]) {
+  for (const text of ["sugar, creme brulee pieces", "sugar, panna cotta", "lupini beans, water, salt", "rice, kala namak"]) {
     assert.deepEqual(checkProduct({ ingredients_text_en: text }, p).dataIssues, [], text);
   }
 });
