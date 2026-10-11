@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ALL_ALLERGENS, checkIngredients, checkProduct, resolveAllergies, scanIngredient, suggestSwaps } from "../src/index.ts";
+import { ALL_ALLERGENS, SWAP_OPTIONS, checkIngredients, checkProduct, resolveAllergies, scanIngredient, suggestSwaps } from "../src/index.ts";
 import type { AllergenId, Person } from "../src/index.ts";
 
 const person = (name: string, ...allergies: AllergenId[]): Person => ({ name, allergies });
@@ -750,4 +750,35 @@ test("engine: names that only look like an allergen (ginger ale, crab apple, roe
   for (const [line, allergen] of [["crab apple, 200g crab", "crustacean"], ["roe deer and salmon roe", "fish"], ["ale", "gluten"], ["pale ale", "gluten"], ["butter, vegan butter", "milk"], ["tiger nut and walnut", "tree_nut"], ["tart apple pie", "wheat"]] as const) {
     assert.equal(verdict(line, allergen), "unsafe", line);
   }
+});
+
+test("swaps: every option, re-scanned by the engine, declares at least what the scan finds", () => {
+  const gaps: string[] = [];
+  for (const [term, options] of Object.entries(SWAP_OPTIONS)) {
+    for (const o of options) {
+      // A hit whose own term names the allergen is a free-from claim ("dairy-free cheese"), not an ingredient.
+      const found = new Set(scanIngredient(o.use).filter((h) => !resolveAllergies([h.term]).ids.includes(h.allergen)).map((h) => h.allergen));
+      const missing = [...found].filter((a) => !o.contains.includes(a));
+      if (missing.length) gaps.push(`${term} -> ${o.use}: scan finds ${missing.join(", ")}`);
+    }
+  }
+  assert.deepEqual(gaps, []);
+});
+
+test("swaps: with a peanut, soy or lupin allergy in the house no legume is offered, and tofu is not swapped for chickpeas", () => {
+  const optionsFor = (line: string, people: Person[], household = people) => suggestSwaps(checkIngredients([line], people).lines, people, household)[0].options;
+  for (const a of ["peanut", "lupin", "soy"] as const) {
+    const milk = optionsFor("1 cup milk", [person("A", "milk"), person("B", a)]);
+    assert.ok(!milk.includes("soya milk"), `soya milk offered with ${a}`);
+    assert.ok(milk.includes("rice milk"));
+    assert.ok(!optionsFor("2 eggs", [person("A", "egg"), person("B", a)]).some((o) => /chickpea/.test(o)), `chickpea water offered with ${a}`);
+    assert.ok(!optionsFor("hummus", [person("A", "sesame"), person("B", a)]).some((o) => /bean/.test(o)), `bean dip offered with ${a}`);
+  }
+  // Without a legume allergy they are still offered.
+  assert.ok(optionsFor("1 cup milk", [person("A", "milk")]).includes("soya milk"));
+  assert.ok(optionsFor("2 eggs", [person("A", "egg")]).some((o) => /chickpea-water foam/.test(o)));
+  const tofu = optionsFor("200g tofu", [person("A", "soy")]);
+  assert.ok(tofu.length && tofu.every((o) => !/chickpea|bean|lentil|pea\b|lupin|peanut/i.test(o)), tofu.join(", "));
+  // The egg swaps are not named after egg.
+  assert.ok(optionsFor("2 eggs", [person("A", "egg")]).every((o) => !/\begg\b/i.test(o)));
 });

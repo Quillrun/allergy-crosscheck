@@ -142,7 +142,7 @@ Every tool result has a short `speech` line for voice, a `Say to the user:` sent
 ## Tests
 
 ```bash
-npm test          # 111 tests (74 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
+npm test          # 125 tests (81 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -164,7 +164,7 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, phone scan, simulator guards | 111 automated tests, 74 of them in the engine package (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 125 automated tests, 81 of them in the engine package (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The screen and the tap-to-choose flow | Headless Chrome, with every demo button's screen measured at the guide's 768×480 base canvas (dark and light), at 1280×800 with the 1.667 root scale (dark theme only), and in the simulator's Echo Show 8 frame: all fit with no scrolling. The tap-to-choose click was checked in that scaled frame. Not tested on a real Echo Show |
@@ -176,7 +176,7 @@ The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`
 ## Limits, stated plainly
 
 - English ingredient text only. Products without it get "can't confirm".
-- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". Across all 790 TheMealDB recipes, 2.6% of ingredient lines hit that rule; the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every answer ends with "check the label".
+- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". Across all 790 TheMealDB recipes, 2.6% of ingredient lines hit that rule (measured before the 2026-10-11 engine fixes, which changed the filler words and so this rate; not re-measured); the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every answer ends with "check the label".
 - Product checks read the label's declared allergens, traces and English ingredient text; unrecognised words there don't block an answer, because the declaration is the legal record.
 - Saying someone is "also allergic to" something adds it; only "no longer allergic" replaces the list.
 - It isn't medical advice and isn't an emergency service.

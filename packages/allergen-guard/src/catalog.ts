@@ -187,7 +187,7 @@ const NOT_WHEAT_FLOUR = [
   "citrus flour", "cashew flour", "almonds flour", "chestnut flour", "hazelnut flour", "walnut flour", "flour treatment agent", "flour treatment",
 ];
 const VEGAN_CHEESE = ["vegan cheese", "vegan cream cheese", "vegan parmesan", "vegan mozzarella", "vegan cheddar", "vegan feta", "plant based cheese", "plant cheese"];
-const NOT_WHEAT_PASTA = ["rice pasta", "gluten free pasta", "chickpea pasta", "lentil pasta", "corn pasta", "rice lasagne", "gluten free lasagne"];
+const NOT_WHEAT_PASTA = ["rice pasta", "gluten free pasta", "chickpea pasta", "lentil pasta", "corn pasta", "rice lasagne", "gluten free lasagne", "rice lasagna", "gluten free lasagna"];
 const CULTURES = ["yogurt culture", "yoghurt culture", "cheese culture", "kefir culture"];
 const SULPHITE_CARAMEL = ["sulphite ammonia caramel", "sulfite ammonia caramel", "caustic sulphite caramel", "caustic sulfite caramel"];
 const BAKED: AllergenId[] = ["milk", "egg", "tree_nut", "peanut", "soy"];
@@ -256,7 +256,7 @@ export const TERMS: Term[] = [
   { terms: ["bread", "breadcrumb", "panko", "pita", "pitta", "naan", "bagel", "crouton", "cracker", "pizza", "tortilla", "wonton", "dumpling", "ramen"], contains: ["wheat", "gluten"], possible: ["milk", "egg", "soy", "sesame"], unless: ["corn tortilla", "gluten free bread", "rice cracker", "rye bread", "pumpernickel"] },
   // Rye is gluten, not wheat, but most rye breads are part wheat flour.
   { terms: ["rye bread", "pumpernickel"], contains: ["gluten"], possible: ["wheat", "milk", "egg", "soy", "sesame"] },
-  { terms: ["cake", "cookie", "biscuit", "pastry", "puff pastry", "filo", "phyllo", "croissant", "pie crust", "brownie", "muffin", "waffle", "pancake", "doughnut", "donut", "scone"], contains: ["wheat", "gluten"], possible: BAKED },
+  { terms: ["cake", "cookie", "biscuit", "pastry", "puff pastry", "filo", "phyllo", "croissant", "pie crust", "brownie", "muffin", "waffle", "pancake", "doughnut", "donut", "scone"], contains: ["wheat", "gluten"], possible: BAKED, unless: ["rice cake"] },
   { terms: ["soba"], contains: [], possible: ["wheat", "gluten"] },
   { terms: ["noodle"], contains: [], possible: ["wheat", "gluten", "egg"], unless: ["rice noodle", "glass noodle", "rice vermicelli"] },
   { terms: ["soy sauce", "teriyaki"], contains: ["soy", "wheat", "gluten"] },
