@@ -40,6 +40,14 @@ export function createApp(opts: AppOptions): Server {
       if (!allowed.has(host)) return send(res, 403, { error: `host ${host} not allowed` });
       const url = new URL(req.url ?? "/", "http://local");
 
+      // CSRF guard on every POST: a page on another origin can fire a "simple" request (text/plain, no preflight) at this server
+      // from the browser of anyone on the household network. Only JSON from the same origin, or from a client that sends no Origin (curl, the MCP client), gets through.
+      if (req.method === "POST") {
+        const origin = req.headers.origin;
+        if (origin !== undefined && !sameOrigin(origin, req.headers.host)) return send(res, 403, { error: "cross-origin request refused" });
+        if (!/^application\/json\s*(;|$)/i.test(req.headers["content-type"] ?? "")) return send(res, 415, { error: "Content-Type must be application/json" });
+      }
+
       if (url.pathname === "/mcp") {
         if (req.method !== "POST") return send(res, 405, { jsonrpc: "2.0", error: { code: -32000, message: "Method not allowed (stateless server: use POST)" }, id: null });
         const body = await readJson(req);
@@ -91,6 +99,14 @@ export function createApp(opts: AppOptions): Server {
   });
   http.on("close", () => void client?.close());
   return http;
+}
+
+function sameOrigin(origin: string, host: string | undefined): boolean {
+  try {
+    return Boolean(host) && new URL(origin).host.toLowerCase() === host!.toLowerCase();
+  } catch {
+    return false; // "null" and anything unparsable
+  }
 }
 
 /** The simulator talks to the MCP endpoint over real Streamable HTTP, like Alexa+ would. */

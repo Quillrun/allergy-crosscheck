@@ -42,6 +42,8 @@ export type View = {
   items?: { text: string; flags: { allergen: string; kind: string }[] }[];
   swaps?: Swap[];
   candidates?: { barcode: string; name: string; brand?: string }[];
+  /** The people the check was limited to, so a tap on a choice checks the same people. */
+  for?: string[];
   shopping?: { item: string; note?: string }[];
   dataIssues?: string[];
   source?: { label: string };
@@ -95,12 +97,23 @@ function registerSavePerson(server: McpServer, { store }: Deps): void {
       _meta: ui("Saving…", "Saved"),
     },
     async ({ name, allergies, guest, until, replace }) => {
+      if (!name.trim()) {
+        return reply({ kind: "message", title: "Who is it for?", speech: "I didn't catch a name, so I haven't saved anything. Tell me who it is and what they're allergic to.", disclaimer: DISCLAIMER }, true);
+      }
       const { ids, unknown } = resolveAllergies(allergies);
       if (unknown.length) {
         return reply({
           kind: "message",
           title: "Allergy not recognised",
           speech: `I can't check for ${unknown.join(" or ")} yet, so I haven't ${store.find(name) ? `changed ${store.find(name)!.name}'s list` : `saved ${name}`}. I can track peanuts, tree nuts, milk, egg, wheat, gluten, soy, sesame, fish, shellfish, celery, mustard, lupin and sulphites.`,
+          disclaimer: DISCLAIMER,
+        }, true);
+      }
+      if (ids.length === 0) {
+        return reply({
+          kind: "message",
+          title: "No allergy heard",
+          speech: `I didn't catch an allergy for ${name.trim()}, so I haven't ${store.find(name) ? `changed ${store.find(name)!.name}'s list` : "saved them"}. Which foods can't they have?`,
           disclaimer: DISCLAIMER,
         }, true);
       }
@@ -112,8 +125,8 @@ function registerSavePerson(server: McpServer, { store }: Deps): void {
           disclaimer: DISCLAIMER,
         }, true);
       }
-      // An end date only makes sense for a visitor.
-      const { saved: p, before } = store.savePerson({ name: name.trim(), allergies: ids, guest: Boolean(guest || until), until }, replace);
+      // An end date only makes sense for a visitor. With neither given, an existing person's status is kept.
+      const { saved: p, before } = store.savePerson({ name: name.trim(), allergies: ids, guest: until ? true : guest, until }, replace);
       const who = p.guest ? `guest ${p.name}${p.until ? ` until ${spokenDate(p.until)}` : ""}` : p.name;
       const added = before ? ids.filter((a) => !before.allergies.includes(a)) : [];
       const speech = !before
@@ -234,7 +247,7 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
       let note = "";
       let nameLine: string | undefined;
       const unknown: string[] = [];
-      if (!ingredients && dish) {
+      if (!ingredients?.length && dish) {
         // The dish name is checked too: "shrimp pad thai" names its shellfish even if the recipe found doesn't.
         nameLine = `${dish} (the dish name)`;
         const { recipe, error } = await sources.recipe(dish);
@@ -321,6 +334,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
             title: `Which ${name}?`,
             speech: `I found ${found.candidates.length} products called ${name}, and they're not the same. ${whichOne(found.candidates)}`,
             candidates: found.candidates.slice(0, 5),
+            ...(names?.length ? { for: names } : {}),
             disclaimer: DISCLAIMER,
           });
         }

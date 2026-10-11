@@ -37,3 +37,18 @@ test("a corrupt household file refuses to start empty", () => {
   writeFileSync(path, "{not json");
   assert.throws(() => new Store(path), /refusing to start with an empty household/);
 });
+
+test("re-saving without guest or until keeps a guest's status and end date; saying so changes it", () => {
+  const s = new Store(tmp());
+  s.savePerson({ name: "Leo", allergies: ["milk"], guest: true, until: "2026-10-10" });
+  s.savePerson({ name: "leo", allergies: ["egg"] });
+  const leo = s.find("Leo")!;
+  assert.deepEqual([leo.guest, leo.until, leo.allergies], [true, "2026-10-10", ["milk", "egg"]]);
+  assert.deepEqual(s.activePeople("2026-10-11"), []); // an expired guest stays expired
+  s.savePerson({ name: "Leo", allergies: ["egg"], until: "2026-12-01" });
+  assert.deepEqual([s.find("Leo")!.guest, s.find("Leo")!.until], [true, "2026-12-01"]);
+  s.savePerson({ name: "Leo", allergies: ["egg"], guest: false });
+  assert.deepEqual([s.find("Leo")!.guest, s.find("Leo")!.until], [false, undefined]); // explicitly a member now
+  s.savePerson({ name: "Ana", allergies: ["fish"] });
+  assert.deepEqual([s.find("Ana")!.guest, s.find("Ana")!.until], [false, undefined]); // new people default to household members
+});

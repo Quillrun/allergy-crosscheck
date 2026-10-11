@@ -35,12 +35,18 @@ export class Store {
     return this.state.people.find((p) => same(p.name, name));
   }
 
-  /** Saves someone. By default new allergies are added to what's saved; `replace` swaps the list. The first spelling of a name is kept. */
-  savePerson(profile: Profile, replace = false): { saved: Profile; before?: Profile } {
+  /**
+   * Saves someone. By default new allergies are added to what's saved; `replace` swaps the list. The first spelling of a name is kept.
+   * Saving an existing person without `guest` or `until` keeps their guest status and end date: an update to the allergies
+   * must not make a guest permanent or bring an expired one back.
+   */
+  savePerson(profile: Omit<Profile, "guest"> & { guest?: boolean }, replace = false): { saved: Profile; before?: Profile } {
     const before = this.find(profile.name);
+    const keepStatus = before && profile.guest === undefined && profile.until === undefined;
+    const status = keepStatus ? { guest: before.guest, until: before.until } : { guest: profile.guest ?? Boolean(profile.until), until: profile.until };
     const saved: Profile = before
-      ? { ...profile, name: before.name, allergies: replace ? profile.allergies : [...new Set([...before.allergies, ...profile.allergies])] }
-      : profile;
+      ? { ...profile, ...status, name: before.name, allergies: replace ? profile.allergies : [...new Set([...before.allergies, ...profile.allergies])] }
+      : { ...profile, ...status };
     this.state.people = [...this.state.people.filter((p) => !same(p.name, profile.name)), saved];
     this.flush();
     return { saved, before };

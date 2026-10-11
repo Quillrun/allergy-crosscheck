@@ -140,10 +140,10 @@
     notify("ui/notifications/size-changed", { width: Math.ceil(box.width), height: Math.ceil(box.height) });
   }
 
-  async function choose(barcode) {
+  async function choose(barcode, forNames) {
     app.innerHTML = `<div class="empty">Checking…</div>`;
     try {
-      const result = await request("tools/call", { name: "check_product", arguments: { barcode } });
+      const result = await request("tools/call", { name: "check_product", arguments: forNames?.length ? { barcode, for: forNames } : { barcode } });
       render(result?.structuredContent);
     } catch (e) {
       app.innerHTML = `<div class="empty">That didn't work. Ask me again by voice.</div>`;
@@ -206,7 +206,7 @@
     const src = v.source ? `Data: ${esc(v.source.label)}` : "";
     parts.push(`<footer><span>${esc(v.disclaimer)}</span><span>${src}</span></footer>`);
     app.innerHTML = parts.join("");
-    app.querySelectorAll("button.choice").forEach((b) => b.addEventListener("click", () => choose(b.dataset.barcode)));
+    app.querySelectorAll("button.choice").forEach((b) => b.addEventListener("click", () => choose(b.dataset.barcode, v.for)));
     resize();
   }
 

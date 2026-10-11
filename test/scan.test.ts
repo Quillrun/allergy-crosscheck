@@ -72,3 +72,23 @@ test("serves the scan page and its barcode decoder locally", async () => {
   const js = await fetch(`${app.url}/vendor/barcode-detector.js`);
   assert.match(await js.text(), /BarcodeDetectionAPI/);
 });
+
+test("POST routes need JSON and refuse a foreign Origin (CSRF); same-origin and no-Origin clients still work", async () => {
+  const body = JSON.stringify({ barcode: "3017624010701" });
+  const post = (path: string, headers: Record<string, string>, payload = body) => fetch(`${app.url}${path}`, { method: "POST", headers, body: payload });
+  const json = { "Content-Type": "application/json" };
+  const scanBefore = app.store.recentScan()?.at;
+  for (const path of ["/scan", "/sim/tool", "/sim/turn", "/mcp"]) {
+    assert.equal((await post(path, { "Content-Type": "text/plain" })).status, 415, `${path} text/plain`);
+    assert.equal((await post(path, {})).status, 415, `${path} no content type`);
+    assert.equal((await post(path, { ...json, Origin: "https://evil.example" })).status, 403, `${path} foreign origin`);
+    assert.equal((await post(path, { "Content-Type": "text/plain", Origin: "https://evil.example" })).status, 403, `${path} both`);
+    assert.equal((await post(path, { ...json, Origin: "null" })).status, 403, `${path} opaque origin`);
+  }
+  // Nothing was saved by the refused scans.
+  assert.equal(app.store.recentScan()?.at, scanBefore);
+  const host = new URL(app.url).host;
+  assert.equal((await post("/scan", { ...json, Origin: `http://${host}` })).status, 200); // the scan page itself
+  assert.equal((await post("/scan", { "Content-Type": "application/json; charset=utf-8" })).status, 200); // curl
+  assert.equal((await post("/sim/tool", { ...json, Origin: `http://${host}` }, JSON.stringify({ name: "list_people" }))).status, 200);
+});

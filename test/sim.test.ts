@@ -25,6 +25,10 @@ const fakeLlm = createServer(async (req, res) => {
     ? { role: "assistant", content: "Bye, stay safe!" }
     : /dinner/.test(asked)
     ? { role: "assistant", content: "Which dish is dinner?" }
+    : !sawTool && /two checks/.test(asked)
+    ? { role: "assistant", content: null, tool_calls: (/reversed/.test(asked) ? ["rice", "peanut butter"] : ["peanut butter", "rice"]).map((food, i) => (
+        { id: `c${i}`, type: "function", function: { name: "check_recipe", arguments: JSON.stringify({ ingredients: [food], for: ["Maya"] }) } }
+      )) }
     : sawTool
     ? { role: "assistant", content: "Good news, it's totally safe for everyone!" }
     : { role: "assistant", content: null, tool_calls: [{ id: "c1", type: "function", function: { name: "check_recipe", arguments: JSON.stringify({ ingredients: ["satay sauce", "rice"] }) } }] };
@@ -53,6 +57,16 @@ test("a model that says 'safe' is overridden by the tool's verdict", async () =>
   assert.doesNotMatch(turn.speech, /safe for everyone/);
   assert.match(turn.speech, /Maya should avoid this: it contains peanuts/);
   assert.equal(turn.views[0].overall, "unsafe");
+});
+
+test("two checks in one turn: the unsafe one is spoken first whichever call came first, and the clean one is not alone", async () => {
+  for (const [text, order] of [["Run two checks", ["unsafe", "no_listed_allergens"]], ["Run two checks reversed", ["no_listed_allergens", "unsafe"]]] as const) {
+    const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    const turn = await res.json();
+    assert.deepEqual(turn.views.map((v: { overall: string }) => v.overall), order, text);
+    assert.match(turn.speech, /^Maya should avoid this: it contains peanuts/, text);
+    assert.match(turn.speech, /I didn't find peanuts listed for Maya/, text);
+  }
 });
 
 test("a verdict without a tool call is never spoken", async () => {

@@ -77,10 +77,15 @@ export async function runTurn(client: Client, llm: Llm, history: ChatMessage[], 
     // A reply to the nudge that talks about tools is meta-talk, not an answer for the kitchen.
     if (!views.length && nudged && /\btools?\b/i.test(said)) return done(messages, SMALL_TALK, views);
     const checks = views.filter((v) => v.overall || v.kind === "needs_choice");
-    return done(messages, checks.length ? checks[checks.length - 1].speech : said || views.at(-1)?.speech || "Sorry, I didn't catch that.", views);
+    return done(messages, checks.length ? spokenChecks(checks) : said || views.at(-1)?.speech || "Sorry, I didn't catch that.", views);
   }
   return done(messages, views.at(-1)?.speech ?? "Sorry, I couldn't finish that.", views);
 }
+
+// Two checks in one turn are both spoken, the worst first, so an unsafe one is never lost behind a later clean one.
+const RANK: Record<string, number> = { unsafe: 2, cannot_confirm: 1, no_listed_allergens: 0 };
+const spokenChecks = (checks: View[]): string =>
+  [...new Set(checks.map((v, i) => ({ v, i })).sort((a, b) => (RANK[b.v.overall ?? "cannot_confirm"] - RANK[a.v.overall ?? "cannot_confirm"]) || a.i - b.i).map(({ v }) => v.speech))].join(" ");
 
 // History keeps the tool results (so "add the swaps" knows what the swaps were) and
 // ends with what was actually spoken, not what the model drafted. It is trimmed at a

@@ -132,6 +132,18 @@ test("a product name with several matches asks instead of guessing", async () =>
   assert.match(r.structuredContent.speech, /Which one: Nutella by Ferrero or Nutella\? Or read me the barcode\./);
 });
 
+test("a choice remembers who the check was for, and the screen passes it back when a choice is tapped", async () => {
+  const limited = await call("check_product", { name: "Nutella", for: ["Maya"] });
+  assert.deepEqual(limited.structuredContent.for, ["Maya"]);
+  assert.equal((await call("check_product", { name: "Nutella" })).structuredContent.for, undefined);
+  const widget = String(((await client.readResource({ uri: "ui://allergy-crosscheck/verdict.html" })).contents[0] as { text: string }).text);
+  assert.match(widget, /choose\(b\.dataset\.barcode, v\.for\)/);
+  assert.match(widget, /arguments: forNames\?\.length \? \{ barcode, for: forNames \} : \{ barcode \}/);
+  // What the tap sends: the same people only.
+  const tapped = await call("check_product", { barcode: "3017624010701", for: limited.structuredContent.for });
+  assert.deepEqual(tapped.structuredContent.people.map((p: View) => p.name), ["Maya"]);
+});
+
 test("choices that sound the same aren't read out", async () => {
   const r = await call("check_product", { name: "spread" });
   assert.equal(r.structuredContent.kind, "needs_choice");
@@ -190,4 +202,42 @@ test("rejects requests for unexpected hosts (DNS rebinding guard)", async () => 
     req.end("{}");
   });
   assert.equal(status, 403);
+});
+
+test("an allergy list that resolves to nothing, or a blank name, is refused and nothing is saved", async () => {
+  for (const allergies of [["and"], [""], [" "], [",", "&"]]) {
+    const r = await call("save_person", { name: "Blank Allergy", allergies });
+    assert.equal(r.isError, true, JSON.stringify(allergies));
+    assert.match(r.structuredContent.speech, /didn't catch an allergy for Blank Allergy, so I haven't saved them/);
+  }
+  const noName = await call("save_person", { name: "   ", allergies: ["milk"] });
+  assert.equal(noName.isError, true);
+  const list = await call("list_people");
+  assert.ok(!list.structuredContent.people.some((p: View) => /blank allergy|^\s*$/i.test(p.name)));
+  // An existing person's list is left alone, and the reply says so.
+  await call("save_person", { name: "Keep Me", allergies: ["milk"] });
+  const keep = await call("save_person", { name: "keep me", allergies: ["and"] });
+  assert.equal(keep.isError, true);
+  assert.match(keep.structuredContent.speech, /changed Keep Me's list/);
+  assert.deepEqual((await call("list_people")).structuredContent.people.find((p: View) => p.name === "Keep Me").allergies, ["Milk"]);
+  await call("remove_person", { name: "Keep Me" });
+});
+
+test("save_person without guest or until leaves a guest a guest", async () => {
+  await call("save_person", { name: "Visiting Vic", allergies: ["milk"], until: "2999-01-01" });
+  const more = await call("save_person", { name: "visiting vic", allergies: ["egg"] });
+  const vic = more.structuredContent.people.find((p: View) => p.name === "Visiting Vic");
+  assert.equal(vic.guest, true);
+  assert.equal(vic.until, "2999-01-01");
+  assert.match(more.structuredContent.speech, /guest Visiting Vic until/);
+  await call("remove_person", { name: "Visiting Vic" });
+});
+
+test("an empty ingredient list does not stop the dish being looked up", async () => {
+  for (const ingredients of [[], ""]) {
+    const r = await call("check_recipe", { ingredients, dish: "lasagne" });
+    assert.equal(r.structuredContent.title, "Lasagne", JSON.stringify(ingredients));
+    assert.equal(r.structuredContent.source?.label, "TheMealDB");
+    assert.equal(r.structuredContent.overall, "unsafe");
+  }
 });

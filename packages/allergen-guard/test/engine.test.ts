@@ -684,3 +684,23 @@ test("engine: macadamia milk is a rare plant milk (milk possible, the nut contai
   assert.equal(k.milk, "possible");
   assert.equal(kindsOf("milk, macadamia milk").milk, "contains");
 });
+
+test("engine: a line in a script the catalogue can't read, or with no letters at all, is unrecognised, never 'none listed'", () => {
+  for (const line of ["牛奶", "молоко", "حليب", "1 cup 牛乳", "200g ミルク", "—", "?"]) {
+    const r = checkIngredients([line], [person("X", "milk")]);
+    assert.equal(r.people[0].verdict, "cannot_confirm", line);
+    assert.match(r.people[0].reasons[0], /I don't know what's in/, line);
+  }
+  // Quantities and units still read as quantities, and a micro sign is a unit.
+  for (const line of ["1", "½ cup", "1/2", "to taste", "5µg"]) assert.equal(verdict(line, "milk"), "no_listed_allergens", line);
+});
+test("engine: product text in a script we can't read, or a foreign precaution naming nothing we know, is a data issue", () => {
+  const p = [person("X", "tree_nut")];
+  for (const text of ["sugar, 牛奶", "молоко, сахар", "sugar. Kann Spuren von Nüssen enthalten", "sugar. Peut contenir des fruits à coque"]) {
+    const r = checkProduct({ ingredients_text_en: text }, p);
+    assert.equal(r.overall, "cannot_confirm", text);
+    assert.match(r.dataIssues.join(" "), /isn't in English/, text);
+  }
+  assert.equal(checkProduct({ ingredients_text_en: "sugar, 5µg vitamin D. May contain milk" }, p).overall, "no_listed_allergens");
+  assert.equal(checkProduct({ ingredients_text_en: "sugar. Kann Spuren von Milch enthalten" }, [person("X", "milk")]).overall, "unsafe"); // read as usual when it names an allergen we know
+});

@@ -109,8 +109,7 @@ export function splitIngredients(input: string | string[]): string[] {
 }
 
 // "may contain traces of nuts", "made in a factory that also handles milk": a warning, not an ingredient.
-const PRECAUTION = new RegExp(
-  [
+const PRECAUTION_EN = [
     "may (?:also )?contain", "could contain", "contains traces of", "traces of", "may be present",
     "(?:made|produced|manufactured|packed|processed|prepared) (?:in|at) (?:an? |the |our )?(?:\\w+ ){0,2}(?:factory|facility|site|kitchen|environment) that (?:also )?(?:handles|uses|processes)",
     "made on (?:shared )?equipment", "shares (?:the same )?(?:equipment|facility|production line|line) with", "produced on equipment shared with", "made on a line that also", "processed on shared equipment",
@@ -118,13 +117,16 @@ const PRECAUTION = new RegExp(
     "(?:manufactured|made|produced|processed|packed|packaged) on equipment exposed to",
     "\\b(?:plant|factory|facility|site|line|lines|equipment|premises|bakery|kitchen|environment) (?:that|which|where) (?:also )?(?:processes|handles|uses|manufactures|packs|produces|makes)",
     "(?:in|on) the same (?:facility|equipment|line|lines|premises)", "shared (?:equipment|facility|line)", "may also use", "contains one or more of",
+];
+// The same warnings in other languages: found, but the allergens after them are only read when they are words the catalogue knows.
+const PRECAUTION_FOREIGN = [
     "kan inneholde", "kan inneh[aå]lla", "kan indeholde", "mo[zż]e zawiera[cć]", "mo[zž]e obsahovat", "m[oô][zž]e obsahova[tť]", "gali b[uū]ti", "pode conter",
     "(?:l[ií]neas?|planta|f[aá]brica) que (?:tambi[eé]n )?(?:procesa|procesan|elabora|elaboran|utiliza|utilizan)", "fabriqu[ée] dans un atelier qui",
     "peut contenir", "traces [ée]ventuelles", "traces de", "kann spuren", "spuren von", "kann\\b(?=[^.]*\\benthalten)",
     "pu[òo] contenere", "tracce di", "puede contener", "trazas de", "kan sporen", "sporen van",
-  ].join("|"),
-  "gi",
-);
+];
+const PRECAUTION = new RegExp([...PRECAUTION_EN, ...PRECAUTION_FOREIGN].join("|"), "gi");
+const FOREIGN_PRECAUTION = new RegExp(`^(?:${PRECAUTION_FOREIGN.join("|")})`, "i");
 
 // "Not suitable for Nut, Peanut and Sesame allergy sufferers.", "It may not be suitable for those with peanut allergy.", "Allergy advice: Not suitable for customers with an allergy to soya.": a sentence of its own (or the text after an allergy-advice label), only a precaution when it speaks of allergy.
 const NOT_SUITABLE = /(?<=^|[.\n]\s*|\ballerg(?:y|en|ens|ic) (?:advice|information|warning|note)\s*:\s*)(?:(?:(?:it|this|this product|the product) )?(?:may|might) not be suitable|not suitable|unsuitable) for\b(?=(?:[^.\n]|\.(?!\s|$))*\ballerg(?:y|ic|ies)\b)/gi;
@@ -176,12 +178,18 @@ function splitPrecautions(text: string): { ingredients: string; warnings: string
   return { ingredients: ingredients + text.slice(at), warnings };
 }
 
+/** True when the text has a letter from a script this catalogue can't read (CJK, Cyrillic, Arabic, Greek…). The micro sign is a unit, not a letter. */
+const NON_LATIN = /(?![µμ])(?!\p{Script=Latin})\p{L}/u;
+const unreadable = (text: string) => NON_LATIN.test(text.normalize("NFKD"));
+
 export function checkIngredients(input: string | string[], people: Person[]): CheckResult & { lines: { text: string; hits: Hit[] }[] } {
   const lines = splitIngredients(input).map((text) => {
     const hits = scanIngredient(text);
     const odd = unrecognised(text);
+    // A line that normalises to nothing ("—", "牛奶") or holds letters we can't read is not "no allergens found": it is unread.
+    if (!normalize(text) || unreadable(text)) odd.push(text.trim());
     // A word the engine doesn't know could be anything: it blocks "none listed" for everyone.
-    if (odd.length) for (const a of ALL_ALLERGENS) hits.push({ allergen: a, kind: "possible", source: text.trim(), term: foodName(text), unknown: true });
+    if (odd.length) for (const a of ALL_ALLERGENS) hits.push({ allergen: a, kind: "possible", source: text.trim(), term: foodName(text) || text.trim(), unknown: true });
     return { text, hits };
   });
   const dataIssues = lines.length === 0 ? ["No ingredients were given, so nothing could be checked."] : [];
@@ -239,7 +247,13 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
   splitIngredients(ingredients).forEach((l) => fromLabel.push(...scanIngredient(l)));
   taxonomy.forEach((t) => fromLabel.push(...scanIngredient(t)));
   hits.push(...fromLabel.map((h) => (h.kind === "contains" && claimed.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));
-  warnings.forEach((w) => splitIngredients(w).forEach((l) => hits.push(...scanIngredient(l, "may_contain"))));
+  // A warning in another language that names nothing we can read ("Kann Spuren von Nüssen enthalten") is not a clean one.
+  let unreadWarning = false;
+  for (const w of warnings) {
+    const found = splitIngredients(w).flatMap((l) => scanIngredient(l, "may_contain"));
+    hits.push(...found);
+    if (!found.length && FOREIGN_PRECAUTION.test(w)) unreadWarning = true;
+  }
   if (!english && enTags.length === 0) {
     dataIssues.push(
       (product.ingredients_text ?? "").trim()
@@ -248,7 +262,7 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
     );
   } else if (!english && labelTags.some((t) => !t.startsWith("en:"))) {
     dataIssues.push("Part of the ingredient list isn't in English, so I can't read it.");
-  } else if (english && normalize(english).split(" ").some((w) => FOREIGN_ALLERGEN_WORDS.has(w))) {
+  } else if (english && (unreadable(english) || unreadWarning || normalize(english).split(" ").some((w) => FOREIGN_ALLERGEN_WORDS.has(w)))) {
     dataIssues.push("Part of the ingredient list isn't in English, so I can't read it.");
   }
   return evaluate(dedupe(hits), people, dataIssues);
