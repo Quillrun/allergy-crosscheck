@@ -92,3 +92,13 @@ test("POST routes need JSON and refuse a foreign Origin (CSRF); same-origin and 
   assert.equal((await post("/scan", { "Content-Type": "application/json; charset=utf-8" })).status, 200); // curl
   assert.equal((await post("/sim/tool", { ...json, Origin: `http://${host}` }, JSON.stringify({ name: "list_people" }))).status, 200);
 });
+
+test("a malformed JSON body is a 400 with a plain message, not a 500 with the parser's error", async () => {
+  for (const path of ["/scan", "/sim/tool", "/mcp"]) {
+    const res = await fetch(`${app.url}${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{not json" });
+    assert.equal(res.status, 400, path);
+    const text = await res.text();
+    assert.doesNotMatch(text, /SyntaxError|Unexpected token|position/, path);
+    assert.match(text, /isn't valid JSON/, path);
+  }
+});

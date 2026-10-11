@@ -742,6 +742,9 @@ test("engine: product text that is not an ingredient list (placeholder, numbers,
     assert.equal(r.overall, "cannot_confirm", text);
     assert.deepEqual(r.dataIssues, ["I couldn't read the ingredient list."], text);
   }
+  // In speech the issue keeps its capital "I"; other issues start lower case after the colon.
+  assert.equal(checkProduct({ ingredients_text_en: "-" }, [person("Maya", "milk")]).speech, "I can't confirm this is OK for Maya: I couldn't read the ingredient list. Treat it as unsafe and check the label.");
+  assert.match(checkProduct(null, [person("Maya", "milk")]).speech, /: the product wasn't found/);
   // A list of English words the catalogue doesn't know is not this issue; a known word anywhere makes the list readable.
   for (const text of ["xylitol", "Soursop, ascorbic acid", "Sour cherries, Sugar, Water, Citric acid.", "Water"]) {
     assert.deepEqual(checkProduct({ ingredients_text_en: text }, p).dataIssues, [], text);

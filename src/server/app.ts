@@ -93,6 +93,13 @@ export function createApp(opts: AppOptions): Server {
       }
       send(res, 404, { error: "not found" });
     } catch (err) {
+      // A malformed body is the caller's mistake, not a server fault, and the parser's message is not shown.
+      if (err instanceof BadJson) {
+        if (res.headersSent) return;
+        return req.url?.startsWith("/mcp")
+          ? send(res, 400, { jsonrpc: "2.0", error: { code: -32700, message: "Parse error: the request body isn't valid JSON" }, id: null })
+          : send(res, 400, { error: "The request body isn't valid JSON." });
+      }
       client = undefined;
       if (!res.headersSent) send(res, 500, { error: (err as Error).message });
     }
@@ -122,8 +129,13 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
   for await (const c of req) chunks.push(c as Buffer);
   const raw = Buffer.concat(chunks).toString("utf8");
-  return raw ? JSON.parse(raw) : {};
+  try {
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    throw new BadJson();
+  }
 }
+class BadJson extends Error {}
 
 function send(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });

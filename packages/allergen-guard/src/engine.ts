@@ -352,7 +352,7 @@ function speak(p: Person, verdict: Verdict, contains: Hit[], may: Hit[], possibl
     ];
     const why = parts.length
       ? parts.join(", and ")
-      : (issues[0] ?? "the data is incomplete").replace(/\.$/, "").replace(/^./, (c) => c.toLowerCase());
+      : (issues[0] ?? "the data is incomplete").replace(/\.$/, "").replace(/^(?!I\b)./, (c) => c.toLowerCase()); // "I couldn't …" keeps its capital
     return `I can't confirm this is OK for ${p.name}: ${why}. Treat it as unsafe and check the label.`;
   }
   return `I didn't find ${join(p.allergies.map((a) => ALLERGENS[a].spoken))} listed for ${p.name}, but data can be wrong, so check the label.`;
