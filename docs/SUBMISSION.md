@@ -15,8 +15,10 @@ An Alexa+ add-on that tells you who at the table can eat a dish or a scanned foo
 
 Who at the table can eat tonight's dinner, and why? Allergy Crosscheck answers that by voice and on the Echo Show screen, for the whole household and its guests, from a recipe or a scanned product. When the data can't back an answer, it says "I can't confirm" instead of guessing.
 
+What is real and what is simulated: the MCP server, the allergen engine, the Echo Show screen and the phone scan are the shipped code; the Alexa+ host in the video is a simulator driven by a local model, because the MCP Toolkit is available in the United States and I am outside it (details under "Simulated Alexa+" below).
+
 ### Inspiration
-Two real records from Open Food Facts, the open database behind many allergy apps. A chocolate hazelnut spread has an empty allergen list and no ingredient list, so a checker that trusts the list would call it allergen-free. A hot cocoa mix lists soy as its only allergen, while its ingredients include nonfat dry milk, whey and caseinate. A voice assistant that answers confidently from data like that is dangerous. One that knows when it doesn't know is useful.
+Two real records from Open Food Facts, the open database behind many allergy apps. A chocolate hazelnut spread has an empty allergen list and no ingredient list, so a checker that trusts the list would call it allergen-free. A hot cocoa mix lists soy as its only allergen and milk only as a "may contain", while its ingredients include nonfat dry milk, whey and caseinate. A voice assistant that answers confidently from data like that is dangerous. One that knows when it doesn't know is useful.
 
 This is common. I ran the engine over all 4,784,317 Open Food Facts records (snapshot of 7 October 2026). 72.3% of them list no allergens, no "may contain", and have no ingredient list. So do 53.2% of the products scanned in the Open Food Facts app. A checker that trusts the list would say "no allergens" for each one; this one says "can't confirm". Details: [`packages/allergen-guard/bench/README.md`](packages/allergen-guard/bench/README.md). Data: Open Food Facts (ODbL).
 
@@ -41,7 +43,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   - **MCP Apps:** the Echo Show screen, with tap-to-choose that calls back into the server (`public/widget.html`).
   - **Cards, partly:** the screen is made of card panels: "Who's eating", "Watch out for", "Swaps", "Which one?" and "Shopping list". These are HTML sections I drew inside the MCP Apps view, not Alexa+'s own card or carousel components, and there are no images or media.
   - **Not built:** purchasing, and Agent Skills.
-  - **A cross-check, not a lookup:** a product's allergen tags, traces and ingredient text are read together, which is how it finds the milk that the cocoa mix's tags leave out.
+  - **A cross-check, not a lookup:** a product's allergen tags, traces and ingredient text are read together, which is how the cocoa mix's "may contain milk" becomes a firm "contains milk" with the ingredients named.
 - **Self-hosted MCP server** in TypeScript with the MCP TypeScript SDK 1.32. It uses MCP spec **2025-11-25** over **Streamable HTTP**, is stateless, and has 9 tools. Every check result (`check_recipe`, `check_product`) leads with a `VERDICT:` line, and every result carries the exact sentence to say, plus `structuredContent` for the screen.
 - **MCP Apps screen** for the Echo Show (`text/html;profile=mcp-app`), following the Alexa+ MCP design guide's base canvas, zoom, touch-target and contrast figures, and using the `hostContext` fields theme, safeAreaInsets, maxWidth and maxHeight:
   - authored at the guide's 768×480 base canvas with its type, spacing and corner-radius tokens; the widget applies one root scale from `hostContext` maxWidth/maxHeight, 1.667 for the Echo Show 8's 1280×800 (guide figures), and each demo verdict fits both with no scrolling (measured in headless Chrome, not on a real Echo Show);
@@ -84,7 +86,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 ### Accomplishments that I'm proud of
 - The server's results never call a food "safe"; the engine's tests check that, and a simulator test checks that a fake model's "totally safe" is overridden. On a real Alexa+ the spoken words are the model's.
 - One spoken question checks everyone at the table, including a guest who drops off after the visit.
-- It finds the milk in a real cocoa mix whose allergen tags miss it.
+- In a real cocoa mix whose tags carry milk only as "may contain", it shows the milk is in the ingredients.
 - It follows MCP spec 2025-11-25 over Streamable HTTP, with an MCP Apps screen authored at the Alexa+ 768×480 base canvas and checked in an Echo Show 8 simulator frame (untested on a real Echo Show).
 - The language model runs locally (Qwen3.5 9B, 4-bit, MLX), with no cloud LLM API; product and recipe data come live from Open Food Facts and TheMealDB.
 
@@ -107,14 +109,15 @@ alexa+, model-context-protocol, mcp-apps, streamable-http, typescript, node.js, 
 - Code repository: <GitHub URL, once the author decides private or public>
 
 ## Video demo link
-<YouTube URL, after the upload>. The file is `docs/video/allergy-crosscheck-demo.mp4` (2:57, 4K at 60 fps, recorded 11 October 2026), with captions in `docs/video/allergy-crosscheck-demo.srt`.
+<YouTube URL, after the upload>. The file is `docs/video/allergy-crosscheck-demo.mp4` (2:50, 4K at 60 fps, recorded 12 October 2026), with captions in `docs/video/allergy-crosscheck-demo.srt`.
 
 ## Image gallery (upload in this order)
 Files are in `docs/video/gallery/`, padded to 3:2.
 1. `1-cannot-confirm.png`: "Missing product data: 'Can't confirm', never 'allergen-free'."
 2. `2-lasagne-check.png`: "One question gives a verdict for everyone at the table, with swaps checked against all of them."
-3. `3-product-check.png`: "The allergen tags say soy; the ingredient text adds the milk."
+3. `3-product-check.png`: "The allergen tags say soy, and milk only as a 'may contain'. The ingredient text shows the milk is in it."
 4. `4-phone-scan.png`: "Scan on your phone, then ask about 'what I just scanned'."
+5. `5-sunday.png`: "A new session the day after: the household is remembered, the guest's visit is over."
 
 ## Additional info (the hackathon's questions)
 
@@ -132,7 +135,7 @@ Node 22.6 or newer. Run `npm install && npm start`, then open http://127.0.0.1:8
 
 The demo-script buttons call the MCP tools directly and need no model or API key. They reproduce the video's checks:
 - the spread with no ingredient list gives "Can't confirm";
-- the cocoa mix whose tags miss the milk gives "Avoid" for Leo.
+- the cocoa mix whose tags carry milk only as "may contain" gives "Avoid" for Leo, with the milk ingredients named.
 
 To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 146 tests.
 
@@ -167,7 +170,7 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
 - **Onboarding:** the spec plus the Alexa+ design guide was enough to get a first screen. The host shim I built to test it is part of the simulator.
 
 **Alexa developer console: Voice & Tone** (Test tab)
-- **Used for:** Alexa's five lines in the demo video, in Amazon's own Alexa voice.
+- **Used for:** Alexa's six lines in the demo video, in Amazon's own Alexa voice.
 - **Worked well:** the voice is the real one, and the page's own `getTTS` call returns the audio as a base64 MP3.
 - **Needs work:** no export or download control, and the editor adds its own closing `</speak>` tag, so a typed one causes a 400 (friction log 6).
 - **Onboarding:** the Test tab only opens once a skill exists, so I created an empty private skill for it. Account sign-up also rejected a diacritic in my legal name (friction log 7).
@@ -236,7 +239,7 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
 - **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 92 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents. The engine is open source (MIT), so any allergy feature can start fail-closed.
 
 ## YouTube upload (not part of the Devpost form)
-- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:57, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
+- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:50, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
 - **Title:** Allergy Crosscheck: who at the table can eat it, and why (Alexa+ hackathon demo)
 - **Visibility:** Public. The rules say "publicly visible", and Unlisted may not count. This is the author's call.
 - **Altered or synthetic content:** yes. The voices are synthetic: Alexa's lines are Amazon's Alexa voice from the developer console; the narrator and the user are AI-generated.
@@ -252,15 +255,16 @@ Built for Amazon's Build, Ship, Shape hackathon (Alexa+ track): a self-hosted MC
 
 Code: <repository URL>
 
-0:00 The problem: a record with an empty allergen list
-0:18 What it does: who at the table can eat it, and why
-0:31 Saving the household and a guest
-0:55 Checking tonight's lasagne for everyone
-1:29 Scan on a phone: missing data means "can't confirm"
-1:48 A cocoa mix whose tags miss the milk
-2:14 Keeping the model honest
-2:23 How it's built
-2:36 Who it's for, and the open engine
+0:00 Cold open: the lasagne verdict
+0:06 The problem: a record with an empty allergen list
+0:32 The simulator
+0:38 Saving the household and a guest
+0:58 Checking the lasagne for everyone
+1:25 Scan on a phone: missing data means "can't confirm"
+1:44 A cocoa mix: the tags say "may contain" milk, the ingredients show it is in
+2:07 Sunday: the guest's visit is over
+2:19 How it's built
+2:31 Who it's for, and the open engine
 ```
 
 ## Repository access (not part of the Devpost form)

@@ -20,7 +20,7 @@ npm start    # then open http://127.0.0.1:8787/ and press the demo script button
 | Missing product data: "can't confirm", never "allergen-free" | A recipe check: verdict per person, the risky lines, swaps checked against everyone |
 |---|---|
 | ![Can't confirm](docs/screenshots/cannot-confirm.png) | ![Lasagne check](docs/screenshots/lasagne-check.png) |
-| **Allergen tags say soy; the ingredient text adds milk** | **A guest saved until Saturday: not checked after the visit** |
+| **Allergen tags say soy, milk only "may contain"; the ingredient text shows it is in** | **A guest saved until Saturday: not checked after the visit** |
 | ![Product check](docs/screenshots/product-check.png) | ![Household](docs/screenshots/household.png) |
 
 Screens from the recorded demo run: a local model driving the server, with live data. They show the screen's earlier layout, from before it was moved to the 768×480 base canvas.
@@ -57,7 +57,7 @@ npm ci
 npm start                     # MCP: http://127.0.0.1:8787/mcp   Simulator: http://127.0.0.1:8787/
 ```
 
-Open the simulator and use the **demo script** buttons. They need no LLM. Each button is one MCP tool call, and they reproduce the video's checks: the spread with no ingredient list ("Can't confirm") and the cocoa mix whose tags miss the milk ("Avoid" for Leo).
+Open the simulator and use the **demo script** buttons. They need no LLM. Each button is one MCP tool call, and they reproduce the video's checks: the spread with no ingredient list ("Can't confirm") and the cocoa mix whose tags carry milk only as "may contain" ("Avoid" for Leo: the ingredients name it).
 
 To talk to it, point it at any OpenAI-compatible endpoint with tool calling:
 
