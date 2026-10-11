@@ -1,0 +1,268 @@
+{
+ "total": 7566,
+ "none": 9,
+ "none_scanned": 1,
+ "by": {
+  "fr:peut contenir": {
+   "rows": 2184,
+   "none": 8,
+   "examples": [
+    "0651986703128",
+    "0041554563290",
+    "0067800005024"
+   ]
+  },
+  "fr:traces de": {
+   "rows": 1117,
+   "none": 1,
+   "examples": [
+    "0666522041381"
+   ]
+  },
+  "es:puede contener": {
+   "rows": 1277,
+   "none": 0,
+   "examples": []
+  },
+  "de:spuren von": {
+   "rows": 1388,
+   "none": 0,
+   "examples": []
+  },
+  "sv:kan innehalla": {
+   "rows": 198,
+   "none": 0,
+   "examples": []
+  },
+  "sv:spar av": {
+   "rows": 146,
+   "none": 0,
+   "examples": []
+  },
+  "nl:kan sporen": {
+   "rows": 381,
+   "none": 0,
+   "examples": []
+  },
+  "nl:sporen van": {
+   "rows": 269,
+   "none": 0,
+   "examples": []
+  },
+  "nl:kan bevatten": {
+   "rows": 538,
+   "none": 0,
+   "examples": []
+  },
+  "de:kann spuren": {
+   "rows": 1375,
+   "none": 0,
+   "examples": []
+  },
+  "de:kann enthalten": {
+   "rows": 1530,
+   "none": 0,
+   "examples": []
+  },
+  "es:trazas de": {
+   "rows": 612,
+   "none": 0,
+   "examples": []
+  },
+  "it:puo contenere": {
+   "rows": 708,
+   "none": 0,
+   "examples": []
+  },
+  "it:tracce di": {
+   "rows": 452,
+   "none": 0,
+   "examples": []
+  },
+  "hu:tartalmazhat": {
+   "rows": 172,
+   "none": 0,
+   "examples": []
+  },
+  "hr:moze sadrzavati": {
+   "rows": 128,
+   "none": 0,
+   "examples": []
+  },
+  "sr:moze sadrzati": {
+   "rows": 31,
+   "none": 0,
+   "examples": []
+  },
+  "pt:pode conter": {
+   "rows": 413,
+   "none": 0,
+   "examples": []
+  },
+  "pt:vestigios de": {
+   "rows": 183,
+   "none": 0,
+   "examples": []
+  },
+  "cs:muze obsahovat": {
+   "rows": 162,
+   "none": 0,
+   "examples": []
+  },
+  "fr:atelier qui": {
+   "rows": 93,
+   "none": 0,
+   "examples": []
+  },
+  "ro:poate contine": {
+   "rows": 192,
+   "none": 0,
+   "examples": []
+  },
+  "da:kan indeholde": {
+   "rows": 169,
+   "none": 0,
+   "examples": []
+  },
+  "da:spor af": {
+   "rows": 128,
+   "none": 0,
+   "examples": []
+  },
+  "pl:moze zawierac": {
+   "rows": 180,
+   "none": 0,
+   "examples": []
+  },
+  "no:kan inneholde": {
+   "rows": 187,
+   "none": 0,
+   "examples": []
+  },
+  "hu:nyomokban": {
+   "rows": 71,
+   "none": 0,
+   "examples": []
+  },
+  "ro:urme de": {
+   "rows": 124,
+   "none": 0,
+   "examples": []
+  },
+  "et:voib sisaldada": {
+   "rows": 38,
+   "none": 0,
+   "examples": []
+  },
+  "de:betrieb der auch": {
+   "rows": 17,
+   "none": 0,
+   "examples": []
+  },
+  "sk:moze obsahovat": {
+   "rows": 83,
+   "none": 0,
+   "examples": []
+  },
+  "sl:lahko vsebuje": {
+   "rows": 143,
+   "none": 0,
+   "examples": []
+  },
+  "no:spor av": {
+   "rows": 176,
+   "none": 0,
+   "examples": []
+  },
+  "fi:saattaa sisaltaa": {
+   "rows": 100,
+   "none": 0,
+   "examples": []
+  },
+  "sl:sledi": {
+   "rows": 72,
+   "none": 0,
+   "examples": []
+  },
+  "nl:geproduceerd waar ook": {
+   "rows": 29,
+   "none": 0,
+   "examples": []
+  },
+  "lv:var saturet": {
+   "rows": 28,
+   "none": 0,
+   "examples": []
+  },
+  "ca:pot contenir": {
+   "rows": 26,
+   "none": 0,
+   "examples": []
+  },
+  "it:stabilimento che": {
+   "rows": 9,
+   "none": 0,
+   "examples": []
+  },
+  "fi:voi sisaltaa": {
+   "rows": 15,
+   "none": 0,
+   "examples": []
+  },
+  "es:planta que": {
+   "rows": 77,
+   "none": 0,
+   "examples": []
+  },
+  "pl:mozliwa obecnosc": {
+   "rows": 3,
+   "none": 0,
+   "examples": []
+  },
+  "id:dapat mengandung": {
+   "rows": 16,
+   "none": 0,
+   "examples": []
+  },
+  "tr:icerebilir": {
+   "rows": 70,
+   "none": 0,
+   "examples": []
+  },
+  "tr:eser miktarda": {
+   "rows": 56,
+   "none": 0,
+   "examples": []
+  },
+  "lt:gali buti": {
+   "rows": 39,
+   "none": 0,
+   "examples": []
+  },
+  "lt:gali tureti": {
+   "rows": 11,
+   "none": 0,
+   "examples": []
+  },
+  "pl:moga zawierac": {
+   "rows": 4,
+   "none": 0,
+   "examples": []
+  },
+  "cs:mohou obsahovat": {
+   "rows": 2,
+   "none": 0,
+   "examples": []
+  },
+  "vi:co the chua": {
+   "rows": 4,
+   "none": 0,
+   "examples": []
+  },
+  "sk:mozu obsahovat": {
+   "rows": 1,
+   "none": 0,
+   "examples": []
+  }
+ }
+}

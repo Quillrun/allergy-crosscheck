@@ -705,6 +705,37 @@ test("engine: product text in a script we can't read, or a foreign precaution na
   assert.equal(checkProduct({ ingredients_text_en: "sugar, 5µg vitamin D. May contain milk" }, p).overall, "no_listed_allergens");
   assert.equal(checkProduct({ ingredients_text_en: "sugar. Kann Spuren von Milch enthalten" }, [person("X", "milk")]).overall, "unsafe"); // read as usual when it names an allergen we know
 });
+test("engine: a whole ingredient list in another language, filed as English, is not 'none listed' (2026-10-11 scan)", () => {
+  const p = [person("X", "milk", "wheat", "tree_nut", "peanut", "mustard")];
+  for (const text of [
+    "cukier, mąka pszenna, olej palmowy, serwatka w proszku (z mleka)", "Pasztőrözött tej (40%), Pálmaolaj, Cukor, Búzaliszt", "kvietiniai miltai, nenugriebto PIENO milteliai, LAZDYNŲ RIEŠUTAI",
+    "CASHEWPÄHKINÄ 50%, MANTELI 35%", "Dadlar 60%, mörk choklad 25%, Jordnötter 15%", "Rødbet 50 %, rapsolje, vann, sennep", "Složení: syrovátkový proteinový koncentrát",
+    "voda, MLIJEČNE bjelančevine 3%, SOJINO brašno", "yağsız süttozu (%21), şeker", "Mjölkprotein, glukossirap, socker", "Ingrediënten: suiker, melkpoeder",
+  ]) {
+    const r = checkProduct({ ingredients_text_en: text }, p);
+    assert.equal(r.overall, "cannot_confirm", text);
+    assert.match(r.dataIssues.join(" "), /isn't in English/, text);
+  }
+  // Plain English lists stay readable.
+  for (const text of ["Sour cherries, Sugar, Water, Citric acid.", "Pineapple, water, sugar, citric acid", "Prepared navy beans, water, salt, and calcium chloride (for firmness)."]) {
+    assert.equal(checkProduct({ ingredients_text_en: text }, p).overall, "no_listed_allergens", text);
+  }
+});
+
+test("engine: foreign precautions found in English-labelled Open Food Facts text (2026-10-11 scan) are not 'none listed'", () => {
+  const p = [person("X", "tree_nut")];
+  for (const text of [
+    "sugar. Mogą zawierać orzechy laskowe.", "sugar. Výrobek může obsahovat skořápkové plody.", "só, búzaliszt. Földimogyorót és dióféléket tartalmazhat.",
+    "apă, miere. poate conține urme de nuci.", "MANTELI 97 %. Saattaa sisältää pieniä määriä MAAPÄHKINÄÄ.", "sladkor. Lahko vsebuje sledi oreščkov.",
+    "šećer. Može sadržavati tragove orašastih plodova.", "suhkur. Võib sisaldada pähkleid.", "cukrus. Gali turėti riešutų.", "şeker. Fındık içerebilir.",
+    "suiker. Kan sporen van noten bevatten.", "suiker. Gemaakt in een bedrijf waar ook wordt verwerkt: noten.", "De saus wordt geproduceerd in een fabriek waar PINDA's worden verwerkt.",
+    "sel. Emballé dans un atelier qui utilise noix.", "salt. Kan innehálla spår av: nötter.", "cukrus. Gali büti riešutų.",
+  ]) {
+    const r = checkProduct({ ingredients_text_en: text }, p);
+    assert.equal(r.overall, "cannot_confirm", text);
+    assert.match(r.dataIssues.join(" "), /isn't in English/, text);
+  }
+});
 
 test("engine: 'free range' is not a free-from claim, and an allergen never 'can contain' itself", () => {
   for (const line of ["Eggs (free range)", "free range eggs", "6 free range eggs"]) assert.equal(verdict(line, "egg"), "unsafe", line);
@@ -737,13 +768,16 @@ test("engine: names that only look like an allergen (ginger ale, crab apple, roe
     ["vegan butter", "milk"], ["vegan cheese", "milk"], ["plant butter", "milk"], ["plant-based butter", "milk"], ["palm butter", "milk"], ["butter lettuce", "milk"],
     ["vegan mayonnaise", "egg"], ["egg replacer", "egg"],
     ["crab apple", "crustacean"], ["tart apple", "wheat"], ["tart apple", "gluten"], ["roe deer", "fish"],
-    ["cashew apple", "tree_nut"], ["tiger nut", "tree_nut"], ["tiger nuts", "tree_nut"], ["Ground Nut Oil", "tree_nut"],
+    ["tiger nut", "tree_nut"], ["tiger nuts", "tree_nut"], ["Ground Nut Oil", "tree_nut"],
   ];
   for (const [line, allergen] of none) assert.equal(scanIngredient(line).filter((h) => h.allergen === allergen).length, 0, `${line} flagged ${allergen}`);
   // Plant-based swaps for dairy and egg are made from soy and nuts, so they are not waved through for those.
   assert.equal(verdict("vegan butter", "soy"), "cannot_confirm");
   assert.equal(verdict("vegan cheese", "tree_nut"), "cannot_confirm");
   assert.equal(verdict("vegan mayonnaise", "soy"), "cannot_confirm");
+  // Cashew apple is the fruit, not the nut, but it is processed with the nut.
+  assert.equal(verdict("cashew apple", "tree_nut"), "cannot_confirm");
+  assert.equal(scanIngredient("cashew apple").filter((h) => h.kind === "contains").length, 0);
   // "Ground nut" is a peanut, and the real thing next to a lookalike is still caught.
   assert.equal(verdict("Ground Nut Oil", "peanut"), "unsafe");
   assert.equal(verdict("ground nuts", "peanut"), "unsafe");

@@ -7,7 +7,7 @@ It is built around one rule: **when the data is missing, ambiguous or the lookup
 **Quick start** (Node 22.6 or newer, no build step):
 
 ```bash
-npm install
+npm ci
 npm start    # then open http://127.0.0.1:8787/ and press the demo script buttons (no LLM needed)
 ```
 
@@ -27,7 +27,7 @@ Screens from the recorded demo run: a local model driving the server, with live 
 
 ## Why fail-closed matters here
 
-Open Food Facts, the open food database this uses, says its data comes with "no assurances that the data is accurate, complete, or reliable". Real records prove it. One chocolate hazelnut spread (barcode 0868030000236) has an empty allergen list and no ingredient list, so a checker that trusts the tags would call it allergen-free. A hot cocoa mix (0050700000220) lists soy as its only allergen, with milk only as a "may contain", while its ingredients include nonfat dry milk, whey and sodium caseinate.
+Open Food Facts, the open food database this uses, says its data comes with "no assurances that the data is accurate, complete, or reliable" ([API docs](https://openfoodfacts.github.io/openfoodfacts-server/api/)). Real records prove it. One chocolate hazelnut spread (barcode 0868030000236) has an empty allergen list and no ingredient list, so a checker that trusts the tags would call it allergen-free. A hot cocoa mix (0050700000220) lists soy as its only allergen, with milk only as a "may contain", while its ingredients include nonfat dry milk, whey and sodium caseinate.
 
 Across all 4,784,317 Open Food Facts records (snapshot of 7 October 2026), 72.3% list no allergens, no "may contain" and have no ingredient list, and so do 53.2% of the products scanned in the Open Food Facts app. This engine says "can't confirm" for each. See [`packages/allergen-guard/bench/README.md`](packages/allergen-guard/bench/README.md).
 
@@ -53,7 +53,7 @@ In the simulator, a **verdict lock** applies: after a check, the spoken answer i
 Node 22.6 or newer. No build step.
 
 ```bash
-npm install
+npm ci
 npm start                     # MCP: http://127.0.0.1:8787/mcp   Simulator: http://127.0.0.1:8787/
 ```
 
@@ -101,7 +101,7 @@ The screen follows parts of the Alexa+ MCP design guide: it is authored at the g
 - it applies the host's theme and safe-area insets (divided by the scale, so the host's pixels are not scaled twice);
 - no links out of the view.
 
-Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result repeats `resourceUri`. Some failures set `isError`: `save_person` (allergy not recognised, date already passed), `remove_person` (nobody by that name), `find_recipe` (recipe not found), `check_product` (nothing scanned, or no product named) and `remove_from_shopping_list` (item not on the list). A product name that finds nothing is a normal "check the label" answer, not an error.
+Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result repeats `resourceUri`. Some failures set `isError`: `save_person` (blank name, allergy not recognised, no allergy given, a date that isn't a real day or has already passed), `remove_person` (nobody by that name), `find_recipe` (recipe not found), `check_product` (nothing scanned, or no product named), `add_to_shopping_list` (only blank items) and `remove_from_shopping_list` (item not on the list). A product name that finds nothing is a normal "check the label" answer, not an error.
 
 ### What Alexa+ receives
 
@@ -142,7 +142,7 @@ Every tool result has a short `speech` line for voice, a `Say to the user:` sent
 ## Tests
 
 ```bash
-npm test          # 139 tests (87 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
+npm test          # 142 tests (89 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -164,7 +164,7 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, phone scan, simulator guards | 139 automated tests, 87 of them in the engine package (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 142 automated tests, 89 of them in the engine package (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The screen and the tap-to-choose flow | Headless Chrome, with every demo button's screen measured at the guide's 768×480 base canvas (dark and light), at 1280×800 with the 1.667 root scale (dark theme only), and in the simulator's Echo Show 8 frame: all fit with no scrolling. The tap-to-choose click was checked in that scaled frame. Not tested on a real Echo Show |
@@ -176,8 +176,8 @@ The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`
 ## Limits, stated plainly
 
 - English ingredient text only. Products without it get "can't confirm".
-- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". Across all 790 TheMealDB recipes, 2.6% of ingredient lines hit that rule (measured before the 2026-10-11 engine fixes, which changed the filler words and so this rate; not re-measured); the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every answer ends with "check the label".
-- Product checks read the label's declared allergens, traces and English ingredient text; unrecognised words there don't block an answer, because the declaration is the legal record.
+- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". Across all 790 TheMealDB recipes, 2.6% of ingredient lines hit that rule (a one-off check before the 2026-10-11 engine fixes, which changed the filler words and so this rate; its script and result are not in this repo, so it can't be re-run from here); the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every answer ends with "check the label".
+- Product checks read the label's declared allergens, traces and English ingredient text; unrecognised words there don't block an answer, because the declaration is the legal record. The exceptions give "can't confirm": a foreign allergen word, letters from a non-Latin script, or a foreign "may contain" warning that names nothing the engine knows.
 - Saying someone is "also allergic to" something adds it; only "no longer allergic" replaces the list.
 - It isn't medical advice and isn't an emergency service.
 - Data: Open Food Facts (ODbL). Product data: [Open Food Facts](https://world.openfoodfacts.org), ODbL. Recipes: [TheMealDB](https://www.themealdb.com), using its free development key.

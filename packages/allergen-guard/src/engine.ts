@@ -124,10 +124,17 @@ const PRECAUTION_EN = [
 ];
 // The same warnings in other languages: found, but the allergens after them are only read when they are words the catalogue knows.
 const PRECAUTION_FOREIGN = [
-    "kan inneholde", "kan inneh[aå]lla", "kan indeholde", "mo[zż]e zawiera[cć]", "mo[zž]e obsahovat", "m[oô][zž]e obsahova[tť]", "gali b[uū]ti", "pode conter",
-    "(?:l[ií]neas?|planta|f[aá]brica) que (?:tambi[eé]n )?(?:procesa|procesan|elabora|elaboran|utiliza|utilizan)", "fabriqu[ée] dans un atelier qui",
+    "kan inneholde", "kan inneh[aåá]lla", "kan indeholde", "mo[zż]e zawiera[cć]", "mo[zž]e obsahovat", "m[oô][zž]e obsahova[tť]", "gali b[uūü]ti", "pode conter",
+    "(?:l[ií]neas?|planta|f[aá]brica) que (?:tambi[eé]n )?(?:procesa|procesan|elabora|elaboran|utiliza|utilizan)", "(?:fabriqu|emball|conditionn)[ée]e? dans un atelier qui",
     "peut contenir", "traces [ée]ventuelles", "traces de", "kann spuren", "spuren von", "kann\\b(?=[^.]*\\benthalten)",
     "pu[òo] contenere", "tracce di", "puede contener", "trazas de", "kan sporen", "sporen van",
+    // Found in English-labelled Open Food Facts text, 2026-10-11 (bench/README.md): Czech, Slovak and Polish plurals, Hungarian, Romanian,
+    // Finnish, Slovene, Croatian/Serbian, Baltic, Turkish, Dutch, Vietnamese, Indonesian/Malay. Verb-final ones (Hungarian, Turkish) start the
+    // warning after the allergens: those are then read as ingredients, which only ever adds a flag.
+    "m[ůu][žz]e obsahovat", "mohou obsahovat", "m[ôo][žz]u obsahova[tť]", "mog[ąa] zawiera[cć]", "mo[żz]liwa obecno[śs][cć]",
+    "tartalmazhat", "nyomokban", "poate con[țţt]ine", "pot con[țţt]ine", "urme de", "saattaa sis[äa]lt[äa][äa]", "voi sis[äa]lt[äa][äa]",
+    "lahko vsebuje", "mo(?:[žz]e|gu) sadr[žz]a(?:va)?ti", "v[õo]ib sisaldada", "var satur[ēe]t", "gali tur[ėeé]ti",
+    "i[çc]erebilir", "eser miktarda", "kan\\b(?=[^.]*\\bbevatten)", "(?:gemaakt|geproduceerd|bereid|verpakt) in een (?:\\w+ ){0,2}(?:bedrijf|omgeving|fabriek|ruimte) waar(?:in)?\\b", "c[óo] th[ểe] ch[ứu]a", "(?:dapat|mungkin|boleh) mengandung",
 ];
 const PRECAUTION = new RegExp([...PRECAUTION_EN, ...PRECAUTION_FOREIGN].join("|"), "gi");
 const FOREIGN_PRECAUTION = new RegExp(`^(?:${PRECAUTION_FOREIGN.join("|")})`, "i");

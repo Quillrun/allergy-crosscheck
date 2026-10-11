@@ -153,7 +153,25 @@ export function normalize(text: string): string {
  * Left out on purpose: "ei", "ble", "mani", "latte" (English words or too short to be safe).
  */
 export const FOREIGN_ALLERGEN_WORDS: ReadonlySet<string> = new Set(
-  "trigo, hvete, hvetemel, weizen, weizenmehl, tarwe, harina, farine, lait, leche, melk, milch, huevo, huevos, eier, oeuf, oeufs, uovo, soja, soia, cacahuete, cacahuetes, erdnuss, almendra, almendras, avellana, avellanas, noisette, noisettes, haselnuss, haselnusse, nocciole, sesamo, ajonjoli, apio, selleri, sellerie, moutarde, senf, mostaza, sulfitos, solfiti, pescado, poisson, fisk, pesce".split(",").map((w) => normalize(w)),
+  ("trigo, hvete, hvetemel, weizen, weizenmehl, tarwe, harina, farine, lait, leche, melk, milch, huevo, huevos, eier, oeuf, oeufs, uovo, soja, soia, cacahuete, cacahuetes, erdnuss, almendra, almendras, avellana, avellanas, noisette, noisettes, haselnuss, haselnusse, nocciole, sesamo, ajonjoli, apio, selleri, sellerie, moutarde, senf, mostaza, sulfitos, solfiti, pescado, poisson, fisk, pesce, " +
+  // 2026-10-11 scan (bench/README.md): whole ingredient lists in other languages filed as English came out "none listed". Their words
+  // for "ingredients", and allergen words with common inflections, accent-folded as normalize() does.
+  "skladniki, osszetevok, slozeni, zlozenie, sestavine, sastojci, sastav, sudedamosios, ainesosat, koostisosad, sastavdalas, icindekiler, ingredienser, zutaten, ingredienti, ingredientes, ingredienten, ingrediente, " +
+  "pszenna, pszennej, pszenny, pszenica, mleko, mleka, mleczna, mleczny, mlecznej, orzechy, orzechow, orzechowa, orzechami, arachidowymi, laskowe, laskowych, arachidowe, sojowa, sojowy, sojowej, jaja, jajka, jajeczny, sezam, gorczyca, seler, " +
+  "psenicna, psenicne, psenice, psenicny, psenicni, psenica, psenicno, mlecna, mlecne, mlecny, mlecni, orechy, oriesky, arasidy, arasidove, arasidi, sojove, sojova, sojin, vejce, vajecny, vajce, jajca, jajcni, horcice, gorcica, celer, oreski, lesniki, " +
+  "mlijeko, mlijeka, mlijecni, mlijecna, mlijecne, riblji, sojino, soje, brasno, bjelancevine, belancevine, orasasti, ljesnjaci, ljesnjak, lesnik, kikiriki, jaje, gorusica, " +
+  "buza, buzaliszt, tejpor, tejsavo, tejszin, tejfeherje, mogyoro, mogyorot, foldimogyoro, foldimogyorot, diofelek, diofeleket, mandula, szoja, szojalecitin, tojas, tojasfeherje, tojaspor, szezam, mustar, zeller, " +
+  "grau, lapte, nuci, alune, arahide, oua, susan, telina, " +
+  "kvietiniai, kvieciu, kvietiniu, pienas, pieno, pieniskas, riesutai, riesutu, lazdynu, sojos, soju, kiausiniai, kiausiniu, sezamo, garstyciu, salieru, " +
+  "kviesu, piens, piena, rieksti, riekstu, zemesrieksti, zemesriekstu, sojas, sinepes, selerijas, " +
+  "nisu, nisujahu, piim, piima, piimapulber, taispiim, pahklid, pahkleid, maapahkel, maapahklid, munapulber, seesam, sinep, " +
+  "vehna, vehnajauho, vehnajauhot, maito, maitoa, maitojauhe, pahkina, pahkinoita, hasselpahkina, maapahkina, maapahkinaa, cashewpahkina, manteli, soija, soijaa, kananmuna, kananmunaa, seesami, sinappi, " +
+  "vete, vetemjol, mjolk, mjolkpulver, mjolkprotein, mjolkchoklad, helmjolkspulver, agg, aggula, senapsfro, rismjol, hvede, hvedemel, maelk, maelkepulver, notter, nodder, hasselnotter, jordnotter, jordnodder, sesamfro, senap, sennep, sennepsfro, " +
+  "bugday, sut, suttozu, yumurta, findik, ceviz, susam, hardal, kereviz, " +
+  "erdnusse, erdnussen, haselnussen, milchpulver, vollmilchpulver, magermilchpulver, sahne, eigelb, volleipulver, senfsaat, sojalecithin, weizengluten, roggen, gerste, hafer, " +
+  "mosterd, mosterdzaad, pinda, pindas, hazelnoten, eieren, melkpoeder, tarwebloem, tarwemeel, selderij, sesamzaad, " +
+  "arachide, arachides, lactoserum, froment, seigle, frumento, uova, nocciola, arachidi, senape, sedano, segale, " +
+  "leite, ovo, ovos, amendoim, avela, nozes, cevada, centeno, mostarda, aipo, gergelim, cacahuate, nueces, lacteos").split(",").map((w) => normalize(w)),
 );
 
 /**
@@ -209,6 +227,8 @@ export const TERMS: Term[] = [
   { terms: ["nut"], contains: ["tree_nut"], possible: ["peanut"], unless: ["pine nut", "brazil nut", "monkey nut", "tree nut", "nutmeg nut", "tiger nut", "ground nut oil"] },
   { terms: ["pesto"], contains: ["tree_nut", "milk"], possible: ["peanut"] },
   { terms: ["nougat"], contains: [], possible: ["tree_nut", "peanut", "egg", "milk"] },
+  // The fruit the cashew nut grows on: not the nut, but processed with it, so not waved through either.
+  { terms: ["cashew apple", "cashew fruit"], contains: [], possible: ["tree_nut"] },
   { terms: ["amaretti", "macaron", "orgeat", "romesco", "baklava", "dukkah"], contains: ["tree_nut"], possible: ["egg", "wheat", "gluten", "sesame"] },
   { terms: ["amaretto", "frangelico", "nocino", "biscotti", "mole", "nut oil"], contains: [], possible: ["tree_nut", "peanut"], unless: ["ground nut oil"] },
   // milk

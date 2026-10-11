@@ -1,0 +1,349 @@
+{
+ "total": 7566,
+ "none": 113,
+ "none_scanned": 62,
+ "by": {
+  "hu:tartalmazhat": {
+   "rows": 172,
+   "none": 24,
+   "examples": [
+    "4099200033495",
+    "5997289701313",
+    "5997347555674"
+   ]
+  },
+  "ro:poate contine": {
+   "rows": 192,
+   "none": 18,
+   "examples": [
+    "6424949000589",
+    "9002975423014",
+    "20127664"
+   ]
+  },
+  "ro:urme de": {
+   "rows": 124,
+   "none": 12,
+   "examples": [
+    "6424949000589",
+    "9002975423014",
+    "20127664"
+   ]
+  },
+  "cs:muze obsahovat": {
+   "rows": 162,
+   "none": 11,
+   "examples": [
+    "20346218",
+    "12172425",
+    "5051007157315"
+   ]
+  },
+  "fi:saattaa sisaltaa": {
+   "rows": 100,
+   "none": 9,
+   "examples": [
+    "7039317006446",
+    "5765228126912",
+    "6410381092800"
+   ]
+  },
+  "fr:peut contenir": {
+   "rows": 2184,
+   "none": 8,
+   "examples": [
+    "0651986703128",
+    "0041554563290",
+    "0067800005024"
+   ]
+  },
+  "hu:nyomokban": {
+   "rows": 71,
+   "none": 7,
+   "examples": [
+    "5997289701313",
+    "4099200703459",
+    "4099200703350"
+   ]
+  },
+  "sl:lahko vsebuje": {
+   "rows": 143,
+   "none": 7,
+   "examples": [
+    "4099200033495",
+    "3838999052383",
+    "3831029326140"
+   ]
+  },
+  "sr:moze sadrzati": {
+   "rows": 31,
+   "none": 6,
+   "examples": [
+    "12275281",
+    "3830060860309",
+    "4056489283195"
+   ]
+  },
+  "lt:gali tureti": {
+   "rows": 11,
+   "none": 5,
+   "examples": [
+    "4056489083702",
+    "20955564",
+    "0207281287605"
+   ]
+  },
+  "hr:moze sadrzavati": {
+   "rows": 128,
+   "none": 4,
+   "examples": [
+    "3838900962466",
+    "3850334433015",
+    "8595564525127"
+   ]
+  },
+  "et:voib sisaldada": {
+   "rows": 38,
+   "none": 4,
+   "examples": [
+    "4740086007222",
+    "4740029040736",
+    "4740012028574"
+   ]
+  },
+  "tr:icerebilir": {
+   "rows": 70,
+   "none": 4,
+   "examples": [
+    "8683347033553",
+    "8696362804718",
+    "4038407039824"
+   ]
+  },
+  "tr:eser miktarda": {
+   "rows": 56,
+   "none": 4,
+   "examples": [
+    "8683347033553",
+    "4038407039824",
+    "8682214736290"
+   ]
+  },
+  "nl:kan bevatten": {
+   "rows": 538,
+   "none": 2,
+   "examples": [
+    "5400141322583",
+    "20717070"
+   ]
+  },
+  "sl:sledi": {
+   "rows": 72,
+   "none": 2,
+   "examples": [
+    "4061462607301",
+    "8600012702750"
+   ]
+  },
+  "nl:geproduceerd waar ook": {
+   "rows": 29,
+   "none": 2,
+   "examples": [
+    "17103978",
+    "8716769022376"
+   ]
+  },
+  "pl:mozliwa obecnosc": {
+   "rows": 3,
+   "none": 2,
+   "examples": [
+    "5900437037462",
+    "7900633037486"
+   ]
+  },
+  "vi:co the chua": {
+   "rows": 4,
+   "none": 2,
+   "examples": [
+    "8936221041794",
+    "8935001719298"
+   ]
+  },
+  "fr:traces de": {
+   "rows": 1117,
+   "none": 1,
+   "examples": [
+    "0666522041381"
+   ]
+  },
+  "sv:kan innehalla": {
+   "rows": 198,
+   "none": 1,
+   "examples": [
+    "7340146503854"
+   ]
+  },
+  "sv:spar av": {
+   "rows": 146,
+   "none": 1,
+   "examples": [
+    "7340146503854"
+   ]
+  },
+  "fr:atelier qui": {
+   "rows": 93,
+   "none": 1,
+   "examples": [
+    "5420036415602"
+   ]
+  },
+  "lv:var saturet": {
+   "rows": 28,
+   "none": 1,
+   "examples": [
+    "4750212904059"
+   ]
+  },
+  "fi:voi sisaltaa": {
+   "rows": 15,
+   "none": 1,
+   "examples": [
+    "0258840514106"
+   ]
+  },
+  "lt:gali buti": {
+   "rows": 39,
+   "none": 1,
+   "examples": [
+    "9010437031226"
+   ]
+  },
+  "sk:mozu obsahovat": {
+   "rows": 1,
+   "none": 1,
+   "examples": [
+    "5999862590567"
+   ]
+  },
+  "es:puede contener": {
+   "rows": 1277,
+   "none": 0,
+   "examples": []
+  },
+  "de:spuren von": {
+   "rows": 1388,
+   "none": 0,
+   "examples": []
+  },
+  "nl:kan sporen": {
+   "rows": 381,
+   "none": 0,
+   "examples": []
+  },
+  "nl:sporen van": {
+   "rows": 269,
+   "none": 0,
+   "examples": []
+  },
+  "de:kann spuren": {
+   "rows": 1375,
+   "none": 0,
+   "examples": []
+  },
+  "de:kann enthalten": {
+   "rows": 1530,
+   "none": 0,
+   "examples": []
+  },
+  "es:trazas de": {
+   "rows": 612,
+   "none": 0,
+   "examples": []
+  },
+  "it:puo contenere": {
+   "rows": 708,
+   "none": 0,
+   "examples": []
+  },
+  "it:tracce di": {
+   "rows": 452,
+   "none": 0,
+   "examples": []
+  },
+  "pt:pode conter": {
+   "rows": 413,
+   "none": 0,
+   "examples": []
+  },
+  "pt:vestigios de": {
+   "rows": 183,
+   "none": 0,
+   "examples": []
+  },
+  "da:kan indeholde": {
+   "rows": 169,
+   "none": 0,
+   "examples": []
+  },
+  "da:spor af": {
+   "rows": 128,
+   "none": 0,
+   "examples": []
+  },
+  "pl:moze zawierac": {
+   "rows": 180,
+   "none": 0,
+   "examples": []
+  },
+  "no:kan inneholde": {
+   "rows": 187,
+   "none": 0,
+   "examples": []
+  },
+  "de:betrieb der auch": {
+   "rows": 17,
+   "none": 0,
+   "examples": []
+  },
+  "sk:moze obsahovat": {
+   "rows": 83,
+   "none": 0,
+   "examples": []
+  },
+  "no:spor av": {
+   "rows": 176,
+   "none": 0,
+   "examples": []
+  },
+  "ca:pot contenir": {
+   "rows": 26,
+   "none": 0,
+   "examples": []
+  },
+  "it:stabilimento che": {
+   "rows": 9,
+   "none": 0,
+   "examples": []
+  },
+  "es:planta que": {
+   "rows": 77,
+   "none": 0,
+   "examples": []
+  },
+  "id:dapat mengandung": {
+   "rows": 16,
+   "none": 0,
+   "examples": []
+  },
+  "pl:moga zawierac": {
+   "rows": 4,
+   "none": 0,
+   "examples": []
+  },
+  "cs:mohou obsahovat": {
+   "rows": 2,
+   "none": 0,
+   "examples": []
+  }
+ }
+}

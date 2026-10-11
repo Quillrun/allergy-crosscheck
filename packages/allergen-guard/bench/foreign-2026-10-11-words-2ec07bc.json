@@ -1,0 +1,69 @@
+{
+ "total": 4702,
+ "none": 1,
+ "none_scanned": 0,
+ "by": {
+  "hu": {
+   "rows": 1063,
+   "none": 1,
+   "examples": [
+    "5411153017671"
+   ]
+  },
+  "hr": {
+   "rows": 1179,
+   "none": 0,
+   "examples": []
+  },
+  "tr": {
+   "rows": 147,
+   "none": 0,
+   "examples": []
+  },
+  "pl": {
+   "rows": 1004,
+   "none": 0,
+   "examples": []
+  },
+  "sv": {
+   "rows": 1969,
+   "none": 0,
+   "examples": []
+  },
+  "cs": {
+   "rows": 1113,
+   "none": 0,
+   "examples": []
+  },
+  "sl": {
+   "rows": 664,
+   "none": 0,
+   "examples": []
+  },
+  "ro": {
+   "rows": 316,
+   "none": 0,
+   "examples": []
+  },
+  "et": {
+   "rows": 296,
+   "none": 0,
+   "examples": []
+  },
+  "fi": {
+   "rows": 163,
+   "none": 0,
+   "examples": []
+  },
+  "lt": {
+   "rows": 224,
+   "none": 0,
+   "examples": []
+  },
+  "lv": {
+   "rows": 63,
+   "none": 0,
+   "examples": []
+  }
+ }
+}

@@ -1,0 +1,5086 @@
+{
+ "all": {
+  "total": 4784317,
+  "A": 3457538,
+  "allergens_empty": 4020078,
+  "english": 1271966,
+  "B": 136763,
+  "B_traces_only": 13483,
+  "B_by_family": {
+   "soy": 21433,
+   "sulphites": 41739,
+   "fish": 4812,
+   "gluten": 39052,
+   "milk": 20677,
+   "crustacean": 1667,
+   "tree_nut": 11353,
+   "mustard": 2210,
+   "mollusc": 1115,
+   "peanut": 3716,
+   "egg": 8724,
+   "celery": 1875,
+   "sesame": 2561,
+   "lupin": 206
+  },
+  "strict_unreadable_lists": 2003,
+  "strict_not_english_or_unparsed": 398931,
+  "strict_checked": 307998,
+  "strict_hits_unlocated": 905,
+  "strict_named": 162298,
+  "strict_named_by_family": {
+   "milk": 72263,
+   "soy": 45867,
+   "gluten": 70202,
+   "peanut": 8695,
+   "tree_nut": 19080,
+   "egg": 26215,
+   "mustard": 7202,
+   "celery": 7696,
+   "sulphites": 6502,
+   "lupin": 108,
+   "crustacean": 1644,
+   "sesame": 5343,
+   "mollusc": 719,
+   "fish": 4382
+  },
+  "strict_missed": 8295,
+  "strict_missed_list_empty": 2049,
+  "strict_missed_list_partial": 6246,
+  "strict_missed_by_family": {
+   "soy": 892,
+   "sulphites": 4236,
+   "gluten": 662,
+   "milk": 981,
+   "egg": 716,
+   "tree_nut": 272,
+   "celery": 180,
+   "peanut": 59,
+   "mustard": 192,
+   "fish": 161,
+   "mollusc": 52,
+   "sesame": 86,
+   "crustacean": 90,
+   "lupin": 8
+  },
+  "foreign_exposed": 68,
+  "compared": 4784317,
+  "vanished": {
+   "gluten": 111,
+   "peanut": 75,
+   "tree_nut": 57,
+   "egg": 63,
+   "soy": 35,
+   "milk": 120,
+   "fish": 23,
+   "lupin": 71,
+   "sulphites": 57,
+   "sesame": 29,
+   "celery": 66,
+   "mustard": 66,
+   "mollusc": 12,
+   "crustacean": 10
+  },
+  "weakened": {
+   "gluten": 234,
+   "egg": 53,
+   "tree_nut": 63,
+   "milk": 114,
+   "crustacean": 3,
+   "soy": 22,
+   "peanut": 20,
+   "lupin": 6,
+   "celery": 3,
+   "mustard": 5,
+   "sulphites": 7,
+   "fish": 4,
+   "mollusc": 1,
+   "sesame": 2
+  },
+  "changed": 583,
+  "to_none": 117
+ },
+ "popular": {
+  "total": 1552376,
+  "A": 826465,
+  "allergens_empty": 1118358,
+  "english": 689596,
+  "B": 64232,
+  "B_traces_only": 9599,
+  "B_by_family": {
+   "gluten": 18017,
+   "soy": 10341,
+   "sulphites": 21677,
+   "tree_nut": 6205,
+   "milk": 8867,
+   "egg": 4075,
+   "mustard": 836,
+   "fish": 1506,
+   "peanut": 1842,
+   "sesame": 1274,
+   "crustacean": 479,
+   "celery": 528,
+   "mollusc": 442,
+   "lupin": 144
+  },
+  "strict_unreadable_lists": 1519,
+  "strict_not_english_or_unparsed": 161066,
+  "strict_checked": 102082,
+  "strict_hits_unlocated": 177,
+  "strict_named": 55425,
+  "strict_named_by_family": {
+   "milk": 22928,
+   "soy": 13600,
+   "gluten": 24807,
+   "tree_nut": 6151,
+   "celery": 2146,
+   "sulphites": 2240,
+   "egg": 7239,
+   "mustard": 2689,
+   "peanut": 3111,
+   "mollusc": 166,
+   "fish": 1911,
+   "sesame": 1962,
+   "crustacean": 383,
+   "lupin": 56
+  },
+  "strict_missed": 2071,
+  "strict_missed_list_empty": 717,
+  "strict_missed_list_partial": 1354,
+  "strict_missed_by_family": {
+   "gluten": 166,
+   "soy": 193,
+   "sulphites": 1176,
+   "egg": 139,
+   "milk": 143,
+   "mustard": 44,
+   "fish": 47,
+   "tree_nut": 78,
+   "peanut": 21,
+   "lupin": 3,
+   "celery": 32,
+   "sesame": 32,
+   "mollusc": 9,
+   "crustacean": 18
+  },
+  "foreign_exposed": 40,
+  "compared": 1552376,
+  "vanished": {
+   "gluten": 51,
+   "peanut": 52,
+   "tree_nut": 39,
+   "egg": 40,
+   "soy": 22,
+   "milk": 47,
+   "fish": 13,
+   "lupin": 27,
+   "sulphites": 22,
+   "sesame": 17,
+   "celery": 26,
+   "mustard": 25,
+   "crustacean": 6,
+   "mollusc": 7
+  },
+  "weakened": {
+   "gluten": 119,
+   "tree_nut": 43,
+   "milk": 35,
+   "crustacean": 1,
+   "soy": 18,
+   "peanut": 10,
+   "egg": 14,
+   "sulphites": 3,
+   "lupin": 5,
+   "fish": 3,
+   "celery": 1,
+   "mustard": 1,
+   "sesame": 2
+  },
+  "changed": 269,
+  "to_none": 40
+ },
+ "reverse": {
+  "peanut": {
+   "count": 2815,
+   "words": {
+    "en:added-sugar": 1765,
+    "en:disaccharide": 1657,
+    "en:oil-and-fat": 1655,
+    "en:sugar": 1629,
+    "en:vegetable-oil-and-fat": 1608,
+    "en:salt": 1524,
+    "en:cereal": 1269,
+    "en:flavouring": 1115,
+    "en:plant": 1099,
+    "en:flour": 1041,
+    "en:dairy": 1013,
+    "en:vegetable-oil": 1008,
+    "en:wheat": 942,
+    "en:e322": 859,
+    "en:cocoa": 848,
+    "en:nut": 837,
+    "en:cereal-flour": 822,
+    "en:monosaccharide": 774,
+    "en:wheat-flour": 770,
+    "en:vegetable": 733,
+    "en:tree-nut": 712,
+    "en:glucose": 705,
+    "en:e322i": 625,
+    "en:fruit": 625,
+    "en:starch": 614,
+    "en:natural-flavouring": 597,
+    "en:cocoa-butter": 582,
+    "en:sunflower-oil": 529,
+    "en:vegetable-fat": 520,
+    "en:soya-lecithin": 512,
+    "en:milk-powder": 499,
+    "en:water": 492,
+    "en:seed": 490,
+    "en:palm-oil-and-fat": 489,
+    "en:cocoa-paste": 485,
+    "en:emulsifier": 482,
+    "en:root-vegetable": 443,
+    "en:e500": 437,
+    "en:e330": 434,
+    "en:milk": 403,
+    "en:egg": 400,
+    "en:almond": 395,
+    "en:glucose-syrup": 391,
+    "en:condiment": 382,
+    "en:palm-oil": 381,
+    "en:spice": 365,
+    "en:soya": 359,
+    "en:rice": 313,
+    "en:whey": 309,
+    "en:chocolate": 307,
+    "en:rapeseed-oil": 306,
+    "en:cocoa-powder": 300,
+    "en:skimmed-milk-powder": 299,
+    "en:fruit-vegetable": 264,
+    "en:onion-family-vegetable": 263,
+    "en:whole-milk-powder": 263,
+    "en:hazelnut": 261,
+    "en:oat": 259,
+    "en:e471": 257,
+    "en:corn-starch": 250,
+    "en:protein": 247,
+    "en:e500ii": 246,
+    "en:colour": 243,
+    "en:berries": 240,
+    "en:legume": 236,
+    "en:fructose": 225,
+    "en:sesame": 219,
+    "en:dextrose": 218,
+    "en:corn": 216,
+    "en:yeast": 215,
+    "en:fat": 214,
+    "en:rice-flour": 213,
+    "en:pulse": 211,
+    "en:syrup": 206,
+    "en:vanilla-flavouring": 201,
+    "en:garlic": 199,
+    "en:butter": 197,
+    "en:onion": 188,
+    "en:sea-salt": 185,
+    "en:whey-powder": 183,
+    "en:lactose": 182,
+    "en:maltodextrin": 180,
+    "en:sunflower": 177,
+    "en:e202": 176,
+    "en:glucose-fructose-syrup": 174,
+    "en:herb": 172,
+    "en:milkfat": 172,
+    "en:malt": 171,
+    "en:e422": 168,
+    "en:modified-starch": 168,
+    "en:raising-agent": 168,
+    "en:e412": 166,
+    "en:fat-reduced-cocoa-powder": 166,
+    "en:vitamins": 165,
+    "en:vanilla": 163,
+    "en:coconut": 160,
+    "en:natural-vanilla-flavouring": 160,
+    "en:honey": 158,
+    "en:cream": 156,
+    "en:preservative": 155,
+    "en:e415": 151,
+    "en:e503": 148,
+    "en:fat-reduced-cocoa": 148,
+    "en:oat-flakes": 148,
+    "en:minerals": 144,
+    "en:gluten": 142,
+    "en:acidity-regulator": 138,
+    "en:chili-pepper": 136,
+    "en:malted-barley": 136,
+    "en:animal-protein": 134,
+    "en:fiber": 134,
+    "en:milk-proteins": 132,
+    "en:coconut-oil": 128,
+    "en:plant-protein": 126,
+    "en:palm-fat": 125,
+    "en:e450": 124,
+    "en:tuber": 124,
+    "en:cashew-nuts": 123,
+    "en:grape": 123,
+    "en:stabiliser": 123,
+    "en:colza-oil": 122,
+    "en:taproot-vegetable": 122,
+    "en:vegetable-fiber": 122,
+    "en:potato-starch": 121,
+    "en:invert-sugar": 120,
+    "en:soya-oil": 119,
+    "en:antioxidant": 118,
+    "en:acid": 117,
+    "en:barley-malt-extract": 117,
+    "en:pod-and-seed-vegetable": 117,
+    "en:iron": 114,
+    "en:pepper": 113,
+    "en:butterfat": 112,
+    "en:e375": 111,
+    "en:extract": 111,
+    "en:e101": 109,
+    "en:juice": 108,
+    "en:potato": 108,
+    "en:sugar-syrup": 108,
+    "en:cane-sugar": 107,
+    "en:e440a": 107,
+    "en:fruit-juice": 107,
+    "en:e420": 106,
+    "en:soya-bean": 103,
+    "en:milk-chocolate": 102,
+    "en:artificial-flavouring": 100,
+    "en:pistachio-nuts": 100,
+    "en:skimmed-milk": 99,
+    "en:sesame-seeds": 98,
+    "en:e621": 97,
+    "en:sunflower-lecithin": 97,
+    "en:vegetable-extract": 97,
+    "en:cinnamon": 96,
+    "en:e407": 96,
+    "en:sauce": 96,
+    "en:tomato": 96,
+    "en:carrot": 94,
+    "en:dark-chocolate": 94,
+    "en:palm": 94,
+    "en:tapioca": 94,
+    "en:thickener": 94,
+    "en:vinegar": 94,
+    "en:e160a": 93,
+    "en:e414": 93,
+    "en:thiamin": 92,
+    "en:invert-sugar-syrup": 91,
+    "en:walnut": 90,
+    "en:wheat-starch": 90,
+    "en:corn-syrup": 86,
+    "en:e160c": 86,
+    "en:egg-white": 84,
+    "en:apple": 83,
+    "en:malaceous-fruit": 83,
+    "en:vanilla-extract": 83,
+    "en:e150a": 81,
+    "en:folate": 81,
+    "en:mustard": 81,
+    "en:modified-corn-starch": 80,
+    "en:e170": 79,
+    "en:egg-yolk": 79,
+    "en:citrus-fruit": 76,
+    "en:raisin": 76,
+    "en:canola-oil": 75,
+    "en:e150": 75,
+    "en:soy-protein": 75,
+    "en:sunflower-seed": 75,
+    "en:shea-butter": 74,
+    "en:wheat-gluten": 74,
+    "en:e300": 73,
+    "en:e476": 73,
+    "en:palm-kernel-oil-and-fat": 73,
+    "en:rapeseed": 73,
+    "en:e306": 72,
+    "en:folic-acid": 72,
+    "en:soy-sauce": 71,
+    "en:cheese": 70,
+    "en:dough": 67,
+    "en:humectant": 67,
+    "en:ginger": 66,
+    "en:yeast-extract": 66
+   }
+  },
+  "tree_nut": {
+   "count": 6231,
+   "words": {
+    "en:added-sugar": 4210,
+    "en:disaccharide": 3905,
+    "en:sugar": 3829,
+    "en:oil-and-fat": 3550,
+    "en:vegetable-oil-and-fat": 3346,
+    "en:salt": 3274,
+    "en:cereal": 2741,
+    "en:flavouring": 2679,
+    "en:dairy": 2598,
+    "en:flour": 2504,
+    "en:plant": 2447,
+    "en:wheat": 2206,
+    "en:cereal-flour": 2079,
+    "en:cocoa": 2019,
+    "en:monosaccharide": 1993,
+    "en:e322": 1965,
+    "en:wheat-flour": 1945,
+    "en:vegetable-oil": 1868,
+    "en:glucose": 1839,
+    "en:fruit": 1666,
+    "en:water": 1652,
+    "en:e322i": 1514,
+    "en:vegetable": 1468,
+    "en:natural-flavouring": 1453,
+    "en:cocoa-butter": 1443,
+    "en:starch": 1333,
+    "en:vegetable-fat": 1298,
+    "en:milk-powder": 1285,
+    "en:cocoa-paste": 1215,
+    "en:soya-lecithin": 1184,
+    "en:egg": 1156,
+    "en:e500": 1079,
+    "en:emulsifier": 1055,
+    "en:glucose-syrup": 1013,
+    "en:palm-oil-and-fat": 1008,
+    "en:sunflower-oil": 994,
+    "en:milk": 947,
+    "en:e330": 938,
+    "en:seed": 824,
+    "en:root-vegetable": 807,
+    "en:condiment": 791,
+    "en:skimmed-milk-powder": 783,
+    "en:spice": 779,
+    "en:palm-oil": 770,
+    "en:chocolate": 735,
+    "en:fat": 717,
+    "en:protein": 677,
+    "en:rapeseed-oil": 666,
+    "en:cocoa-powder": 661,
+    "en:e471": 661,
+    "en:whole-milk-powder": 633,
+    "en:whey": 614,
+    "en:dextrose": 612,
+    "en:soya": 607,
+    "en:berries": 598,
+    "en:oat": 589,
+    "en:fructose": 576,
+    "en:legume": 571,
+    "en:vanilla-flavouring": 568,
+    "en:rice": 563,
+    "en:milkfat": 560,
+    "en:nut": 557,
+    "en:peanut": 554,
+    "en:yeast": 554,
+    "en:butter": 551,
+    "en:pulse": 522,
+    "en:e500ii": 521,
+    "en:onion-family-vegetable": 519,
+    "en:lactose": 501,
+    "en:coconut": 499,
+    "en:e450": 496,
+    "en:colour": 490,
+    "en:natural-vanilla-flavouring": 476,
+    "en:vanilla": 467,
+    "en:glucose-fructose-syrup": 458,
+    "en:raising-agent": 448,
+    "en:fruit-vegetable": 446,
+    "en:corn-starch": 443,
+    "en:animal-protein": 436,
+    "en:gluten": 435,
+    "en:cream": 430,
+    "en:milk-proteins": 430,
+    "en:e412": 420,
+    "en:syrup": 420,
+    "en:herb": 418,
+    "en:modified-starch": 418,
+    "en:sea-salt": 415,
+    "en:whey-powder": 408,
+    "en:butterfat": 406,
+    "en:fat-reduced-cocoa-powder": 399,
+    "en:preservative": 398,
+    "en:fat-reduced-cocoa": 396,
+    "en:malt": 394,
+    "en:coconut-oil": 390,
+    "en:juice": 386,
+    "en:vitamins": 385,
+    "en:rice-flour": 384,
+    "en:colza-oil": 382,
+    "en:minerals": 378,
+    "en:fruit-juice": 376,
+    "en:cane-sugar": 375,
+    "en:e503": 372,
+    "en:e440a": 365,
+    "en:garlic": 355,
+    "en:e202": 349,
+    "en:oat-flakes": 349,
+    "en:stabiliser": 345,
+    "en:e415": 344,
+    "en:onion": 344,
+    "en:sesame": 344,
+    "en:corn": 341,
+    "en:fiber": 335,
+    "en:wheat-starch": 327,
+    "en:e422": 318,
+    "en:extract": 312,
+    "en:acid": 311,
+    "en:malted-barley": 306,
+    "en:acidity-regulator": 304,
+    "en:e300": 302,
+    "en:vegetable-fiber": 302,
+    "en:grape": 299,
+    "en:antioxidant": 293,
+    "en:sunflower-lecithin": 292,
+    "en:citrus-fruit": 291,
+    "en:e407": 285,
+    "en:invert-sugar": 285,
+    "en:wheat-gluten": 285,
+    "en:taproot-vegetable": 280,
+    "en:vegetable-extract": 275,
+    "en:palm-fat": 273,
+    "en:plant-protein": 271,
+    "en:pod-and-seed-vegetable": 270,
+    "en:skimmed-milk": 264,
+    "en:barley-malt-extract": 262,
+    "en:thickener": 261,
+    "en:e420": 259,
+    "en:maltodextrin": 257,
+    "en:animal": 255,
+    "en:sugar-syrup": 251,
+    "en:milk-chocolate": 250,
+    "en:lemon-juice": 243,
+    "en:pepper": 242,
+    "en:e101": 238,
+    "en:apple": 236,
+    "en:malaceous-fruit": 236,
+    "en:iron": 235,
+    "en:potato-starch": 230,
+    "en:e375": 227,
+    "en:vanilla-extract": 226,
+    "en:cheese": 223,
+    "en:e160a": 223,
+    "en:sunflower": 222,
+    "en:carrot": 220,
+    "en:whole-egg": 220,
+    "en:thiamin": 212,
+    "en:wholemeal-flour": 212,
+    "en:invert-sugar-syrup": 209,
+    "en:honey": 208,
+    "en:cinnamon": 205,
+    "en:meat": 199,
+    "en:tomato": 195,
+    "en:palm-kernel-oil-and-fat": 194,
+    "en:barley": 192,
+    "en:palm": 189,
+    "en:pork": 189,
+    "en:e450i": 188,
+    "en:carob-bean": 187,
+    "en:egg-white": 187,
+    "en:raisin": 187,
+    "en:soya-bean": 187,
+    "en:dark-chocolate": 185,
+    "en:vinegar": 183,
+    "en:alcohol": 181,
+    "en:carob-seed-flour": 181,
+    "en:ferment": 177,
+    "en:tuber": 174,
+    "en:dough": 172,
+    "en:folate": 172,
+    "en:pork-meat": 170,
+    "en:prunus-species-fruit": 168,
+    "en:folic-acid": 165,
+    "en:olive-oil": 162,
+    "en:tapioca": 160,
+    "en:e170": 158,
+    "en:mustard": 158,
+    "en:e503ii": 156,
+    "en:artificial-flavouring": 154,
+    "en:e331": 154,
+    "en:iodised-salt": 153,
+    "en:egg-yolk": 150,
+    "en:leaf-vegetable": 149,
+    "en:chili-pepper": 147,
+    "en:e414": 147,
+    "en:e476": 146,
+    "en:sesame-seeds": 146,
+    "en:corn-syrup": 145,
+    "en:gelling-agent": 145,
+    "en:palm-kernel-oil": 142,
+    "en:whole-wheat-flour": 142,
+    "en:e150": 140
+   }
+  },
+  "milk": {
+   "count": 15028,
+   "words": {
+    "en:salt": 8305,
+    "en:added-sugar": 8187,
+    "en:disaccharide": 7228,
+    "en:sugar": 7088,
+    "en:oil-and-fat": 6870,
+    "en:vegetable-oil-and-fat": 6439,
+    "en:flavouring": 5987,
+    "en:cereal": 5383,
+    "en:vegetable": 4985,
+    "en:flour": 4585,
+    "en:water": 4414,
+    "en:wheat": 4365,
+    "en:starch": 3885,
+    "en:vegetable-oil": 3861,
+    "en:cereal-flour": 3770,
+    "en:root-vegetable": 3574,
+    "en:wheat-flour": 3549,
+    "en:condiment": 3221,
+    "en:monosaccharide": 3197,
+    "en:spice": 3060,
+    "en:glucose": 2920,
+    "en:plant": 2801,
+    "en:natural-flavouring": 2690,
+    "en:onion-family-vegetable": 2673,
+    "en:fruit": 2662,
+    "en:e330": 2230,
+    "en:seed": 2181,
+    "en:egg": 2153,
+    "en:sunflower-oil": 2143,
+    "en:e322": 2132,
+    "en:fruit-vegetable": 2065,
+    "en:onion": 2023,
+    "en:yeast": 2022,
+    "en:rapeseed-oil": 1936,
+    "en:cocoa": 1927,
+    "en:herb": 1854,
+    "en:nut": 1806,
+    "en:emulsifier": 1700,
+    "en:garlic": 1679,
+    "en:e322i": 1673,
+    "en:soya": 1572,
+    "en:modified-starch": 1521,
+    "en:ferment": 1496,
+    "en:palm-oil-and-fat": 1483,
+    "en:colour": 1474,
+    "en:e500": 1459,
+    "en:dairy": 1425,
+    "en:legume": 1386,
+    "en:dextrose": 1375,
+    "en:corn-starch": 1369,
+    "en:preservative": 1310,
+    "en:animal": 1301,
+    "en:microbial-culture": 1262,
+    "en:vitamins": 1258,
+    "en:tomato": 1244,
+    "en:lactic-ferments": 1229,
+    "en:taproot-vegetable": 1228,
+    "en:minerals": 1207,
+    "en:tree-nut": 1202,
+    "en:colza-oil": 1169,
+    "en:palm-oil": 1157,
+    "en:soya-lecithin": 1140,
+    "en:glucose-syrup": 1138,
+    "en:meat": 1138,
+    "en:pulse": 1136,
+    "en:pepper": 1134,
+    "en:vegetable-fat": 1132,
+    "en:rice": 1086,
+    "en:cocoa-butter": 1075,
+    "en:carrot": 1032,
+    "en:acid": 1030,
+    "en:e471": 1026,
+    "en:antioxidant": 1000,
+    "en:e415": 988,
+    "en:juice": 984,
+    "en:vinegar": 970,
+    "en:fruit-juice": 961,
+    "en:protein": 948,
+    "en:enzyme": 937,
+    "en:thickener": 936,
+    "en:pork": 924,
+    "en:acidity-regulator": 922,
+    "en:corn": 914,
+    "en:e202": 914,
+    "en:e375": 914,
+    "en:cocoa-paste": 906,
+    "en:stabiliser": 894,
+    "en:thiamin": 878,
+    "en:tuber": 875,
+    "en:e101": 866,
+    "en:maltodextrin": 829,
+    "en:iron": 825,
+    "en:gluten": 812,
+    "en:potato": 812,
+    "en:potato-starch": 812,
+    "en:leaf-vegetable": 811,
+    "en:berries": 809,
+    "en:mustard": 803,
+    "en:e450": 797,
+    "en:pork-meat": 793,
+    "en:plant-protein": 788,
+    "en:oat": 765,
+    "en:cocoa-powder": 758,
+    "en:yeast-extract": 742,
+    "en:e412": 737,
+    "en:folate": 731,
+    "en:sea-salt": 731,
+    "en:e500ii": 730,
+    "en:folic-acid": 728,
+    "en:poultry": 724,
+    "en:raising-agent": 721,
+    "en:cane-sugar": 709,
+    "en:chocolate": 707,
+    "en:lemon-juice": 707,
+    "en:fructose": 688,
+    "en:sesame": 688,
+    "en:fiber": 687,
+    "en:fat": 680,
+    "en:e250": 671,
+    "en:e300": 664,
+    "en:parsley": 654,
+    "en:pod-and-seed-vegetable": 652,
+    "en:stalk-vegetable": 651,
+    "en:vegetable-fiber": 625,
+    "en:sauce": 618,
+    "en:almond": 617,
+    "en:celery": 608,
+    "en:rice-flour": 599,
+    "en:bell-pepper": 586,
+    "en:e160a": 565,
+    "en:chili-pepper": 563,
+    "en:milk": 557,
+    "en:peanut": 557,
+    "en:dough": 555,
+    "en:e440a": 555,
+    "en:soya-bean": 553,
+    "en:capsicum-annuum": 545,
+    "en:paprika": 541,
+    "en:syrup": 536,
+    "en:olive-oil": 533,
+    "en:e621": 531,
+    "en:e407": 528,
+    "en:coconut": 527,
+    "en:chicken": 526,
+    "en:fish": 521,
+    "en:e160c": 518,
+    "en:glucose-fructose-syrup": 513,
+    "en:concentrate": 508,
+    "en:modified-corn-starch": 506,
+    "en:wheat-gluten": 506,
+    "en:turmeric": 493,
+    "en:barley": 487,
+    "en:coagulating-enzyme": 484,
+    "en:sweetener": 484,
+    "en:e955": 481,
+    "en:e503": 471,
+    "en:wheat-starch": 455,
+    "en:vanilla-flavouring": 451,
+    "en:tomato-concentrate": 443,
+    "en:animal-fat": 439,
+    "en:thiamin-mononitrate": 431,
+    "en:alcohol": 429,
+    "en:iodised-salt": 429,
+    "en:e270": 426,
+    "en:e301": 422,
+    "en:malt": 422,
+    "en:e422": 421,
+    "en:tapioca": 413,
+    "en:rennet": 407,
+    "en:vanilla": 407,
+    "en:beef": 406,
+    "en:citrus-fruit": 404,
+    "en:soya-oil": 403,
+    "en:vitamin-c": 398,
+    "en:hazelnut": 396,
+    "en:sunflower-lecithin": 391,
+    "en:coating": 389,
+    "en:concentrated-lemon-juice": 387,
+    "en:soy-protein": 386,
+    "en:fat-reduced-cocoa-powder": 376,
+    "en:chicken-meat": 371,
+    "en:extract": 369,
+    "en:natural-vanilla-flavouring": 368,
+    "en:egg-white": 362,
+    "en:shellfish": 362,
+    "en:e262": 360,
+    "en:palm-fat": 360,
+    "en:oat-flakes": 356,
+    "en:coconut-oil": 350,
+    "en:e150a": 349,
+    "en:black-pepper": 347,
+    "en:flavour-enhancer": 347,
+    "en:apple": 346,
+    "en:malaceous-fruit": 346,
+    "en:fat-reduced-cocoa": 344,
+    "en:wholemeal-flour": 344,
+    "en:mustard-seed": 337,
+    "en:vitamin-d": 337,
+    "en:spice-extract": 327,
+    "en:virgin-olive-oil": 320
+   }
+  },
+  "egg": {
+   "count": 7609,
+   "words": {
+    "en:salt": 4974,
+    "en:added-sugar": 4745,
+    "en:oil-and-fat": 4521,
+    "en:cereal": 4334,
+    "en:vegetable-oil-and-fat": 4218,
+    "en:disaccharide": 4189,
+    "en:sugar": 4125,
+    "en:wheat": 4007,
+    "en:flour": 3785,
+    "en:dairy": 3527,
+    "en:cereal-flour": 3399,
+    "en:flavouring": 3393,
+    "en:wheat-flour": 3306,
+    "en:water": 3247,
+    "en:vegetable": 2992,
+    "en:starch": 2723,
+    "en:vegetable-oil": 2386,
+    "en:monosaccharide": 2250,
+    "en:root-vegetable": 2215,
+    "en:glucose": 2084,
+    "en:condiment": 2071,
+    "en:spice": 1937,
+    "en:onion-family-vegetable": 1801,
+    "en:plant": 1787,
+    "en:natural-flavouring": 1688,
+    "en:yeast": 1564,
+    "en:e322": 1505,
+    "en:milk": 1486,
+    "en:seed": 1436,
+    "en:sunflower-oil": 1372,
+    "en:rapeseed-oil": 1370,
+    "en:herb": 1330,
+    "en:onion": 1325,
+    "en:fruit": 1321,
+    "en:cocoa": 1310,
+    "en:e330": 1269,
+    "en:fruit-vegetable": 1222,
+    "en:e500": 1215,
+    "en:emulsifier": 1210,
+    "en:palm-oil-and-fat": 1154,
+    "en:protein": 1134,
+    "en:nut": 1124,
+    "en:e322i": 1102,
+    "en:milk-powder": 1102,
+    "en:modified-starch": 1097,
+    "en:garlic": 1061,
+    "en:glucose-syrup": 949,
+    "en:vegetable-fat": 932,
+    "en:dextrose": 916,
+    "en:colza-oil": 904,
+    "en:cocoa-butter": 902,
+    "en:cheese": 898,
+    "en:preservative": 894,
+    "en:soya": 881,
+    "en:palm-oil": 877,
+    "en:colour": 870,
+    "en:pepper": 867,
+    "en:butter": 859,
+    "en:soya-lecithin": 858,
+    "en:corn-starch": 840,
+    "en:fat": 838,
+    "en:tree-nut": 835,
+    "en:e471": 831,
+    "en:taproot-vegetable": 804,
+    "en:tomato": 800,
+    "en:cocoa-paste": 796,
+    "en:raising-agent": 770,
+    "en:legume": 760,
+    "en:skimmed-milk-powder": 753,
+    "en:cream": 734,
+    "en:antioxidant": 733,
+    "en:e415": 730,
+    "en:e450": 730,
+    "en:whey": 717,
+    "en:animal": 702,
+    "en:vinegar": 693,
+    "en:thickener": 687,
+    "en:carrot": 686,
+    "en:acid": 677,
+    "en:minerals": 667,
+    "en:gluten": 659,
+    "en:potato-starch": 654,
+    "en:meat": 645,
+    "en:acidity-regulator": 637,
+    "en:vitamins": 631,
+    "en:pulse": 622,
+    "en:leaf-vegetable": 618,
+    "en:dough": 610,
+    "en:durum-wheat": 593,
+    "en:semolina": 589,
+    "en:animal-protein": 583,
+    "en:fiber": 582,
+    "en:e202": 566,
+    "en:stabiliser": 566,
+    "en:milk-proteins": 562,
+    "en:rice": 560,
+    "en:chocolate": 554,
+    "en:vegetable-fiber": 549,
+    "en:durum-wheat-semolina": 538,
+    "en:e300": 537,
+    "en:e412": 529,
+    "en:fructose": 529,
+    "en:enzyme": 527,
+    "en:juice": 522,
+    "en:pork": 518,
+    "en:fruit-juice": 514,
+    "en:e500ii": 500,
+    "en:wheat-gluten": 497,
+    "en:plant-protein": 494,
+    "en:iron": 488,
+    "en:poultry": 482,
+    "en:cocoa-powder": 481,
+    "en:pork-meat": 476,
+    "en:mustard": 475,
+    "en:parsley": 463,
+    "en:e101": 462,
+    "en:e375": 462,
+    "en:maltodextrin": 460,
+    "en:thiamin": 452,
+    "en:almond": 451,
+    "en:yeast-extract": 447,
+    "en:e503": 443,
+    "en:vanilla-flavouring": 442,
+    "en:whole-milk-powder": 442,
+    "en:wheat-starch": 436,
+    "en:milkfat": 428,
+    "en:sea-salt": 427,
+    "en:glucose-fructose-syrup": 424,
+    "en:tuber": 423,
+    "en:e407": 413,
+    "en:chicken": 411,
+    "en:lemon-juice": 411,
+    "en:stalk-vegetable": 409,
+    "en:turmeric": 403,
+    "en:lactose": 401,
+    "en:olive-oil": 396,
+    "en:egg": 393,
+    "en:potato": 393,
+    "en:celery": 391,
+    "en:coating": 390,
+    "en:natural-vanilla-flavouring": 382,
+    "en:e160a": 381,
+    "en:sesame": 381,
+    "en:fish": 379,
+    "en:folate": 373,
+    "en:sauce": 373,
+    "en:pod-and-seed-vegetable": 369,
+    "en:folic-acid": 368,
+    "en:e250": 363,
+    "en:alcohol": 356,
+    "en:corn": 354,
+    "en:whey-powder": 353,
+    "en:bell-pepper": 344,
+    "en:syrup": 339,
+    "en:butterfat": 334,
+    "en:rice-flour": 333,
+    "en:hazelnut": 332,
+    "en:malt": 319,
+    "en:berries": 315,
+    "en:oat": 312,
+    "en:capsicum-annuum": 311,
+    "en:palm-fat": 310,
+    "en:ferment": 309,
+    "en:chicken-meat": 306,
+    "en:basil": 305,
+    "en:e440a": 303,
+    "en:fat-reduced-cocoa-powder": 301,
+    "en:breadcrumbs": 298,
+    "en:modified-corn-starch": 298,
+    "en:e270": 288,
+    "en:margarine": 285,
+    "en:iodised-salt": 284,
+    "en:soya-bean": 280,
+    "en:vitamin-c": 280,
+    "en:paprika": 277,
+    "en:chili-pepper": 269,
+    "en:invert-sugar": 269,
+    "en:e422": 268,
+    "en:citrus-fruit": 267,
+    "en:animal-fat": 266,
+    "en:e450i": 261,
+    "en:fat-reduced-cocoa": 261,
+    "en:concentrate": 260,
+    "en:virgin-olive-oil": 259,
+    "en:extract": 258,
+    "en:thiamin-mononitrate": 258,
+    "en:coconut": 257,
+    "en:barley": 250,
+    "en:cane-sugar": 245,
+    "en:soya-oil": 243,
+    "en:sunflower": 242,
+    "en:mushroom": 241,
+    "en:microbial-culture": 240,
+    "en:soy-protein": 238,
+    "en:tapioca": 237,
+    "en:vanilla": 232,
+    "en:coagulating-enzyme": 231,
+    "en:emmental": 231,
+    "en:beef": 229,
+    "en:coconut-oil": 228
+   }
+  },
+  "gluten": {
+   "count": 11559,
+   "words": {
+    "en:salt": 5911,
+    "en:added-sugar": 5905,
+    "en:oil-and-fat": 5198,
+    "en:disaccharide": 5124,
+    "en:sugar": 4984,
+    "en:vegetable-oil-and-fat": 4851,
+    "en:flavouring": 4335,
+    "en:vegetable": 4136,
+    "en:water": 3749,
+    "en:dairy": 3154,
+    "en:starch": 3000,
+    "en:root-vegetable": 2895,
+    "en:vegetable-oil": 2801,
+    "en:plant": 2753,
+    "en:condiment": 2557,
+    "en:spice": 2347,
+    "en:monosaccharide": 2334,
+    "en:cereal": 2199,
+    "en:onion-family-vegetable": 2179,
+    "en:glucose": 2120,
+    "en:natural-flavouring": 2106,
+    "en:fruit": 2010,
+    "en:cocoa": 1801,
+    "en:seed": 1757,
+    "en:e322": 1714,
+    "en:fruit-vegetable": 1714,
+    "en:onion": 1685,
+    "en:e330": 1606,
+    "en:nut": 1602,
+    "en:sunflower-oil": 1597,
+    "en:herb": 1498,
+    "en:egg": 1460,
+    "en:flour": 1401,
+    "en:e322i": 1319,
+    "en:rapeseed-oil": 1306,
+    "en:milk": 1292,
+    "en:cocoa-butter": 1238,
+    "en:rice": 1227,
+    "en:garlic": 1214,
+    "en:modified-starch": 1162,
+    "en:emulsifier": 1151,
+    "en:legume": 1102,
+    "en:milk-powder": 1079,
+    "en:yeast": 1071,
+    "en:tree-nut": 1060,
+    "en:tomato": 1048,
+    "en:taproot-vegetable": 1043,
+    "en:vegetable-fat": 1038,
+    "en:corn-starch": 1037,
+    "en:protein": 1037,
+    "en:colour": 1032,
+    "en:dextrose": 1000,
+    "en:cocoa-paste": 980,
+    "en:soya-lecithin": 962,
+    "en:sea-salt": 960,
+    "en:soya": 960,
+    "en:glucose-syrup": 946,
+    "en:e415": 911,
+    "en:oat": 891,
+    "en:vitamins": 889,
+    "en:carrot": 888,
+    "en:pulse": 887,
+    "en:pepper": 876,
+    "en:e500": 822,
+    "en:palm-oil-and-fat": 794,
+    "en:tuber": 785,
+    "en:animal": 772,
+    "en:fat": 759,
+    "en:vinegar": 759,
+    "en:corn": 732,
+    "en:potato-starch": 731,
+    "en:acid": 708,
+    "en:potato": 708,
+    "en:e412": 706,
+    "en:rice-flour": 706,
+    "en:cream": 704,
+    "en:fiber": 696,
+    "en:acidity-regulator": 686,
+    "en:colza-oil": 668,
+    "en:preservative": 654,
+    "en:maltodextrin": 650,
+    "en:leaf-vegetable": 643,
+    "en:thickener": 638,
+    "en:antioxidant": 637,
+    "en:meat": 637,
+    "en:stabiliser": 635,
+    "en:juice": 633,
+    "en:vegetable-fiber": 631,
+    "en:fruit-juice": 615,
+    "en:cocoa-powder": 614,
+    "en:palm-oil": 608,
+    "en:chocolate": 604,
+    "en:minerals": 603,
+    "en:cane-sugar": 594,
+    "en:e471": 593,
+    "en:berries": 585,
+    "en:plant-protein": 585,
+    "en:skimmed-milk-powder": 584,
+    "en:mustard": 579,
+    "en:almond": 564,
+    "en:pork": 558,
+    "en:whey": 557,
+    "en:butter": 544,
+    "en:yeast-extract": 534,
+    "en:whole-milk-powder": 531,
+    "en:e500ii": 523,
+    "en:syrup": 518,
+    "en:cheese": 515,
+    "en:e101": 513,
+    "en:e202": 510,
+    "en:pod-and-seed-vegetable": 505,
+    "en:e450": 483,
+    "en:parsley": 479,
+    "en:animal-protein": 478,
+    "en:fish": 478,
+    "en:olive-oil": 476,
+    "en:stalk-vegetable": 474,
+    "en:pork-meat": 466,
+    "en:lactose": 464,
+    "en:e160c": 459,
+    "en:milk-proteins": 458,
+    "en:vanilla": 449,
+    "en:bell-pepper": 446,
+    "en:e621": 444,
+    "en:sesame": 443,
+    "en:celery": 434,
+    "en:cereal-flour": 430,
+    "en:e250": 429,
+    "en:peanut": 429,
+    "en:e300": 427,
+    "en:lemon-juice": 424,
+    "en:e375": 421,
+    "en:vanilla-flavouring": 420,
+    "en:poultry": 418,
+    "en:hazelnut": 412,
+    "en:fructose": 405,
+    "en:chili-pepper": 404,
+    "en:capsicum-annuum": 403,
+    "en:turmeric": 402,
+    "en:extract": 394,
+    "en:e407": 391,
+    "en:citrus-fruit": 390,
+    "en:coconut": 386,
+    "en:milkfat": 386,
+    "en:tapioca": 383,
+    "en:raising-agent": 375,
+    "en:paprika": 374,
+    "en:ferment": 372,
+    "en:enzyme": 368,
+    "en:natural-vanilla-flavouring": 351,
+    "en:alcohol": 349,
+    "en:chicken": 342,
+    "en:modified-corn-starch": 340,
+    "en:whey-powder": 340,
+    "en:coconut-oil": 332,
+    "en:concentrate": 322,
+    "en:vegetable-extract": 316,
+    "en:shellfish": 312,
+    "en:e422": 308,
+    "en:soy-protein": 304,
+    "en:vitamin-c": 301,
+    "en:e270": 297,
+    "en:egg-white": 297,
+    "en:e160a": 296,
+    "en:fat-reduced-cocoa-powder": 296,
+    "en:honey": 296,
+    "en:sunflower": 296,
+    "en:microbial-culture": 294,
+    "en:iodised-salt": 293,
+    "en:sunflower-lecithin": 291,
+    "en:tomato-concentrate": 289,
+    "en:e150a": 288,
+    "en:egg-yolk": 287,
+    "en:apple": 285,
+    "en:malaceous-fruit": 285,
+    "en:animal-fat": 283,
+    "en:sweetener": 281,
+    "en:folate": 280,
+    "en:thiamin": 280,
+    "en:folic-acid": 277,
+    "en:butterfat": 273,
+    "en:e440a": 272,
+    "en:vanilla-extract": 272,
+    "en:buckwheat": 270,
+    "en:fat-reduced-cocoa": 270,
+    "en:virgin-olive-oil": 269,
+    "en:e955": 267,
+    "en:lactic-ferments": 266,
+    "en:glucose-fructose-syrup": 264,
+    "en:beef": 261,
+    "en:brassica": 261,
+    "en:invert-sugar": 261,
+    "en:quinoa": 260,
+    "en:cinnamon": 258,
+    "en:e420": 258,
+    "en:chicken-meat": 255,
+    "en:grape": 255,
+    "en:e262": 252,
+    "en:leek": 252,
+    "en:extra-virgin-olive-oil": 251
+   }
+  },
+  "soy": {
+   "count": 16044,
+   "words": {
+    "en:added-sugar": 11387,
+    "en:disaccharide": 10683,
+    "en:sugar": 10590,
+    "en:oil-and-fat": 9985,
+    "en:vegetable-oil-and-fat": 9246,
+    "en:salt": 9122,
+    "en:flavouring": 8358,
+    "en:dairy": 7994,
+    "en:plant": 7577,
+    "en:cereal": 7486,
+    "en:flour": 6920,
+    "en:cocoa": 6755,
+    "en:e322": 6675,
+    "en:wheat": 6463,
+    "en:cereal-flour": 5993,
+    "en:wheat-flour": 5815,
+    "en:monosaccharide": 5515,
+    "en:emulsifier": 5495,
+    "en:cocoa-butter": 5186,
+    "en:glucose": 5119,
+    "en:milk-powder": 4882,
+    "en:cocoa-paste": 4821,
+    "en:starch": 4585,
+    "en:water": 4429,
+    "en:vegetable-oil": 4265,
+    "en:vegetable": 4093,
+    "en:natural-flavouring": 3879,
+    "en:vegetable-fat": 3779,
+    "en:nut": 3399,
+    "en:palm-oil-and-fat": 3329,
+    "en:e500": 3085,
+    "en:whole-milk-powder": 3078,
+    "en:egg": 2992,
+    "en:fruit": 2975,
+    "en:condiment": 2925,
+    "en:root-vegetable": 2915,
+    "en:tree-nut": 2907,
+    "en:glucose-syrup": 2864,
+    "en:skimmed-milk-powder": 2822,
+    "en:e330": 2719,
+    "en:fat": 2629,
+    "en:spice": 2620,
+    "en:whey": 2501,
+    "en:milk": 2439,
+    "en:palm-oil": 2402,
+    "en:sunflower-oil": 2183,
+    "en:yeast": 2131,
+    "en:chocolate": 2123,
+    "en:cocoa-powder": 2054,
+    "en:milkfat": 2049,
+    "en:e471": 2019,
+    "en:onion-family-vegetable": 1942,
+    "en:lactose": 1902,
+    "en:raising-agent": 1885,
+    "en:butterfat": 1864,
+    "en:rapeseed-oil": 1821,
+    "en:hazelnut": 1802,
+    "en:colour": 1758,
+    "en:protein": 1753,
+    "en:vanilla-flavouring": 1672,
+    "en:modified-starch": 1637,
+    "en:fructose": 1587,
+    "en:seed": 1579,
+    "en:cream": 1574,
+    "en:dextrose": 1532,
+    "en:butter": 1531,
+    "en:natural-vanilla-flavouring": 1515,
+    "en:fruit-vegetable": 1500,
+    "en:onion": 1464,
+    "en:vanilla": 1430,
+    "en:e450": 1421,
+    "en:acid": 1392,
+    "en:stabiliser": 1379,
+    "en:herb": 1359,
+    "en:fat-reduced-cocoa-powder": 1347,
+    "en:fat-reduced-cocoa": 1346,
+    "en:rice": 1328,
+    "en:extract": 1325,
+    "en:almond": 1316,
+    "en:glucose-fructose-syrup": 1308,
+    "en:acidity-regulator": 1268,
+    "en:corn-starch": 1266,
+    "en:vegetable-extract": 1241,
+    "en:e500ii": 1237,
+    "en:vitamins": 1191,
+    "en:e412": 1176,
+    "en:e503": 1175,
+    "en:garlic": 1175,
+    "en:animal-protein": 1152,
+    "en:antioxidant": 1147,
+    "en:milk-proteins": 1115,
+    "en:whey-powder": 1110,
+    "en:thickener": 1106,
+    "en:wheat-starch": 1091,
+    "en:e415": 1088,
+    "en:vanilla-extract": 1078,
+    "en:maltodextrin": 1070,
+    "en:palm-fat": 1047,
+    "en:corn": 1042,
+    "en:legume": 1040,
+    "en:taproot-vegetable": 1040,
+    "en:e420": 1014,
+    "en:malt": 992,
+    "en:coconut": 971,
+    "en:preservative": 965,
+    "en:syrup": 951,
+    "en:palm": 947,
+    "en:colza-oil": 942,
+    "en:minerals": 935,
+    "en:e202": 929,
+    "en:berries": 921,
+    "en:skimmed-milk": 917,
+    "en:tomato": 909,
+    "en:e322i": 885,
+    "en:e422": 881,
+    "en:pulse": 876,
+    "en:oat": 859,
+    "en:gluten": 850,
+    "en:e160a": 847,
+    "en:animal": 818,
+    "en:carrot": 818,
+    "en:e407": 805,
+    "en:rice-flour": 798,
+    "en:juice": 797,
+    "en:e300": 795,
+    "en:potato-starch": 784,
+    "en:fruit-juice": 782,
+    "en:milk-chocolate": 779,
+    "en:sweet-whey": 778,
+    "en:malted-barley": 768,
+    "en:pepper": 759,
+    "en:invert-sugar": 751,
+    "en:coconut-oil": 750,
+    "en:e440a": 741,
+    "en:fiber": 739,
+    "en:sugar-syrup": 710,
+    "en:e101": 693,
+    "en:dough": 669,
+    "en:humectant": 666,
+    "en:vegetable-fiber": 658,
+    "en:cheese": 656,
+    "en:e621": 641,
+    "en:vinegar": 639,
+    "en:meat": 636,
+    "en:e375": 634,
+    "en:invert-sugar-syrup": 628,
+    "en:sweet-whey-powder": 628,
+    "en:barley-malt-extract": 626,
+    "en:sunflower": 623,
+    "en:leaf-vegetable": 614,
+    "en:egg-white": 606,
+    "en:wheat-gluten": 606,
+    "en:tuber": 603,
+    "en:iodised-salt": 597,
+    "en:thiamin": 591,
+    "en:yeast-extract": 590,
+    "en:plant-protein": 586,
+    "en:iron": 580,
+    "en:sea-salt": 574,
+    "en:dark-chocolate": 560,
+    "en:potato": 560,
+    "en:shea-butter": 558,
+    "en:egg-yolk": 547,
+    "en:carob-bean": 543,
+    "en:sweetener": 541,
+    "en:peanut": 540,
+    "en:citrus-fruit": 537,
+    "en:folate": 534,
+    "en:carob-seed-flour": 532,
+    "en:folic-acid": 530,
+    "en:pod-and-seed-vegetable": 515,
+    "en:lemon-juice": 507,
+    "en:palm-kernel-oil-and-fat": 504,
+    "en:enzyme": 493,
+    "en:alcohol": 487,
+    "en:e150a": 483,
+    "en:pork": 482,
+    "en:parsley": 475,
+    "en:e414": 474,
+    "en:barley": 466,
+    "en:e331": 458,
+    "en:e503ii": 458,
+    "en:vitamin-c": 453,
+    "en:cane-sugar": 446,
+    "en:e160c": 442,
+    "en:e250": 439,
+    "en:sesame": 439,
+    "en:oat-flakes": 436,
+    "en:e955": 435,
+    "en:whole-egg": 435,
+    "en:e476": 432,
+    "en:vanillin": 432,
+    "en:apple": 431,
+    "en:malaceous-fruit": 431,
+    "en:mustard": 428,
+    "en:coating": 422,
+    "en:coconut-fat": 420,
+    "en:wholemeal-flour": 418,
+    "en:poultry": 415,
+    "en:whole-milk": 411
+   }
+  },
+  "sesame": {
+   "count": 2727,
+   "words": {
+    "en:salt": 1783,
+    "en:oil-and-fat": 1561,
+    "en:cereal": 1546,
+    "en:added-sugar": 1538,
+    "en:vegetable-oil-and-fat": 1516,
+    "en:disaccharide": 1392,
+    "en:sugar": 1341,
+    "en:flour": 1330,
+    "en:wheat": 1300,
+    "en:cereal-flour": 1190,
+    "en:wheat-flour": 1100,
+    "en:vegetable": 965,
+    "en:water": 951,
+    "en:vegetable-oil": 921,
+    "en:flavouring": 821,
+    "en:starch": 746,
+    "en:yeast": 717,
+    "en:dairy": 709,
+    "en:condiment": 693,
+    "en:plant": 673,
+    "en:root-vegetable": 639,
+    "en:monosaccharide": 636,
+    "en:spice": 630,
+    "en:glucose": 571,
+    "en:fruit": 568,
+    "en:onion-family-vegetable": 556,
+    "en:sunflower-oil": 546,
+    "en:seed": 534,
+    "en:nut": 511,
+    "en:fruit-vegetable": 438,
+    "en:egg": 434,
+    "en:e322": 427,
+    "en:cocoa": 409,
+    "en:rapeseed-oil": 409,
+    "en:emulsifier": 391,
+    "en:onion": 384,
+    "en:e500": 375,
+    "en:legume": 374,
+    "en:natural-flavouring": 374,
+    "en:e330": 367,
+    "en:tree-nut": 367,
+    "en:soya": 360,
+    "en:garlic": 356,
+    "en:rice": 355,
+    "en:herb": 343,
+    "en:gluten": 330,
+    "en:palm-oil-and-fat": 327,
+    "en:pulse": 320,
+    "en:e322i": 304,
+    "en:vegetable-fat": 301,
+    "en:modified-starch": 296,
+    "en:wheat-gluten": 294,
+    "en:cocoa-butter": 289,
+    "en:protein": 280,
+    "en:sea-salt": 271,
+    "en:vinegar": 268,
+    "en:milk-powder": 259,
+    "en:e300": 258,
+    "en:acidity-regulator": 257,
+    "en:cocoa-paste": 256,
+    "en:oat": 246,
+    "en:corn-starch": 244,
+    "en:palm-oil": 242,
+    "en:sauce": 237,
+    "en:milk": 236,
+    "en:pepper": 227,
+    "en:soya-lecithin": 227,
+    "en:dextrose": 223,
+    "en:almond": 219,
+    "en:preservative": 218,
+    "en:glucose-syrup": 213,
+    "en:e415": 212,
+    "en:malt": 212,
+    "en:e471": 207,
+    "en:raising-agent": 206,
+    "en:taproot-vegetable": 205,
+    "en:fructose": 203,
+    "en:colour": 200,
+    "en:tomato": 199,
+    "en:colza-oil": 196,
+    "en:corn": 196,
+    "en:acid": 191,
+    "en:juice": 189,
+    "en:fruit-juice": 188,
+    "en:potato-starch": 187,
+    "en:dough": 186,
+    "en:vitamins": 186,
+    "en:antioxidant": 180,
+    "en:cane-sugar": 179,
+    "en:chocolate": 179,
+    "en:barley": 178,
+    "en:butter": 176,
+    "en:e202": 176,
+    "en:oat-flakes": 176,
+    "en:soya-bean": 174,
+    "en:syrup": 174,
+    "en:glucose-fructose-syrup": 171,
+    "en:thickener": 170,
+    "en:carrot": 168,
+    "en:fat": 167,
+    "en:wholemeal-flour": 166,
+    "en:berries": 164,
+    "en:skimmed-milk-powder": 162,
+    "en:plant-protein": 161,
+    "en:cocoa-powder": 158,
+    "en:malted-barley": 156,
+    "en:whey": 155,
+    "en:minerals": 154,
+    "en:olive-oil": 152,
+    "en:soy-sauce": 151,
+    "en:rice-flour": 150,
+    "en:e500ii": 149,
+    "en:leaf-vegetable": 149,
+    "en:chili-pepper": 147,
+    "en:pod-and-seed-vegetable": 147,
+    "en:e450": 144,
+    "en:cheese": 142,
+    "en:stabiliser": 142,
+    "en:enzyme": 141,
+    "en:fiber": 141,
+    "en:sunflower": 141,
+    "en:e412": 137,
+    "en:maltodextrin": 137,
+    "en:thiamin": 137,
+    "en:lemon-juice": 135,
+    "en:vegetable-fiber": 134,
+    "en:flax": 129,
+    "en:flour-treatment-agent": 129,
+    "en:animal": 128,
+    "en:coconut": 128,
+    "en:hazelnut": 126,
+    "en:mustard": 126,
+    "en:animal-protein": 125,
+    "en:ginger": 124,
+    "en:yeast-extract": 124,
+    "en:e503": 122,
+    "en:flax-seed": 122,
+    "en:milk-proteins": 122,
+    "en:egg-white": 120,
+    "en:peanut": 119,
+    "en:sunflower-seed": 118,
+    "en:bell-pepper": 117,
+    "en:e375": 117,
+    "en:iron": 117,
+    "en:barley-malt-extract": 112,
+    "en:amino-acids": 111,
+    "en:whole-milk-powder": 111,
+    "en:e282": 110,
+    "en:whole-wheat-flour": 109,
+    "en:e101": 108,
+    "en:e150a": 108,
+    "en:turmeric": 108,
+    "en:honey": 107,
+    "en:barley-flour": 106,
+    "en:capsicum-annuum": 106,
+    "en:meat": 106,
+    "en:iodised-salt": 104,
+    "en:parsley": 104,
+    "en:cinnamon": 103,
+    "en:virgin-olive-oil": 102,
+    "en:grape": 101,
+    "en:cream": 98,
+    "en:wheat-starch": 98,
+    "en:coriander": 97,
+    "en:fish": 96,
+    "en:rye-flour": 96,
+    "en:citrus-fruit": 95,
+    "en:whey-powder": 95,
+    "en:alcohol": 94,
+    "en:black-pepper": 94,
+    "en:extra-virgin-olive-oil": 94,
+    "en:vanilla-flavouring": 94,
+    "en:coating": 92,
+    "en:e160c": 92,
+    "en:invert-sugar": 92,
+    "en:fat-reduced-cocoa-powder": 91,
+    "en:palm-fat": 91,
+    "en:tuber": 91,
+    "en:pork": 90,
+    "en:e270": 89,
+    "en:sugar-syrup": 89,
+    "en:barley-malt-flour": 88,
+    "en:malted-wheat-flour": 87,
+    "en:poultry": 87,
+    "en:cumin": 86,
+    "en:e200": 86,
+    "en:milkfat": 86,
+    "en:e160a": 85,
+    "en:e422": 85,
+    "en:extract": 85,
+    "en:e481": 84,
+    "en:sourdough": 83,
+    "en:soya-oil": 83,
+    "en:tapioca": 83,
+    "en:apple": 82,
+    "en:malaceous-fruit": 82,
+    "en:stalk-vegetable": 82,
+    "en:natural-vanilla-flavouring": 80,
+    "en:potato": 80,
+    "en:chickpea": 79
+   }
+  },
+  "fish": {
+   "count": 2475,
+   "words": {
+    "en:salt": 1915,
+    "en:vegetable": 1504,
+    "en:oil-and-fat": 1455,
+    "en:water": 1445,
+    "en:vegetable-oil-and-fat": 1423,
+    "en:root-vegetable": 1169,
+    "en:onion-family-vegetable": 1068,
+    "en:vegetable-oil": 1006,
+    "en:added-sugar": 987,
+    "en:condiment": 948,
+    "en:starch": 927,
+    "en:cereal": 891,
+    "en:spice": 884,
+    "en:wheat": 830,
+    "en:flavouring": 814,
+    "en:fruit-vegetable": 805,
+    "en:disaccharide": 788,
+    "en:dairy": 783,
+    "en:sugar": 780,
+    "en:herb": 738,
+    "en:flour": 705,
+    "en:onion": 704,
+    "en:garlic": 669,
+    "en:rapeseed-oil": 629,
+    "en:cereal-flour": 628,
+    "en:seed": 620,
+    "en:wheat-flour": 619,
+    "en:sunflower-oil": 558,
+    "en:natural-flavouring": 510,
+    "en:tomato": 508,
+    "en:colza-oil": 502,
+    "en:egg": 480,
+    "en:pepper": 479,
+    "en:fruit": 474,
+    "en:e330": 471,
+    "en:vinegar": 466,
+    "en:modified-starch": 451,
+    "en:shellfish": 436,
+    "en:yeast": 421,
+    "en:taproot-vegetable": 419,
+    "en:monosaccharide": 401,
+    "en:leaf-vegetable": 397,
+    "en:carrot": 387,
+    "en:glucose": 385,
+    "en:e415": 374,
+    "en:olive-oil": 371,
+    "en:legume": 361,
+    "en:corn-starch": 325,
+    "en:milk": 325,
+    "en:soya": 314,
+    "en:cream": 313,
+    "en:parsley": 308,
+    "en:juice": 304,
+    "en:fruit-juice": 298,
+    "en:protein": 296,
+    "en:dextrose": 288,
+    "en:mustard": 288,
+    "en:crustacean": 268,
+    "en:lemon-juice": 264,
+    "en:alcohol": 256,
+    "en:rice": 252,
+    "en:thickener": 246,
+    "en:cheese": 244,
+    "en:chili-pepper": 244,
+    "en:mollusc": 243,
+    "en:virgin-olive-oil": 243,
+    "en:potato-starch": 237,
+    "en:sauce": 230,
+    "en:pod-and-seed-vegetable": 224,
+    "en:bell-pepper": 223,
+    "en:pulse": 223,
+    "en:antioxidant": 222,
+    "en:extra-virgin-olive-oil": 219,
+    "en:butter": 218,
+    "en:capsicum-annuum": 218,
+    "en:e412": 217,
+    "en:stalk-vegetable": 214,
+    "en:turmeric": 211,
+    "en:concentrate": 210,
+    "en:acid": 209,
+    "en:preservative": 207,
+    "en:colour": 206,
+    "en:tomato-concentrate": 204,
+    "en:wine": 198,
+    "en:animal": 197,
+    "en:plant": 195,
+    "en:acidity-regulator": 194,
+    "en:meat": 187,
+    "en:celery": 185,
+    "en:gluten": 185,
+    "en:tuber": 183,
+    "en:e202": 182,
+    "en:alcohol-vinegar": 181,
+    "en:white-wine": 179,
+    "en:nut": 178,
+    "en:coating": 176,
+    "en:shallot": 173,
+    "en:modified-corn-starch": 171,
+    "en:potato": 165,
+    "en:semolina": 165,
+    "en:tapioca": 165,
+    "en:animal-protein": 162,
+    "en:milk-powder": 162,
+    "en:pork": 160,
+    "en:milk-proteins": 158,
+    "en:e300": 157,
+    "en:citrus-fruit": 156,
+    "en:e500": 156,
+    "en:pork-meat": 151,
+    "en:poultry": 151,
+    "en:durum-wheat": 148,
+    "en:mustard-seed": 146,
+    "en:stabiliser": 145,
+    "en:yeast-extract": 145,
+    "en:e621": 144,
+    "en:chicken": 143,
+    "en:plant-protein": 143,
+    "en:maltodextrin": 142,
+    "en:breadcrumbs": 139,
+    "en:dough": 139,
+    "en:paprika": 139,
+    "en:vitamins": 139,
+    "en:e450": 137,
+    "en:egg-yolk": 136,
+    "en:fish": 135,
+    "en:corn": 131,
+    "en:wheat-gluten": 130,
+    "en:fresh-cream": 129,
+    "en:leek": 127,
+    "en:mushroom": 127,
+    "en:fiber": 126,
+    "en:basil": 125,
+    "en:e160c": 123,
+    "en:pea": 123,
+    "en:ferment": 122,
+    "en:soya-bean": 120,
+    "en:e250": 119,
+    "en:palm-oil-and-fat": 119,
+    "en:vegetable-fiber": 118,
+    "en:e451": 116,
+    "en:sesame": 116,
+    "en:durum-wheat-semolina": 114,
+    "en:red-bell-pepper": 113,
+    "en:wheat-starch": 111,
+    "en:black-pepper": 107,
+    "en:soy-sauce": 107,
+    "en:chives": 106,
+    "en:palm-oil": 106,
+    "en:chicken-meat": 104,
+    "en:e322": 104,
+    "en:emulsifier": 104,
+    "en:glucose-syrup": 104,
+    "en:e270": 102,
+    "en:skimmed-milk-powder": 100,
+    "en:coriander": 98,
+    "en:e471": 97,
+    "en:lactose": 97,
+    "en:oregano": 97,
+    "en:white-pepper": 97,
+    "en:minerals": 96,
+    "en:shrimp": 96,
+    "en:concentrated-lemon-juice": 95,
+    "en:enzyme": 95,
+    "en:e407": 94,
+    "en:courgette": 92,
+    "en:fat": 91,
+    "en:lemon": 91,
+    "en:tomato-puree": 89,
+    "en:sea-salt": 88,
+    "en:brassica": 87,
+    "en:vitamin-c": 85,
+    "en:e211": 84,
+    "en:e331": 84,
+    "en:spice-extract": 80,
+    "en:flavour-enhancer": 79,
+    "en:green-peas": 79,
+    "en:garden-peas": 78,
+    "en:scallop": 78,
+    "en:e322i": 77,
+    "en:rice-flour": 77,
+    "en:algae": 76,
+    "en:egg-white": 76,
+    "en:ginger": 76,
+    "en:thyme": 76,
+    "en:microbial-culture": 75,
+    "en:tree-nut": 75,
+    "en:dijon-mustard": 74,
+    "en:e262": 73,
+    "en:e301": 73,
+    "en:whey": 73,
+    "en:lactic-ferments": 72,
+    "en:animal-fat": 71,
+    "en:e150a": 71,
+    "en:e160a": 71,
+    "en:wine-vinegar": 71,
+    "en:e260": 69,
+    "en:herbs-and-spices": 69,
+    "en:spinach": 68,
+    "en:e500ii": 66,
+    "en:modified-potato-starch": 66
+   }
+  },
+  "crustacean": {
+   "count": 1646,
+   "words": {
+    "en:salt": 1344,
+    "en:oil-and-fat": 1143,
+    "en:vegetable-oil-and-fat": 1128,
+    "en:water": 1077,
+    "en:vegetable": 1029,
+    "en:added-sugar": 992,
+    "en:starch": 914,
+    "en:disaccharide": 904,
+    "en:sugar": 902,
+    "en:root-vegetable": 850,
+    "en:flavouring": 848,
+    "en:onion-family-vegetable": 763,
+    "en:fish": 740,
+    "en:condiment": 678,
+    "en:rapeseed-oil": 676,
+    "en:cereal": 647,
+    "en:spice": 623,
+    "en:wheat": 602,
+    "en:dairy": 593,
+    "en:colza-oil": 590,
+    "en:egg": 574,
+    "en:vegetable-oil": 554,
+    "en:fruit-vegetable": 550,
+    "en:seed": 498,
+    "en:herb": 497,
+    "en:garlic": 477,
+    "en:onion": 475,
+    "en:flour": 474,
+    "en:natural-flavouring": 460,
+    "en:e160c": 436,
+    "en:cereal-flour": 424,
+    "en:wheat-flour": 419,
+    "en:e330": 397,
+    "en:vinegar": 396,
+    "en:pepper": 374,
+    "en:modified-starch": 371,
+    "en:sunflower-oil": 347,
+    "en:taproot-vegetable": 341,
+    "en:mustard": 332,
+    "en:e415": 328,
+    "en:fish-meat": 322,
+    "en:tomato": 320,
+    "en:carrot": 316,
+    "en:egg-white": 306,
+    "en:colour": 304,
+    "en:wheat-starch": 301,
+    "en:fruit": 297,
+    "en:yeast": 296,
+    "en:shellfish": 275,
+    "en:soya": 275,
+    "en:milk": 273,
+    "en:potato-starch": 271,
+    "en:leaf-vegetable": 250,
+    "en:sauce": 249,
+    "en:monosaccharide": 246,
+    "en:legume": 234,
+    "en:protein": 234,
+    "en:corn-starch": 229,
+    "en:glucose": 229,
+    "en:mollusc": 208,
+    "en:e621": 203,
+    "en:cheese": 199,
+    "en:cream": 197,
+    "en:e412": 196,
+    "en:juice": 196,
+    "en:acid": 195,
+    "en:alcohol-vinegar": 195,
+    "en:parsley": 195,
+    "en:fruit-juice": 194,
+    "en:stalk-vegetable": 189,
+    "en:chili-pepper": 188,
+    "en:olive-oil": 178,
+    "en:celery": 176,
+    "en:lemon-juice": 174,
+    "en:rice": 172,
+    "en:alcohol": 171,
+    "en:antioxidant": 170,
+    "en:thickener": 170,
+    "en:mustard-seed": 168,
+    "en:pulse": 167,
+    "en:bell-pepper": 165,
+    "en:preservative": 163,
+    "en:capsicum-annuum": 162,
+    "en:surimi": 159,
+    "en:e202": 158,
+    "en:white-fish": 157,
+    "en:acidity-regulator": 155,
+    "en:egg-yolk": 155,
+    "en:nut": 155,
+    "en:yeast-extract": 154,
+    "en:sesame": 152,
+    "en:pod-and-seed-vegetable": 151,
+    "en:plant-protein": 145,
+    "en:e500": 143,
+    "en:stabiliser": 137,
+    "en:tapioca": 135,
+    "en:palm-oil-and-fat": 132,
+    "en:dough": 129,
+    "en:e451": 129,
+    "en:modified-corn-starch": 128,
+    "en:animal": 127,
+    "en:tuber": 126,
+    "en:semolina": 125,
+    "en:e450": 124,
+    "en:soy-sauce": 122,
+    "en:dextrose": 120,
+    "en:powdered-egg-white": 120,
+    "en:wine": 119,
+    "en:butter": 118,
+    "en:plant": 118,
+    "en:durum-wheat": 116,
+    "en:meat": 114,
+    "en:e420": 113,
+    "en:concentrate": 112,
+    "en:dijon-mustard": 112,
+    "en:gluten": 112,
+    "en:turmeric": 112,
+    "en:e452": 111,
+    "en:virgin-olive-oil": 110,
+    "en:milk-powder": 109,
+    "en:oily-fish": 109,
+    "en:tomato-concentrate": 109,
+    "en:e300": 108,
+    "en:shallot": 108,
+    "en:palm-oil": 107,
+    "en:white-wine": 106,
+    "en:maltodextrin": 105,
+    "en:potato": 105,
+    "en:ginger": 102,
+    "en:e407": 100,
+    "en:rehydrated-egg-white": 100,
+    "en:chives": 98,
+    "en:coating": 97,
+    "en:extra-virgin-olive-oil": 96,
+    "en:flavour-enhancer": 95,
+    "en:soya-bean": 95,
+    "en:animal-protein": 94,
+    "en:leek": 94,
+    "en:basil": 93,
+    "en:glucose-syrup": 93,
+    "en:soy-protein": 93,
+    "en:milk-proteins": 91,
+    "en:durum-wheat-semolina": 90,
+    "en:poultry": 90,
+    "en:breadcrumbs": 88,
+    "en:paprika": 88,
+    "en:pork": 86,
+    "en:crustacean": 85,
+    "en:alaska-pollock": 84,
+    "en:citrus-fruit": 84,
+    "en:e270": 83,
+    "en:mushroom": 83,
+    "en:red-bell-pepper": 83,
+    "en:e223": 82,
+    "en:fiber": 82,
+    "en:black-pepper": 81,
+    "en:corn": 80,
+    "en:skimmed-milk": 80,
+    "en:pork-meat": 76,
+    "en:vegetable-fiber": 76,
+    "en:chicken": 75,
+    "en:algae": 74,
+    "en:white-pepper": 74,
+    "en:e150a": 73,
+    "en:e260": 73,
+    "en:salmon": 73,
+    "en:vitamins": 73,
+    "en:modified-potato-starch": 72,
+    "en:brassica": 71,
+    "en:cod": 69,
+    "en:fresh-cream": 67,
+    "en:wheat-gluten": 67,
+    "en:sesame-seeds": 65,
+    "en:wine-vinegar": 65,
+    "en:coriander": 64,
+    "en:e471": 64,
+    "en:emulsifier": 64,
+    "en:e635": 63,
+    "en:ferment": 63,
+    "en:amino-acids": 62,
+    "en:scallop": 62,
+    "en:tomato-puree": 62,
+    "en:courgette": 61,
+    "en:e211": 61,
+    "en:concentrated-lemon-juice": 60,
+    "en:e551": 59,
+    "en:cabbage": 57,
+    "en:seaweed": 57,
+    "en:e262": 56,
+    "en:fat": 55,
+    "en:chicken-meat": 54,
+    "en:e501": 54,
+    "en:pea": 54,
+    "en:e631": 53,
+    "en:thyme": 52,
+    "en:enzyme": 51,
+    "en:noodle": 51,
+    "en:e120": 50,
+    "en:beef": 48,
+    "en:cucumber": 48
+   }
+  },
+  "mollusc": {
+   "count": 1005,
+   "words": {
+    "en:salt": 857,
+    "en:water": 660,
+    "en:vegetable": 641,
+    "en:oil-and-fat": 634,
+    "en:vegetable-oil-and-fat": 615,
+    "en:root-vegetable": 567,
+    "en:onion-family-vegetable": 523,
+    "en:added-sugar": 520,
+    "en:starch": 508,
+    "en:disaccharide": 453,
+    "en:sugar": 451,
+    "en:flavouring": 433,
+    "en:dairy": 414,
+    "en:condiment": 397,
+    "en:cereal": 384,
+    "en:fish": 380,
+    "en:spice": 374,
+    "en:garlic": 365,
+    "en:wheat": 363,
+    "en:herb": 350,
+    "en:vegetable-oil": 350,
+    "en:fruit-vegetable": 322,
+    "en:rapeseed-oil": 309,
+    "en:flour": 305,
+    "en:natural-flavouring": 300,
+    "en:onion": 299,
+    "en:seed": 288,
+    "en:colza-oil": 286,
+    "en:cereal-flour": 276,
+    "en:wheat-flour": 276,
+    "en:sunflower-oil": 242,
+    "en:egg": 235,
+    "en:pepper": 221,
+    "en:e160c": 208,
+    "en:tomato": 204,
+    "en:leaf-vegetable": 202,
+    "en:colour": 194,
+    "en:modified-starch": 190,
+    "en:shellfish": 180,
+    "en:yeast": 178,
+    "en:wheat-starch": 175,
+    "en:taproot-vegetable": 172,
+    "en:crustacean": 164,
+    "en:fish-meat": 164,
+    "en:milk": 162,
+    "en:parsley": 160,
+    "en:carrot": 153,
+    "en:e330": 151,
+    "en:cheese": 143,
+    "en:vinegar": 143,
+    "en:protein": 139,
+    "en:potato-starch": 138,
+    "en:fruit": 135,
+    "en:soya": 134,
+    "en:monosaccharide": 130,
+    "en:butter": 123,
+    "en:chili-pepper": 122,
+    "en:corn-starch": 121,
+    "en:glucose": 121,
+    "en:cream": 117,
+    "en:sauce": 117,
+    "en:olive-oil": 115,
+    "en:legume": 113,
+    "en:alcohol": 107,
+    "en:e415": 103,
+    "en:egg-white": 103,
+    "en:tomato-concentrate": 99,
+    "en:concentrate": 98,
+    "en:animal": 97,
+    "en:thickener": 96,
+    "en:stalk-vegetable": 94,
+    "en:rice": 93,
+    "en:white-fish": 90,
+    "en:shrimp": 89,
+    "en:turmeric": 89,
+    "en:antioxidant": 88,
+    "en:celery": 88,
+    "en:juice": 87,
+    "en:fruit-juice": 86,
+    "en:durum-wheat": 85,
+    "en:semolina": 85,
+    "en:bell-pepper": 82,
+    "en:lemon-juice": 82,
+    "en:pulse": 82,
+    "en:skimmed-milk": 82,
+    "en:wine": 81,
+    "en:meat": 79,
+    "en:plant-protein": 79,
+    "en:durum-wheat-semolina": 78,
+    "en:mustard": 77,
+    "en:yeast-extract": 77,
+    "en:capsicum-annuum": 76,
+    "en:pork": 76,
+    "en:acidity-regulator": 75,
+    "en:preservative": 75,
+    "en:animal-protein": 74,
+    "en:e621": 74,
+    "en:e412": 73,
+    "en:shallot": 73,
+    "en:coating": 72,
+    "en:dough": 71,
+    "en:milk-proteins": 71,
+    "en:sesame": 71,
+    "en:dextrose": 70,
+    "en:acid": 69,
+    "en:e500": 69,
+    "en:pod-and-seed-vegetable": 66,
+    "en:tapioca": 66,
+    "en:pork-meat": 65,
+    "en:breadcrumbs": 64,
+    "en:e450": 64,
+    "en:tuber": 64,
+    "en:virgin-olive-oil": 64,
+    "en:white-wine": 64,
+    "en:milk-powder": 63,
+    "en:modified-corn-starch": 63,
+    "en:palm-oil-and-fat": 62,
+    "en:stabiliser": 62,
+    "en:gluten": 61,
+    "en:plant": 61,
+    "en:nut": 59,
+    "en:soy-sauce": 59,
+    "en:alaska-pollock": 58,
+    "en:fiber": 58,
+    "en:basil": 56,
+    "en:vegetable-fiber": 56,
+    "en:alcohol-vinegar": 55,
+    "en:e407": 55,
+    "en:extra-virgin-olive-oil": 55,
+    "en:fat": 55,
+    "en:poultry": 54,
+    "en:e202": 53,
+    "en:potato": 53,
+    "en:oily-fish": 52,
+    "en:leek": 49,
+    "en:maltodextrin": 49,
+    "en:mushroom": 49,
+    "en:soya-bean": 49,
+    "en:chicken": 48,
+    "en:palm-oil": 48,
+    "en:black-pepper": 47,
+    "en:wheat-gluten": 45,
+    "en:brassica": 44,
+    "en:flavour-enhancer": 44,
+    "en:powdered-egg-white": 44,
+    "en:red-bell-pepper": 44,
+    "en:emulsifier": 43,
+    "en:glucose-syrup": 42,
+    "en:animal-fat": 41,
+    "en:rehydrated-egg-white": 41,
+    "en:ferment": 40,
+    "en:fresh-cream": 40,
+    "en:algae": 39,
+    "en:concentrated-lemon-juice": 39,
+    "en:e451": 39,
+    "en:cabbage": 38,
+    "en:cod": 38,
+    "en:skimmed-milk-powder": 38,
+    "en:whey": 38,
+    "en:chives": 37,
+    "en:corn": 37,
+    "en:ginger": 37,
+    "en:paprika": 37,
+    "en:coriander": 36,
+    "en:e250": 35,
+    "en:e471": 35,
+    "en:emmental": 35,
+    "en:salmon": 35,
+    "en:chicken-meat": 34,
+    "en:e150a": 34,
+    "en:mollusc": 34,
+    "en:oregano": 34,
+    "en:soy-protein": 34,
+    "en:spice-extract": 34,
+    "en:thyme": 34,
+    "en:tomato-puree": 34,
+    "en:white-pepper": 34,
+    "en:egg-yolk": 33,
+    "en:mustard-seed": 33,
+    "en:lactose": 32,
+    "en:spinach": 32,
+    "en:courgette": 31,
+    "en:e300": 31,
+    "en:e331": 31,
+    "en:herbs-and-spices": 31,
+    "en:modified-potato-starch": 31,
+    "en:citrus-fruit": 30,
+    "en:e461": 30,
+    "en:noodle": 30,
+    "en:seaweed": 29,
+    "en:double-concentrated-tomato": 28,
+    "en:amino-acids": 27,
+    "en:rice-starch": 27,
+    "en:soya-oil": 27,
+    "en:bay-leaf": 26,
+    "en:filling": 26,
+    "en:lactic-ferments": 26,
+    "en:microbial-culture": 26,
+    "en:surimi": 26,
+    "en:wheat-fiber": 26
+   }
+  },
+  "celery": {
+   "count": 4277,
+   "words": {
+    "en:salt": 3859,
+    "en:vegetable": 3318,
+    "en:condiment": 2917,
+    "en:spice": 2851,
+    "en:added-sugar": 2841,
+    "en:root-vegetable": 2762,
+    "en:oil-and-fat": 2735,
+    "en:water": 2633,
+    "en:vegetable-oil-and-fat": 2570,
+    "en:onion-family-vegetable": 2488,
+    "en:starch": 2228,
+    "en:flavouring": 2156,
+    "en:disaccharide": 2150,
+    "en:sugar": 2105,
+    "en:cereal": 1959,
+    "en:herb": 1957,
+    "en:onion": 1936,
+    "en:fruit-vegetable": 1858,
+    "en:wheat": 1783,
+    "en:vegetable-oil": 1667,
+    "en:flour": 1635,
+    "en:monosaccharide": 1441,
+    "en:cereal-flour": 1435,
+    "en:glucose": 1421,
+    "en:wheat-flour": 1412,
+    "en:tomato": 1359,
+    "en:garlic": 1311,
+    "en:dairy": 1305,
+    "en:yeast": 1256,
+    "en:rapeseed-oil": 1160,
+    "en:sunflower-oil": 1151,
+    "en:animal": 1146,
+    "en:modified-starch": 1129,
+    "en:taproot-vegetable": 1110,
+    "en:seed": 1104,
+    "en:meat": 1099,
+    "en:protein": 1065,
+    "en:vinegar": 1056,
+    "en:egg": 1046,
+    "en:natural-flavouring": 1029,
+    "en:dextrose": 1018,
+    "en:carrot": 1014,
+    "en:e330": 950,
+    "en:corn-starch": 896,
+    "en:pepper": 880,
+    "en:leaf-vegetable": 791,
+    "en:pork": 774,
+    "en:legume": 737,
+    "en:colza-oil": 715,
+    "en:pork-meat": 714,
+    "en:yeast-extract": 675,
+    "en:plant-protein": 666,
+    "en:poultry": 660,
+    "en:preservative": 659,
+    "en:antioxidant": 642,
+    "en:parsley": 639,
+    "en:fruit": 638,
+    "en:potato-starch": 620,
+    "en:e415": 618,
+    "en:mustard": 616,
+    "en:bell-pepper": 572,
+    "en:maltodextrin": 564,
+    "en:chicken": 550,
+    "en:capsicum-annuum": 537,
+    "en:modified-corn-starch": 534,
+    "en:acid": 533,
+    "en:pulse": 533,
+    "en:sauce": 533,
+    "en:e250": 525,
+    "en:milk": 513,
+    "en:animal-protein": 509,
+    "en:e412": 500,
+    "en:soya": 496,
+    "en:glucose-syrup": 493,
+    "en:beef": 489,
+    "en:cheese": 489,
+    "en:thickener": 486,
+    "en:tuber": 472,
+    "en:e300": 466,
+    "en:colour": 462,
+    "en:milk-proteins": 462,
+    "en:stabiliser": 462,
+    "en:coating": 456,
+    "en:palm-oil-and-fat": 450,
+    "en:potato": 448,
+    "en:e301": 439,
+    "en:chicken-meat": 434,
+    "en:spice-extract": 434,
+    "en:cream": 429,
+    "en:breadcrumbs": 420,
+    "en:rice": 415,
+    "en:e621": 402,
+    "en:herbs-and-spices": 401,
+    "en:turmeric": 392,
+    "en:egg-white": 391,
+    "en:butter": 386,
+    "en:juice": 385,
+    "en:dough": 384,
+    "en:concentrate": 381,
+    "en:tomato-concentrate": 381,
+    "en:fruit-juice": 378,
+    "en:beef-meat": 376,
+    "en:fat": 374,
+    "en:lactose": 374,
+    "en:leek": 372,
+    "en:soy-protein": 368,
+    "en:tomato-puree": 364,
+    "en:pod-and-seed-vegetable": 363,
+    "en:e202": 355,
+    "en:e450": 348,
+    "en:fiber": 347,
+    "en:fish": 342,
+    "en:chili-pepper": 341,
+    "en:paprika": 334,
+    "en:e451": 333,
+    "en:olive-oil": 327,
+    "en:plant": 325,
+    "en:acidity-regulator": 324,
+    "en:lemon-juice": 324,
+    "en:egg-yolk": 321,
+    "en:vegetable-fiber": 316,
+    "en:corn": 314,
+    "en:gluten": 314,
+    "en:mustard-seed": 313,
+    "en:alcohol": 310,
+    "en:animal-fat": 307,
+    "en:e331": 307,
+    "en:semolina": 304,
+    "en:durum-wheat": 300,
+    "en:alcohol-vinegar": 296,
+    "en:palm-oil": 293,
+    "en:e262": 290,
+    "en:flavour-enhancer": 282,
+    "en:broth": 278,
+    "en:e407": 278,
+    "en:sea-salt": 275,
+    "en:e160c": 274,
+    "en:shellfish": 270,
+    "en:e500": 269,
+    "en:mushroom": 269,
+    "en:wine": 261,
+    "en:wheat-gluten": 254,
+    "en:durum-wheat-semolina": 252,
+    "en:red-bell-pepper": 247,
+    "en:wheat-starch": 244,
+    "en:e270": 240,
+    "en:iodised-salt": 240,
+    "en:milk-powder": 236,
+    "en:soya-bean": 232,
+    "en:whey": 230,
+    "en:emulsifier": 227,
+    "en:tapioca": 224,
+    "en:basil": 214,
+    "en:nut": 213,
+    "en:coriander": 207,
+    "en:minerals": 204,
+    "en:black-pepper": 198,
+    "en:ferment": 195,
+    "en:white-wine": 192,
+    "en:ginger": 191,
+    "en:virgin-olive-oil": 191,
+    "en:e392": 190,
+    "en:brassica": 187,
+    "en:e452": 187,
+    "en:soy-sauce": 186,
+    "en:palm-fat": 185,
+    "en:e471": 183,
+    "en:vitamins": 183,
+    "en:shallot": 177,
+    "en:e316": 174,
+    "en:extra-virgin-olive-oil": 173,
+    "en:thyme": 172,
+    "en:poultry-fat": 167,
+    "en:white-pepper": 167,
+    "en:crustacean": 165,
+    "en:modified-potato-starch": 163,
+    "en:mollusc": 162,
+    "en:rice-flour": 162,
+    "en:skimmed-milk-powder": 162,
+    "en:wheat-protein": 162,
+    "en:concentrated-lemon-juice": 161,
+    "en:nutmeg": 159,
+    "en:courgette": 158,
+    "en:pasta": 158,
+    "en:sesame": 156,
+    "en:pea": 153,
+    "en:e150a": 150,
+    "en:cultivated-mushroom": 148,
+    "en:oregano": 148,
+    "en:smoke": 148,
+    "en:chives": 146,
+    "en:cumin": 146,
+    "en:e262i": 146,
+    "en:paprika-or-bell-pepper": 145,
+    "en:barley": 142,
+    "en:spinach": 142,
+    "en:wheat-bran": 142,
+    "en:smoke-flavouring": 139,
+    "en:microbial-culture": 138,
+    "en:spirit-vinegar": 137
+   }
+  },
+  "mustard": {
+   "count": 4963,
+   "words": {
+    "en:salt": 4300,
+    "en:vegetable": 3746,
+    "en:added-sugar": 3407,
+    "en:root-vegetable": 3227,
+    "en:water": 3068,
+    "en:oil-and-fat": 3057,
+    "en:condiment": 3002,
+    "en:spice": 2906,
+    "en:vegetable-oil-and-fat": 2876,
+    "en:disaccharide": 2783,
+    "en:sugar": 2628,
+    "en:onion-family-vegetable": 2416,
+    "en:flavouring": 2197,
+    "en:starch": 2123,
+    "en:onion": 1900,
+    "en:fruit-vegetable": 1895,
+    "en:vegetable-oil": 1800,
+    "en:cereal": 1790,
+    "en:vinegar": 1738,
+    "en:herb": 1609,
+    "en:monosaccharide": 1594,
+    "en:glucose": 1543,
+    "en:flour": 1541,
+    "en:wheat": 1490,
+    "en:garlic": 1457,
+    "en:rapeseed-oil": 1319,
+    "en:e330": 1296,
+    "en:natural-flavouring": 1288,
+    "en:dairy": 1218,
+    "en:cereal-flour": 1217,
+    "en:seed": 1195,
+    "en:tomato": 1190,
+    "en:horseradish": 1186,
+    "en:wheat-flour": 1184,
+    "en:sunflower-oil": 1134,
+    "en:modified-starch": 1126,
+    "en:fruit": 1081,
+    "en:dextrose": 1073,
+    "en:yeast": 1067,
+    "en:animal": 1029,
+    "en:e415": 997,
+    "en:meat": 997,
+    "en:egg": 959,
+    "en:protein": 930,
+    "en:taproot-vegetable": 916,
+    "en:preservative": 913,
+    "en:corn-starch": 864,
+    "en:pork": 825,
+    "en:antioxidant": 824,
+    "en:legume": 808,
+    "en:pork-meat": 780,
+    "en:pepper": 769,
+    "en:e412": 676,
+    "en:bell-pepper": 670,
+    "en:acid": 654,
+    "en:juice": 653,
+    "en:fruit-juice": 646,
+    "en:thickener": 645,
+    "en:pulse": 634,
+    "en:carrot": 632,
+    "en:plant": 630,
+    "en:plant-protein": 614,
+    "en:sauce": 609,
+    "en:capsicum-annuum": 598,
+    "en:leaf-vegetable": 579,
+    "en:e250": 563,
+    "en:lemon-juice": 560,
+    "en:colza-oil": 557,
+    "en:colour": 555,
+    "en:e300": 549,
+    "en:soya": 540,
+    "en:modified-corn-starch": 531,
+    "en:maltodextrin": 529,
+    "en:yeast-extract": 520,
+    "en:stabiliser": 515,
+    "en:e202": 504,
+    "en:milk": 499,
+    "en:e301": 494,
+    "en:tomato-concentrate": 485,
+    "en:chili-pepper": 484,
+    "en:potato-starch": 484,
+    "en:rice": 475,
+    "en:parsley": 470,
+    "en:cheese": 460,
+    "en:poultry": 459,
+    "en:tuber": 440,
+    "en:cream": 431,
+    "en:acidity-regulator": 423,
+    "en:paprika": 416,
+    "en:turmeric": 415,
+    "en:glucose-syrup": 410,
+    "en:soy-protein": 408,
+    "en:potato": 401,
+    "en:spice-extract": 391,
+    "en:stalk-vegetable": 384,
+    "en:animal-protein": 379,
+    "en:chicken": 378,
+    "en:egg-yolk": 374,
+    "en:corn": 371,
+    "en:fish": 371,
+    "en:ginger": 369,
+    "en:e450": 366,
+    "en:sea-salt": 364,
+    "en:coating": 359,
+    "en:e262": 354,
+    "en:egg-white": 352,
+    "en:pod-and-seed-vegetable": 349,
+    "en:celery": 348,
+    "en:fat": 348,
+    "en:beef": 341,
+    "en:palm-oil-and-fat": 326,
+    "en:milk-proteins": 323,
+    "en:concentrate": 321,
+    "en:lactose": 321,
+    "en:spirit-vinegar": 318,
+    "en:breadcrumbs": 317,
+    "en:chicken-meat": 311,
+    "en:e160c": 309,
+    "en:coriander": 302,
+    "en:tomato-puree": 300,
+    "en:alcohol-vinegar": 298,
+    "en:curry": 296,
+    "en:soya-bean": 292,
+    "en:e331": 289,
+    "en:fiber": 289,
+    "en:soya-oil": 289,
+    "en:animal-fat": 288,
+    "en:red-bell-pepper": 288,
+    "en:concentrated-lemon-juice": 286,
+    "en:ferment": 286,
+    "en:e621": 284,
+    "en:e451": 278,
+    "en:black-pepper": 274,
+    "en:nut": 269,
+    "en:e270": 268,
+    "en:iodised-salt": 267,
+    "en:e500": 261,
+    "en:vegetable-fiber": 261,
+    "en:beef-meat": 260,
+    "en:whey": 256,
+    "en:fructose": 253,
+    "en:soy-sauce": 253,
+    "en:e211": 248,
+    "en:e407": 239,
+    "en:palm-oil": 239,
+    "en:vitamins": 239,
+    "en:herbs-and-spices": 237,
+    "en:leek": 236,
+    "en:milk-powder": 236,
+    "en:olive-oil": 229,
+    "en:cucumber": 228,
+    "en:dough": 224,
+    "en:tapioca": 220,
+    "en:distilled-vinegar": 218,
+    "en:enzyme": 217,
+    "en:wheat-starch": 217,
+    "en:emulsifier": 215,
+    "en:corn-syrup": 214,
+    "en:brassica": 210,
+    "en:rice-flour": 210,
+    "en:flavour-enhancer": 206,
+    "en:beetroot": 204,
+    "en:citrus-fruit": 203,
+    "en:microbial-culture": 203,
+    "en:sesame": 198,
+    "en:gluten": 196,
+    "en:cumin": 195,
+    "en:shellfish": 193,
+    "en:minerals": 192,
+    "en:butter": 191,
+    "en:glucose-fructose-syrup": 191,
+    "en:e260": 190,
+    "en:pork-fat": 188,
+    "en:chives": 187,
+    "en:smoke": 186,
+    "en:dehydrated-onion": 185,
+    "en:e452": 184,
+    "en:alcohol": 183,
+    "en:paprika-or-bell-pepper": 183,
+    "en:mushroom": 180,
+    "en:smoke-flavouring": 180,
+    "en:durum-wheat": 179,
+    "en:oily-fish": 178,
+    "en:sunflower": 178,
+    "en:e322": 175,
+    "en:e223": 172,
+    "en:pea": 169,
+    "en:e150a": 168,
+    "en:tree-nut": 168,
+    "en:crustacean": 166,
+    "en:skimmed-milk-powder": 166,
+    "en:wine-vinegar": 166,
+    "en:lactic-ferments": 165,
+    "en:semolina": 165,
+    "en:e471": 163,
+    "en:basil": 160,
+    "en:wheat-bran": 160,
+    "en:apple": 156,
+    "en:malaceous-fruit": 156,
+    "en:cane-sugar": 154
+   }
+  },
+  "lupin": {
+   "count": 504,
+   "words": {
+    "en:salt": 350,
+    "en:cereal": 343,
+    "en:oil-and-fat": 310,
+    "en:added-sugar": 304,
+    "en:flour": 301,
+    "en:vegetable-oil-and-fat": 296,
+    "en:wheat": 289,
+    "en:disaccharide": 272,
+    "en:cereal-flour": 269,
+    "en:sugar": 268,
+    "en:wheat-flour": 243,
+    "en:water": 215,
+    "en:vegetable": 196,
+    "en:dairy": 188,
+    "en:monosaccharide": 183,
+    "en:condiment": 177,
+    "en:spice": 176,
+    "en:flavouring": 169,
+    "en:vegetable-oil": 167,
+    "en:glucose": 164,
+    "en:starch": 164,
+    "en:plant": 139,
+    "en:yeast": 137,
+    "en:root-vegetable": 126,
+    "en:fruit": 118,
+    "en:e322": 116,
+    "en:natural-flavouring": 116,
+    "en:sunflower-oil": 114,
+    "en:e500": 110,
+    "en:fruit-vegetable": 108,
+    "en:herb": 106,
+    "en:rapeseed-oil": 106,
+    "en:onion-family-vegetable": 105,
+    "en:cocoa": 103,
+    "en:seed": 97,
+    "en:emulsifier": 96,
+    "en:dextrose": 95,
+    "en:cocoa-paste": 82,
+    "en:onion": 82,
+    "en:cocoa-butter": 81,
+    "en:egg": 78,
+    "en:nut": 78,
+    "en:protein": 76,
+    "en:e330": 74,
+    "en:dough": 69,
+    "en:raising-agent": 69,
+    "en:tree-nut": 65,
+    "en:milk-powder": 63,
+    "en:oat": 63,
+    "en:tomato": 63,
+    "en:vegetable-fat": 63,
+    "en:cheese": 62,
+    "en:garlic": 62,
+    "en:soya": 61,
+    "en:legume": 60,
+    "en:palm-oil-and-fat": 59,
+    "en:e450": 57,
+    "en:rice": 56,
+    "en:acid": 52,
+    "en:fructose": 52,
+    "en:corn-starch": 51,
+    "en:syrup": 51,
+    "en:vinegar": 51,
+    "en:cocoa-powder": 49,
+    "en:plant-protein": 49,
+    "en:potato-starch": 49,
+    "en:pulse": 49,
+    "en:sourdough": 49,
+    "en:cinnamon": 48,
+    "en:e322i": 48,
+    "en:fat": 48,
+    "en:fiber": 48,
+    "en:glucose-syrup": 48,
+    "en:milk": 48,
+    "en:oat-flakes": 48,
+    "en:e300": 46,
+    "en:glucose-fructose-syrup": 46,
+    "en:invert-sugar": 46,
+    "en:sea-salt": 46,
+    "en:sugar-syrup": 46,
+    "en:taproot-vegetable": 46,
+    "en:vegetable-fiber": 46,
+    "en:invert-sugar-syrup": 45,
+    "en:modified-starch": 45,
+    "en:mozzarella": 45,
+    "en:almond": 44,
+    "en:animal": 44,
+    "en:antioxidant": 44,
+    "en:preservative": 44,
+    "en:acidity-regulator": 43,
+    "en:malt": 43,
+    "en:gluten": 42,
+    "en:whey": 42,
+    "en:meat": 41,
+    "en:barley": 40,
+    "en:wheat-starch": 40,
+    "en:carrot": 39,
+    "en:palm-oil": 39,
+    "en:sesame": 39,
+    "en:stabiliser": 39,
+    "en:wholemeal-flour": 39,
+    "en:chocolate": 38,
+    "en:colour": 38,
+    "en:juice": 38,
+    "en:skimmed-milk-powder": 38,
+    "en:whole-milk-powder": 38,
+    "en:fruit-juice": 37,
+    "en:milkfat": 37,
+    "en:pork": 37,
+    "en:butterfat": 36,
+    "en:cane-sugar": 35,
+    "en:rice-flour": 35,
+    "en:thickener": 35,
+    "en:wheat-gluten": 35,
+    "en:e250": 34,
+    "en:malted-barley": 34,
+    "en:mustard": 34,
+    "en:colza-oil": 33,
+    "en:pepper": 33,
+    "en:e412": 32,
+    "en:e471": 32,
+    "en:fat-reduced-cocoa-powder": 32,
+    "en:hazelnut": 32,
+    "en:lemon-juice": 32,
+    "en:olive-oil": 32,
+    "en:pork-meat": 32,
+    "en:extract": 31,
+    "en:maltodextrin": 31,
+    "en:wheat-sourdough": 31,
+    "en:animal-protein": 30,
+    "en:milk-proteins": 30,
+    "en:soya-lecithin": 30,
+    "en:bell-pepper": 29,
+    "en:capsicum-annuum": 29,
+    "en:caramel-syrup": 29,
+    "en:e301": 29,
+    "en:pod-and-seed-vegetable": 29,
+    "en:barley-malt-extract": 28,
+    "en:coconut": 28,
+    "en:e501": 28,
+    "en:berries": 27,
+    "en:caramelised-sugar-syrup": 27,
+    "en:corn": 27,
+    "en:cream": 27,
+    "en:lactose": 27,
+    "en:semolina": 27,
+    "en:spice-extract": 27,
+    "en:vitamins": 27,
+    "en:butter": 26,
+    "en:citrus-fruit": 26,
+    "en:leaf-vegetable": 26,
+    "en:smoke": 26,
+    "en:wholemeal-oat": 26,
+    "en:e270": 25,
+    "en:herbs-and-spices": 25,
+    "en:sauce": 25,
+    "en:tomato-puree": 25,
+    "en:whole-wheat-flour": 25,
+    "en:chili-pepper": 24,
+    "en:chopped-tomato": 24,
+    "en:durum-wheat": 24,
+    "en:e440a": 24,
+    "en:egg-white": 24,
+    "en:paprika": 24,
+    "en:sunflower": 24,
+    "en:sweet-whey": 24,
+    "en:whole-grain-oat-flakes": 24,
+    "en:e407": 23,
+    "en:e500ii": 23,
+    "en:enzyme": 23,
+    "en:ferment": 23,
+    "en:soya-bean": 23,
+    "en:e422": 22,
+    "en:e503": 22,
+    "en:honey": 22,
+    "en:lactic-ferments": 22,
+    "en:microbial-culture": 22,
+    "en:mushroom": 22,
+    "en:stalk-vegetable": 22,
+    "en:whole-egg": 22,
+    "en:e392": 21,
+    "en:fat-reduced-cocoa": 21,
+    "en:flax": 20,
+    "en:flax-seed": 20,
+    "en:palm-fat": 20,
+    "en:sweet-whey-powder": 20,
+    "en:unrefined-sugar": 20,
+    "en:vanilla-flavouring": 20,
+    "en:coriander": 19,
+    "en:durum-wheat-semolina": 19,
+    "en:e415": 19,
+    "en:e420": 19,
+    "en:gelling-agent": 19,
+    "en:natural-vanilla-flavouring": 19,
+    "en:oregano": 19,
+    "en:parsley": 19,
+    "en:poultry": 19,
+    "en:rye-flour": 19,
+    "en:sesame-seeds": 19,
+    "en:tuber": 19
+   }
+  },
+  "sulphites": {
+   "count": 5904,
+   "words": {
+    "en:salt": 3294,
+    "en:added-sugar": 3121,
+    "en:disaccharide": 2759,
+    "en:oil-and-fat": 2747,
+    "en:sugar": 2725,
+    "en:vegetable": 2671,
+    "en:vegetable-oil-and-fat": 2566,
+    "en:water": 2385,
+    "en:flavouring": 2238,
+    "en:root-vegetable": 2163,
+    "en:fruit": 2142,
+    "en:vegetable-oil": 1844,
+    "en:onion-family-vegetable": 1813,
+    "en:cereal": 1682,
+    "en:condiment": 1650,
+    "en:spice": 1632,
+    "en:starch": 1595,
+    "en:monosaccharide": 1516,
+    "en:e330": 1480,
+    "en:flour": 1477,
+    "en:glucose": 1454,
+    "en:wheat": 1432,
+    "en:dairy": 1373,
+    "en:fruit-vegetable": 1364,
+    "en:preservative": 1353,
+    "en:sunflower-oil": 1213,
+    "en:cereal-flour": 1206,
+    "en:herb": 1202,
+    "en:onion": 1201,
+    "en:seed": 1186,
+    "en:natural-flavouring": 1176,
+    "en:wheat-flour": 1161,
+    "en:garlic": 1110,
+    "en:vinegar": 1041,
+    "en:antioxidant": 902,
+    "en:egg": 873,
+    "en:pepper": 831,
+    "en:rapeseed-oil": 797,
+    "en:berries": 774,
+    "en:plant": 752,
+    "en:corn-starch": 731,
+    "en:glucose-syrup": 702,
+    "en:acid": 694,
+    "en:colour": 693,
+    "en:modified-starch": 692,
+    "en:nut": 650,
+    "en:tomato": 647,
+    "en:colza-oil": 638,
+    "en:grape": 603,
+    "en:taproot-vegetable": 603,
+    "en:dextrose": 599,
+    "en:animal": 584,
+    "en:e202": 578,
+    "en:e415": 575,
+    "en:juice": 553,
+    "en:fruit-juice": 545,
+    "en:milk": 544,
+    "en:carrot": 542,
+    "en:mustard": 531,
+    "en:tree-nut": 526,
+    "en:acidity-regulator": 515,
+    "en:meat": 514,
+    "en:protein": 510,
+    "en:e322": 504,
+    "en:e500": 499,
+    "en:leaf-vegetable": 470,
+    "en:emulsifier": 468,
+    "en:yeast": 467,
+    "en:milk-powder": 454,
+    "en:tuber": 451,
+    "en:rice": 445,
+    "en:fructose": 441,
+    "en:alcohol-vinegar": 440,
+    "en:legume": 439,
+    "en:pork": 433,
+    "en:potato": 425,
+    "en:e322i": 405,
+    "en:chili-pepper": 404,
+    "en:prunus-species-fruit": 403,
+    "en:citrus-fruit": 401,
+    "en:potato-starch": 400,
+    "en:olive-oil": 394,
+    "en:thickener": 391,
+    "en:parsley": 385,
+    "en:cream": 382,
+    "en:e471": 380,
+    "en:lemon-juice": 380,
+    "en:bell-pepper": 379,
+    "en:capsicum-annuum": 373,
+    "en:cocoa": 370,
+    "en:pork-meat": 369,
+    "en:e412": 363,
+    "en:glucose-fructose-syrup": 359,
+    "en:e300": 355,
+    "en:fat": 355,
+    "en:stabiliser": 352,
+    "en:palm-oil-and-fat": 347,
+    "en:mustard-seed": 344,
+    "en:pulse": 338,
+    "en:almond": 334,
+    "en:soya": 333,
+    "en:butter": 332,
+    "en:vitamins": 332,
+    "en:cheese": 323,
+    "en:modified-corn-starch": 322,
+    "en:sauce": 317,
+    "en:fish": 315,
+    "en:apple": 305,
+    "en:malaceous-fruit": 305,
+    "en:soya-lecithin": 302,
+    "en:rice-flour": 301,
+    "en:e450": 300,
+    "en:animal-protein": 294,
+    "en:e500ii": 285,
+    "en:corn": 284,
+    "en:alcohol": 283,
+    "en:poultry": 281,
+    "en:milk-proteins": 275,
+    "en:minerals": 274,
+    "en:raisin": 272,
+    "en:skimmed-milk-powder": 271,
+    "en:turmeric": 268,
+    "en:apricot": 264,
+    "en:vegetable-fat": 264,
+    "en:palm-oil": 261,
+    "en:raising-agent": 260,
+    "en:maltodextrin": 259,
+    "en:cucumber": 252,
+    "en:e270": 246,
+    "en:oat": 246,
+    "en:e621": 244,
+    "en:coriander": 238,
+    "en:coconut": 234,
+    "en:concentrate": 234,
+    "en:pod-and-seed-vegetable": 228,
+    "en:shellfish": 225,
+    "en:baby-cucumber": 223,
+    "en:pickled-cucumber": 223,
+    "en:pickled-gherkin": 223,
+    "en:e250": 221,
+    "en:plant-protein": 221,
+    "en:e407": 220,
+    "en:virgin-olive-oil": 218,
+    "en:chicken": 217,
+    "en:stalk-vegetable": 216,
+    "en:egg-yolk": 210,
+    "en:ginger": 210,
+    "en:extra-virgin-olive-oil": 207,
+    "en:red-bell-pepper": 206,
+    "en:honey": 205,
+    "en:egg-white": 204,
+    "en:varietal": 203,
+    "en:tomato-concentrate": 202,
+    "en:wheat-starch": 202,
+    "en:lactose": 201,
+    "en:gluten": 200,
+    "en:whey": 200,
+    "en:cocoa-butter": 198,
+    "en:e428": 196,
+    "en:orange": 194,
+    "en:coating": 193,
+    "en:mushroom": 193,
+    "en:paprika": 193,
+    "en:e440a": 191,
+    "en:black-pepper": 190,
+    "en:concentrated-lemon-juice": 190,
+    "en:fiber": 188,
+    "en:e160c": 187,
+    "en:e211": 187,
+    "en:e101": 186,
+    "en:vanilla-flavouring": 185,
+    "en:flavour-enhancer": 180,
+    "en:animal-fat": 179,
+    "en:crustacean": 177,
+    "en:cocoa-powder": 175,
+    "en:yeast-extract": 175,
+    "en:ferment": 173,
+    "en:celery": 172,
+    "en:syrup": 172,
+    "en:vegetable-fiber": 172,
+    "en:olive": 171,
+    "en:tapioca": 170,
+    "en:e150a": 169,
+    "en:beef": 167,
+    "en:e422": 167,
+    "en:cocoa-paste": 166,
+    "en:basil": 165,
+    "en:thiamin": 165,
+    "en:vitamin-c": 164,
+    "en:e375": 163,
+    "en:malt": 161,
+    "en:e120": 159,
+    "en:e503": 159,
+    "en:dough": 157,
+    "en:peanut": 157,
+    "en:whole-milk-powder": 157,
+    "en:iron": 155,
+    "en:pineapple": 154,
+    "en:shallot": 154,
+    "en:sesame": 153
+   }
+  }
+ },
+ "B_seen": 136763,
+ "strict_seen": 8295,
+ "change_seen": 583,
+ "foreign_examples": {
+  "all": [
+   "0051179220201",
+   "8718906354814",
+   "3564706651654",
+   "7613287402929",
+   "3380380110108",
+   "3608580179467",
+   "2050002845190",
+   "3760302221349",
+   "5054267001374",
+   "7340011455318",
+   "7613287511546",
+   "3464876101051",
+   "99482275",
+   "7613032572471",
+   "0064200117302",
+   "01417579",
+   "7350042719341",
+   "5057753920272",
+   "7613035605893",
+   "4002971083507",
+   "4062300307193",
+   "4062300388536",
+   "3456300020038",
+   "00762302",
+   "3660861909613",
+   "5713221080250",
+   "0055900000995",
+   "0075013050755",
+   "5011309401417",
+   "0667557912776",
+   "5057780015187",
+   "5941868209981",
+   "8713600194711",
+   "5057172102235",
+   "2820988003187",
+   "3580288102032",
+   "3760377561395",
+   "5400141127447",
+   "6411401036248",
+   "7310350122349",
+   "7311312006042",
+   "5400141522938",
+   "0760203005591",
+   "3252970000437",
+   "5400141357998",
+   "0607766250184",
+   "8000139000256",
+   "0819442010283",
+   "7613034381675",
+   "3038359913259"
+  ],
+  "popular": [
+   "8718906354814",
+   "3564706651654",
+   "3380380110108",
+   "3608580179467",
+   "3760302221349",
+   "5054267001374",
+   "7350042719341",
+   "5057753920272",
+   "7613035605893",
+   "4002971083507",
+   "4062300307193",
+   "3456300020038",
+   "3660861909613",
+   "0055900000995",
+   "8713600194711",
+   "5057172102235",
+   "3580288102032",
+   "5400141127447",
+   "6411401036248",
+   "7310350122349",
+   "7311312006042",
+   "5400141522938",
+   "3252970000437",
+   "5400141357998",
+   "0607766250184",
+   "8000139000256",
+   "0819442010283",
+   "3038359913259",
+   "5400113531173",
+   "3347430019934",
+   "6044000027203",
+   "6194003310250",
+   "5012035965556",
+   "5705011113064",
+   "0724373732787",
+   "0059724100473",
+   "3456300019186",
+   "4062300307131",
+   "7041111137455",
+   "3329480001985"
+  ]
+ },
+ "vanished_groups": {
+  "lupin|en:shellfish|may contain": {
+   "n": 53,
+   "ex": [
+    "0682906890529",
+    "0070896124258"
+   ]
+  },
+  "mustard|en:shellfish|may contain": {
+   "n": 49,
+   "ex": [
+    "0682906890529",
+    "0070896124258"
+   ]
+  },
+  "celery|en:shellfish|may contain": {
+   "n": 48,
+   "ex": [
+    "0682906890529",
+    "0070896124258"
+   ]
+  },
+  "milk|butter|butter lettuce": {
+   "n": 48,
+   "ex": [
+    "0681131027861",
+    "00500661"
+   ]
+  },
+  "sulphites|en:shellfish|may contain": {
+   "n": 43,
+   "ex": [
+    "0682906890529",
+    "0070896124258"
+   ]
+  },
+  "milk|butter|baby butter lettuce": {
+   "n": 26,
+   "ex": [
+    "0032601901400",
+    "0036800288744"
+   ]
+  },
+  "milk|butter|red butter lettuce": {
+   "n": 23,
+   "ex": [
+    "0895203001172",
+    "0041497067756"
+   ]
+  },
+  "sesame|en:shellfish|may contain": {
+   "n": 19,
+   "ex": [
+    "0682906890529",
+    "0070896124258"
+   ]
+  },
+  "peanut|en:shellfish|may contain": {
+   "n": 15,
+   "ex": [
+    "00435154",
+    "0210579829500"
+   ]
+  },
+  "gluten|cake|rice cakes": {
+   "n": 12,
+   "ex": [
+    "0042563100001",
+    "0857360004014"
+   ]
+  },
+  "gluten|en:shellfish|may contain": {
+   "n": 12,
+   "ex": [
+    "0210579829500",
+    "00066020"
+   ]
+  },
+  "gluten|beer|natural ginger beer flavor": {
+   "n": 11,
+   "ex": [
+    "0721094200069",
+    "0721094199707"
+   ]
+  },
+  "milk|butter|baby red butter lettuce": {
+   "n": 11,
+   "ex": [
+    "0032601954345",
+    "0030223042013"
+   ]
+  },
+  "milk|butter|green butter lettuce": {
+   "n": 11,
+   "ex": [
+    "0041498216078",
+    "0895203001172"
+   ]
+  },
+  "egg|en:shellfish|may contain": {
+   "n": 10,
+   "ex": [
+    "0070896124258",
+    "0210579829500"
+   ]
+  },
+  "gluten|beer|natural root beer flavor": {
+   "n": 10,
+   "ex": [
+    "0691355898352",
+    "0198168147245"
+   ]
+  },
+  "gluten|en:pine-nuts|allergen list": {
+   "n": 10,
+   "ex": [
+    "0853927003353",
+    "0681131395557"
+   ]
+  },
+  "milk|en:shellfish|may contain": {
+   "n": 9,
+   "ex": [
+    "0210579829500",
+    "0064757233241"
+   ]
+  },
+  "peanut|nut|tiger nut flour": {
+   "n": 9,
+   "ex": [
+    "4044889004571",
+    "4044889004724"
+   ]
+  },
+  "gluten|en:shellfish|allergen list": {
+   "n": 8,
+   "ex": [
+    "0096619635290",
+    "0667888056019"
+   ]
+  },
+  "tree_nut|en:shellfish|may contain": {
+   "n": 8,
+   "ex": [
+    "0210579829500",
+    "0064757233241"
+   ]
+  },
+  "celery|en:pine-nuts|allergen list": {
+   "n": 7,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "crustacean|en:pine-nuts|allergen list": {
+   "n": 7,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "fish|en:pine-nuts|allergen list": {
+   "n": 7,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "gluten|beer|root beer flavor": {
+   "n": 7,
+   "ex": [
+    "0095301133809",
+    "0852095004346"
+   ]
+  },
+  "lupin|en:pine-nuts|allergen list": {
+   "n": 7,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "mollusc|en:pine-nuts|allergen list": {
+   "n": 7,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "peanut|nut|tiger nuts": {
+   "n": 7,
+   "ex": [
+    "4044889002720",
+    "4044889002966"
+   ]
+  },
+  "fish|en:shellfish|allergen list": {
+   "n": 6,
+   "ex": [
+    "7802410000402",
+    "0096619635290"
+   ]
+  },
+  "fish|en:shellfish|may contain": {
+   "n": 6,
+   "ex": [
+    "0210579829500",
+    "00066020"
+   ]
+  },
+  "gluten|cake|40 rice cakes wholegrain brown rice rice": {
+   "n": 6,
+   "ex": [
+    "0857360004014"
+   ]
+  },
+  "gluten|cake|rice cake": {
+   "n": 6,
+   "ex": [
+    "7841787000110",
+    "0810607021533"
+   ]
+  },
+  "lupin|en:shellfish|allergen list": {
+   "n": 6,
+   "ex": [
+    "7802410000402",
+    "0096619635290"
+   ]
+  },
+  "milk|butter|organic butter lettuce": {
+   "n": 6,
+   "ex": [
+    "0688267585593",
+    "0850024486096"
+   ]
+  },
+  "mustard|en:pine-nuts|allergen list": {
+   "n": 6,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "sulphites|en:pine-nuts|allergen list": {
+   "n": 6,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "celery|en:shellfish|allergen list": {
+   "n": 5,
+   "ex": [
+    "0096619635290",
+    "0041224211001"
+   ]
+  },
+  "egg|en:shellfish|allergen list": {
+   "n": 5,
+   "ex": [
+    "0096619635290",
+    "0041224211001"
+   ]
+  },
+  "milk|butter|organic baby lettuces red green romaine red green ": {
+   "n": 5,
+   "ex": [
+    "0854311007162",
+    "0032601900106"
+   ]
+  },
+  "milk|en:shellfish|allergen list": {
+   "n": 5,
+   "ex": [
+    "0096619635290",
+    "0041224211001"
+   ]
+  },
+  "mustard|en:shellfish|allergen list": {
+   "n": 5,
+   "ex": [
+    "0096619635290",
+    "0041224211001"
+   ]
+  },
+  "peanut|en:shellfish|allergen list": {
+   "n": 5,
+   "ex": [
+    "0096619635290",
+    "0041224211001"
+   ]
+  },
+  "sesame|en:shellfish|allergen list": {
+   "n": 5,
+   "ex": [
+    "0096619635290",
+    "0041224211001"
+   ]
+  },
+  "soy|en:pine-nuts|allergen list": {
+   "n": 5,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "soy|en:shellfish|may contain": {
+   "n": 5,
+   "ex": [
+    "0210579829500",
+    "0860007634956"
+   ]
+  },
+  "tree_nut|cashew|cashew apples": {
+   "n": 5,
+   "ex": [
+    "7896288960173",
+    "7896005400029"
+   ]
+  },
+  "tree_nut|en:shellfish|allergen list": {
+   "n": 5,
+   "ex": [
+    "0096619635290",
+    "0041224211001"
+   ]
+  },
+  "tree_nut|nut|tiger nuts": {
+   "n": 5,
+   "ex": [
+    "9358871000034",
+    "0850042078051"
+   ]
+  },
+  "egg|en:pine-nuts|allergen list": {
+   "n": 4,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "gluten|beer|organic root beer flavor": {
+   "n": 4,
+   "ex": [
+    "0852095004346",
+    "0036192114058"
+   ]
+  },
+  "gluten|cake|40 rice cakes 99 whole rice span class allergen se": {
+   "n": 4,
+   "ex": [
+    "4104420053069"
+   ]
+  },
+  "gluten|cake|contains on average 6 rice cakes": {
+   "n": 4,
+   "ex": [
+    "5013665117858",
+    "5013665117872"
+   ]
+  },
+  "gluten|cake|fr rice cakes 100 brown rice": {
+   "n": 4,
+   "ex": [
+    "5400141613674"
+   ]
+  },
+  "gluten|cake|milk chocolate rice cakes": {
+   "n": 4,
+   "ex": [
+    "0074661113034"
+   ]
+  },
+  "gluten|cake|organic rice cakes organic rice": {
+   "n": 4,
+   "ex": [
+    "0042563100001"
+   ]
+  },
+  "gluten|cake|organic rice contains on average 6 rice cakes": {
+   "n": 4,
+   "ex": [
+    "5013665117858",
+    "5013665117872"
+   ]
+  },
+  "gluten|cake|rice cake matcha flavor": {
+   "n": 4,
+   "ex": [
+    "4710623830842"
+   ]
+  },
+  "gluten|en:pine-nuts|may contain": {
+   "n": 4,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "gluten|tart|sweet and tart apples": {
+   "n": 4,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "gluten|tart|sweet tart apples": {
+   "n": 4,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "gluten|tart|tart apples": {
+   "n": 4,
+   "ex": [
+    "0737550040018"
+   ]
+  },
+  "milk|butter|organic baby butter lettuce": {
+   "n": 4,
+   "ex": [
+    "2000000158020",
+    "0032601951023"
+   ]
+  },
+  "milk|en:pine-nuts|allergen list": {
+   "n": 4,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "peanut|en:pine-nuts|allergen list": {
+   "n": 4,
+   "ex": [
+    "0853927003353",
+    "0077890482131"
+   ]
+  },
+  "soy|en:shellfish|allergen list": {
+   "n": 4,
+   "ex": [
+    "0096619635290",
+    "0041224211001"
+   ]
+  },
+  "sulphites|en:shellfish|allergen list": {
+   "n": 4,
+   "ex": [
+    "7802410000402",
+    "0096619635290"
+   ]
+  },
+  "celery|en:crustacea|may contain": {
+   "n": 3,
+   "ex": [
+    "9300657028152",
+    "9323015001659"
+   ]
+  },
+  "egg|egg|egg replacer": {
+   "n": 3,
+   "ex": [
+    "0798304003598",
+    "0892110002049"
+   ]
+  },
+  "gluten|beer|root beer": {
+   "n": 3,
+   "ex": [
+    "4803925151262",
+    "0810095594281"
+   ]
+  },
+  "gluten|beer|root beer spices": {
+   "n": 3,
+   "ex": [
+    "0722430231174",
+    "0722430160030"
+   ]
+  },
+  "lupin|en:crustacea|may contain": {
+   "n": 3,
+   "ex": [
+    "9300657028152",
+    "9323015001659"
+   ]
+  },
+  "mollusc|en:crustacea|may contain": {
+   "n": 3,
+   "ex": [
+    "9300657028152",
+    "9323015001659"
+   ]
+  },
+  "mustard|en:crustacea|may contain": {
+   "n": 3,
+   "ex": [
+    "9300657028152",
+    "9323015001659"
+   ]
+  },
+  "peanut|en:crustacea|may contain": {
+   "n": 3,
+   "ex": [
+    "9300657028152",
+    "9323015001659"
+   ]
+  },
+  "peanut|nut|tiger nuts ground": {
+   "n": 3,
+   "ex": [
+    "4044889002720",
+    "4044889002928"
+   ]
+  },
+  "sesame|en:pine-nuts|allergen list": {
+   "n": 3,
+   "ex": [
+    "0853927003353",
+    "5059977009184"
+   ]
+  },
+  "celery|en:pine-nuts|may contain": {
+   "n": 2,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "crustacean|en:pine-nuts|may contain": {
+   "n": 2,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "egg|cake|40 rice cakes 99 whole rice span class allergen se": {
+   "n": 2,
+   "ex": [
+    "4104420053069",
+    "4104420053489"
+   ]
+  },
+  "egg|cake|contains on average 6 rice cakes": {
+   "n": 2,
+   "ex": [
+    "5013665117858",
+    "5013665117872"
+   ]
+  },
+  "egg|cake|fr rice cakes 100 brown rice": {
+   "n": 2,
+   "ex": [
+    "5400141613674"
+   ]
+  },
+  "egg|cake|milk chocolate rice cakes": {
+   "n": 2,
+   "ex": [
+    "0074661113034"
+   ]
+  },
+  "egg|cake|organic rice contains on average 6 rice cakes": {
+   "n": 2,
+   "ex": [
+    "5013665117858",
+    "5013665117872"
+   ]
+  },
+  "egg|cake|rice cake": {
+   "n": 2,
+   "ex": [
+    "0810607021533",
+    "8720812770893"
+   ]
+  },
+  "egg|cake|rice cake matcha flavor": {
+   "n": 2,
+   "ex": [
+    "4710623830842"
+   ]
+  },
+  "egg|egg|egg substitute": {
+   "n": 2,
+   "ex": [
+    "0703741008044",
+    "0703741008020"
+   ]
+  },
+  "egg|egg|egg substitute potato starch": {
+   "n": 2,
+   "ex": [
+    "0703741008044",
+    "0703741008020"
+   ]
+  },
+  "egg|egg|ener g egg replacer": {
+   "n": 2,
+   "ex": [
+    "0855961005508",
+    "0855961005515"
+   ]
+  },
+  "egg|egg|ener g egg replacer potato starch": {
+   "n": 2,
+   "ex": [
+    "0855961005508",
+    "0855961005515"
+   ]
+  },
+  "egg|en:pine-nuts|may contain": {
+   "n": 2,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "egg|tart|sweet and tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "egg|tart|sweet tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "egg|tart|tart apples": {
+   "n": 2,
+   "ex": [
+    "0737550040018"
+   ]
+  },
+  "fish|en:pine-nuts|may contain": {
+   "n": 2,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "gluten|ale|ginger ale": {
+   "n": 2,
+   "ex": [
+    "0008274111118"
+   ]
+  },
+  "gluten|ale|ginger ale bebida con gas y extracto de jengibre i": {
+   "n": 2,
+   "ex": [
+    "2050001359162"
+   ]
+  },
+  "gluten|beer|barritis jnobarrit bermuda stone ginger beer since": {
+   "n": 2,
+   "ex": [
+    "0074993024046"
+   ]
+  },
+  "gluten|beer|ginger beer": {
+   "n": 2,
+   "ex": [
+    "0816751022556",
+    "6009211577886"
+   ]
+  },
+  "gluten|beer|ginger beer cloudy": {
+   "n": 2,
+   "ex": [
+    "0813246000846"
+   ]
+  },
+  "gluten|beer|natural root beer tea": {
+   "n": 2,
+   "ex": [
+    "0628347700058"
+   ]
+  },
+  "gluten|beer|root beer brew": {
+   "n": 2,
+   "ex": [
+    "0114930004318",
+    "9311493000424"
+   ]
+  },
+  "gluten|beer|root beer brew water sugar molasses ginger root sa": {
+   "n": 2,
+   "ex": [
+    "0114930004318",
+    "9311493000424"
+   ]
+  },
+  "gluten|beer|root beer extract": {
+   "n": 2,
+   "ex": [
+    "0787790497455"
+   ]
+  },
+  "gluten|beer|root beer extract 214": {
+   "n": 2,
+   "ex": [
+    "00421144"
+   ]
+  },
+  "gluten|beer|root beer extract 79 400": {
+   "n": 2,
+   "ex": [
+    "00421144"
+   ]
+  },
+  "gluten|beer|root beer syrup": {
+   "n": 2,
+   "ex": [
+    "0787790497455"
+   ]
+  },
+  "gluten|beer|sarkling ginger beer favoured carbonated spring wa": {
+   "n": 2,
+   "ex": [
+    "5010525058115"
+   ]
+  },
+  "gluten|cake|0 rice cakes 99 whole grain rice sesame seeds sea ": {
+   "n": 2,
+   "ex": [
+    "4058172814129"
+   ]
+  },
+  "gluten|cake|130 g 24 rice cakes approx 5 5 g ingredients 87 br": {
+   "n": 2,
+   "ex": [
+    "8718906268029"
+   ]
+  },
+  "gluten|cake|3 meersalz aus kontrolliert okologischer landwirts": {
+   "n": 2,
+   "ex": [
+    "4005009101754"
+   ]
+  },
+  "gluten|cake|40 rice cakes": {
+   "n": 2,
+   "ex": [
+    "4104420054400"
+   ]
+  },
+  "gluten|cake|40 rice cakes 99 whole grain rice span class aller": {
+   "n": 2,
+   "ex": [
+    "4058172814105"
+   ]
+  },
+  "gluten|cake|40 rice cakes 99 whole rice sesame sea salt": {
+   "n": 2,
+   "ex": [
+    "4104420053762"
+   ]
+  },
+  "gluten|cake|75 sweet glutinous rice cakes with a 25 peanut but": {
+   "n": 2,
+   "ex": [
+    "4711931036834"
+   ]
+  },
+  "gluten|cake|a1 20 2 90 6 brown rice cakes with a white chocola": {
+   "n": 2,
+   "ex": [
+    "00389105"
+   ]
+  },
+  "gluten|cake|a1 20 2 90 6 wholegrain brown rice cakes with a wh": {
+   "n": 2,
+   "ex": [
+    "00389105"
+   ]
+  },
+  "gluten|cake|aus kontrolliert okologischer landwirtschaft rice ": {
+   "n": 2,
+   "ex": [
+    "4005009101754"
+   ]
+  },
+  "gluten|cake|brown rice cake with chocolate and hazelnut fillin": {
+   "n": 2,
+   "ex": [
+    "2006050010585"
+   ]
+  },
+  "gluten|cake|contains on average 8 rice cakes": {
+   "n": 2,
+   "ex": [
+    "5013665103455"
+   ]
+  },
+  "gluten|cake|d18 y3y9 re registered snack a jacks and its logo ": {
+   "n": 2,
+   "ex": [
+    "5000328333991"
+   ]
+  },
+  "gluten|cake|emulsifier soya lecithin rice cake 40 rice 100 coc": {
+   "n": 2,
+   "ex": [
+    "5290094004717"
+   ]
+  },
+  "gluten|cake|fr be plain rice cakes ingredients rice 99 8": {
+   "n": 2,
+   "ex": [
+    "4068706349751"
+   ]
+  },
+  "gluten|cake|fr rice cakes round at6cm narediens rice": {
+   "n": 2,
+   "ex": [
+    "3379141822879"
+   ]
+  },
+  "gluten|cake|glue organic salted rice cakes and chickpeas": {
+   "n": 2,
+   "ex": [
+    "4104420237971"
+   ]
+  },
+  "gluten|cake|gs are still made of pla rice cakes great tasting ": {
+   "n": 2,
+   "ex": [
+    "5000328333991"
+   ]
+  },
+  "gluten|cake|organic rice cakes with yoghurt coating 60 yoghurt": {
+   "n": 2,
+   "ex": [
+    "4058172814129"
+   ]
+  },
+  "gluten|cake|rice cake brown rice": {
+   "n": 2,
+   "ex": [
+    "0810607021533"
+   ]
+  },
+  "gluten|cake|rice cake whole rice": {
+   "n": 2,
+   "ex": [
+    "7841787000110"
+   ]
+  },
+  "gluten|cake|rice cakes 40 whole rice 99 sesame sea salt": {
+   "n": 2,
+   "ex": [
+    "4104420054363"
+   ]
+  },
+  "gluten|cake|rice cakes 40 whole rice 99 span class allergen se": {
+   "n": 2,
+   "ex": [
+    "4104420054387"
+   ]
+  },
+  "gluten|cake|rice cakes very low in salt": {
+   "n": 2,
+   "ex": [
+    "5400111043692"
+   ]
+  },
+  "gluten|cake|rice cakes wholegrain brown rice rice": {
+   "n": 2,
+   "ex": [
+    "0857360004137"
+   ]
+  },
+  "gluten|cake|savour bakes lightly salted rice cakes": {
+   "n": 2,
+   "ex": [
+    "4061462288715"
+   ]
+  },
+  "gluten|cake|see ineredients in bold pi that v nutrition as sol": {
+   "n": 2,
+   "ex": [
+    "5057753920708"
+   ]
+  },
+  "gluten|cake|sweet glutinous rice cakes with a 25 peanut butter": {
+   "n": 2,
+   "ex": [
+    "4711931036834"
+   ]
+  },
+  "gluten|cake|water r sodium bicarbonatel ntair sing agent ju ro": {
+   "n": 2,
+   "ex": [
+    "5057753920708"
+   ]
+  },
+  "gluten|cake|wholegrain brown rice contains on average 8 rice c": {
+   "n": 2,
+   "ex": [
+    "5013665103455"
+   ]
+  },
+  "gluten|en:crustacea|may contain": {
+   "n": 2,
+   "ex": [
+    "9300657028152"
+   ]
+  },
+  "gluten|tart|juice from pressed tart apples": {
+   "n": 2,
+   "ex": [
+    "0867720000105"
+   ]
+  },
+  "lupin|en:pine-nuts|may contain": {
+   "n": 2,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "milk|butter|butter lettuce and lolla rosa": {
+   "n": 2,
+   "ex": [
+    "0011110910776"
+   ]
+  },
+  "milk|butter|may contain green butter lettuce": {
+   "n": 2,
+   "ex": [
+    "0009520300189"
+   ]
+  },
+  "milk|butter|organic red butter lettuce": {
+   "n": 2,
+   "ex": [
+    "00772846",
+    "0818431001370"
+   ]
+  },
+  "milk|butter|palm butter": {
+   "n": 2,
+   "ex": [
+    "0878397004792"
+   ]
+  },
+  "milk|cake|rice cake matcha flavor": {
+   "n": 2,
+   "ex": [
+    "4710623830842"
+   ]
+  },
+  "milk|en:crustacea|may contain": {
+   "n": 2,
+   "ex": [
+    "9300657028152",
+    "8935121616590"
+   ]
+  },
+  "milk|tart|sweet and tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "milk|tart|sweet tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "milk|tart|tart apples": {
+   "n": 2,
+   "ex": [
+    "0737550040018"
+   ]
+  },
+  "mollusc|en:pine-nuts|may contain": {
+   "n": 2,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "mustard|en:pine-nuts|may contain": {
+   "n": 2,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "peanut|cake|fr rice cakes 100 brown rice": {
+   "n": 2,
+   "ex": [
+    "5400141613674"
+   ]
+  },
+  "peanut|cake|never fried soufflees jamais frites glute free san": {
+   "n": 2,
+   "ex": [
+    "0055577120170"
+   ]
+  },
+  "peanut|cake|rice cake": {
+   "n": 2,
+   "ex": [
+    "7841787000110",
+    "8720812770893"
+   ]
+  },
+  "peanut|cake|rice cake matcha flavor": {
+   "n": 2,
+   "ex": [
+    "4710623830842"
+   ]
+  },
+  "peanut|nut|bio peeled tiger nuts wartosc odzywcza w 100 a": {
+   "n": 2,
+   "ex": [
+    "5906395147045"
+   ]
+  },
+  "peanut|tart|1 tart apple": {
+   "n": 2,
+   "ex": [
+    "0068721038436"
+   ]
+  },
+  "peanut|tart|sweet and tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "peanut|tart|sweet tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "peanut|tart|tart apples": {
+   "n": 2,
+   "ex": [
+    "0737550040018"
+   ]
+  },
+  "soy|cake|fr rice cakes 100 brown rice": {
+   "n": 2,
+   "ex": [
+    "5400141613674"
+   ]
+  },
+  "soy|cake|never fried soufflees jamais frites glute free san": {
+   "n": 2,
+   "ex": [
+    "0055577120170"
+   ]
+  },
+  "soy|cake|rice cake matcha flavor": {
+   "n": 2,
+   "ex": [
+    "4710623830842"
+   ]
+  },
+  "soy|tart|sweet and tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "soy|tart|sweet tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "soy|tart|tart apples": {
+   "n": 2,
+   "ex": [
+    "0737550040018"
+   ]
+  },
+  "sulphites|en:crustacea|may contain": {
+   "n": 2,
+   "ex": [
+    "9300657028152",
+    "8935121616590"
+   ]
+  },
+  "sulphites|en:pine-nuts|may contain": {
+   "n": 2,
+   "ex": [
+    "9300633646837",
+    "4607072775490"
+   ]
+  },
+  "tree_nut|cake|fr rice cakes 100 brown rice": {
+   "n": 2,
+   "ex": [
+    "5400141613674"
+   ]
+  },
+  "tree_nut|cake|never fried soufflees jamais frites glute free san": {
+   "n": 2,
+   "ex": [
+    "0055577120170"
+   ]
+  },
+  "tree_nut|cake|rice cake": {
+   "n": 2,
+   "ex": [
+    "7841787000110",
+    "8720812770893"
+   ]
+  },
+  "tree_nut|cake|rice cake matcha flavor": {
+   "n": 2,
+   "ex": [
+    "4710623830842"
+   ]
+  },
+  "tree_nut|en:crustacea|may contain": {
+   "n": 2,
+   "ex": [
+    "9300657028152",
+    "9323015001659"
+   ]
+  },
+  "tree_nut|nut oil|ground nut oil": {
+   "n": 2,
+   "ex": [
+    "8908000295070",
+    "8906049067931"
+   ]
+  },
+  "tree_nut|nut|bio peeled tiger nuts wartosc odzywcza w 100 a": {
+   "n": 2,
+   "ex": [
+    "5906395147045"
+   ]
+  },
+  "tree_nut|nut|ground nut oil": {
+   "n": 2,
+   "ex": [
+    "8908000295070",
+    "8906049067931"
+   ]
+  },
+  "tree_nut|tart|1 tart apple": {
+   "n": 2,
+   "ex": [
+    "0068721038436"
+   ]
+  },
+  "tree_nut|tart|sweet and tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "tree_nut|tart|sweet tart apples": {
+   "n": 2,
+   "ex": [
+    "0051725000110",
+    "0051725000127"
+   ]
+  },
+  "tree_nut|tart|tart apples": {
+   "n": 2,
+   "ex": [
+    "0737550040018"
+   ]
+  },
+  "celery|butter chicken|4 butter chicken barn whole egg": {
+   "n": 1,
+   "ex": [
+    "2021001643872"
+   ]
+  },
+  "crustacean|crab|crab apple": {
+   "n": 1,
+   "ex": [
+    "0825325910403"
+   ]
+  },
+  "crustacean|crab|crab apple 52": {
+   "n": 1,
+   "ex": [
+    "0825325910403"
+   ]
+  },
+  "egg|cake|0 rice cakes 99 whole grain rice sesame seeds sea ": {
+   "n": 1,
+   "ex": [
+    "4058172814129"
+   ]
+  },
+  "egg|cake|130 g 24 rice cakes approx 5 5 g ingredients 87 br": {
+   "n": 1,
+   "ex": [
+    "8718906268029"
+   ]
+  },
+  "egg|cake|3 meersalz aus kontrolliert okologischer landwirts": {
+   "n": 1,
+   "ex": [
+    "4005009101754"
+   ]
+  },
+  "egg|cake|40 rice cakes": {
+   "n": 1,
+   "ex": [
+    "4104420054400"
+   ]
+  },
+  "egg|cake|40 rice cakes 99 whole grain rice span class aller": {
+   "n": 1,
+   "ex": [
+    "4058172814105"
+   ]
+  },
+  "egg|cake|a1 20 2 90 6 brown rice cakes with a white chocola": {
+   "n": 1,
+   "ex": [
+    "00389105"
+   ]
+  },
+  "egg|cake|a1 20 2 90 6 wholegrain brown rice cakes with a wh": {
+   "n": 1,
+   "ex": [
+    "00389105"
+   ]
+  },
+  "egg|cake|aus kontrolliert okologischer landwirtschaft rice ": {
+   "n": 1,
+   "ex": [
+    "4005009101754"
+   ]
+  },
+  "egg|cake|contains on average 8 rice cakes": {
+   "n": 1,
+   "ex": [
+    "5013665103455"
+   ]
+  },
+  "egg|cake|d18 y3y9 re registered snack a jacks and its logo ": {
+   "n": 1,
+   "ex": [
+    "5000328333991"
+   ]
+  },
+  "egg|cake|fr be plain rice cakes ingredients rice 99 8": {
+   "n": 1,
+   "ex": [
+    "4068706349751"
+   ]
+  },
+  "egg|cake|fr rice cakes round at6cm narediens rice": {
+   "n": 1,
+   "ex": [
+    "3379141822879"
+   ]
+  },
+  "egg|cake|glue organic salted rice cakes and chickpeas": {
+   "n": 1,
+   "ex": [
+    "4104420237971"
+   ]
+  },
+  "egg|cake|gs are still made of pla rice cakes great tasting ": {
+   "n": 1,
+   "ex": [
+    "5000328333991"
+   ]
+  },
+  "egg|cake|organic rice cakes organic rice": {
+   "n": 1,
+   "ex": [
+    "0042563100025"
+   ]
+  },
+  "egg|cake|organic rice cakes with yoghurt coating 60 yoghurt": {
+   "n": 1,
+   "ex": [
+    "4058172814129"
+   ]
+  },
+  "egg|cake|rice cake 33 water rice 12 salt": {
+   "n": 1,
+   "ex": [
+    "3700477604134"
+   ]
+  },
+  "egg|cake|rice cake 83 3 rice 98 9": {
+   "n": 1,
+   "ex": [
+    "8720812770893"
+   ]
+  },
+  "egg|cake|rice cake brown rice": {
+   "n": 1,
+   "ex": [
+    "0810607021533"
+   ]
+  },
+  "egg|cake|rice cakes": {
+   "n": 1,
+   "ex": [
+    "0042563100025"
+   ]
+  },
+  "egg|cake|rice cakes 40 whole rice 99 sesame sea salt": {
+   "n": 1,
+   "ex": [
+    "4104420054363"
+   ]
+  },
+  "egg|cake|rice cakes chia": {
+   "n": 1,
+   "ex": [
+    "3800233070934"
+   ]
+  },
+  "egg|cake|rice cakes very low in salt": {
+   "n": 1,
+   "ex": [
+    "5400111043692"
+   ]
+  },
+  "egg|cake|s i rice cake": {
+   "n": 1,
+   "ex": [
+    "8801005198462"
+   ]
+  },
+  "egg|cake|s i rice cake rice": {
+   "n": 1,
+   "ex": [
+    "8801005198462"
+   ]
+  },
+  "egg|cake|savour bakes lightly salted rice cakes": {
+   "n": 1,
+   "ex": [
+    "4061462288715"
+   ]
+  },
+  "egg|cake|see ineredients in bold pi that v nutrition as sol": {
+   "n": 1,
+   "ex": [
+    "5057753920708"
+   ]
+  },
+  "egg|cake|vegan rice cakes chia": {
+   "n": 1,
+   "ex": [
+    "3800233070934"
+   ]
+  },
+  "egg|cake|water r sodium bicarbonatel ntair sing agent ju ro": {
+   "n": 1,
+   "ex": [
+    "5057753920708"
+   ]
+  },
+  "egg|cake|wholegrain brown rice contains on average 8 rice c": {
+   "n": 1,
+   "ex": [
+    "5013665103455"
+   ]
+  },
+  "egg|egg|all natural egg substitute": {
+   "n": 1,
+   "ex": [
+    "2000000028725"
+   ]
+  },
+  "egg|egg|all natural egg substitute whole sorghum flour oat": {
+   "n": 1,
+   "ex": [
+    "2000000028725"
+   ]
+  },
+  "egg|egg|egg replacer potato starch tapioca flour calcium l": {
+   "n": 1,
+   "ex": [
+    "0798304003598"
+   ]
+  },
+  "egg|egg|egg replacer potato starch tapioca starch flour le": {
+   "n": 1,
+   "ex": [
+    "0892110002049"
+   ]
+  },
+  "egg|egg|vegan egg replacer": {
+   "n": 1,
+   "ex": [
+    "0855440003236"
+   ]
+  },
+  "egg|en:crustacea|may contain": {
+   "n": 1,
+   "ex": [
+    "9300657028152"
+   ]
+  },
+  "egg|mayo|aardappeletmel vegan mayo original ingredients zut": {
+   "n": 1,
+   "ex": [
+    "8717662267628"
+   ]
+  },
+  "egg|tart|juice from pressed tart apples": {
+   "n": 1,
+   "ex": [
+    "0867720000105"
+   ]
+  },
+  "fish|en:crustacea|may contain": {
+   "n": 1,
+   "ex": [
+    "8935121616590"
+   ]
+  },
+  "fish|roe|roe deer meat": {
+   "n": 1,
+   "ex": [
+    "8022424008594"
+   ]
+  },
+  "fish|roe|roe deer meat 60": {
+   "n": 1,
+   "ex": [
+    "8022424008594"
+   ]
+  },
+  "gluten|ale|ack is blended using rums aged between ba a throug": {
+   "n": 1,
+   "ex": [
+    "0080480005245"
+   ]
+  },
+  "gluten|ale|cabnada dry ginger ale": {
+   "n": 1,
+   "ex": [
+    "00781140"
+   ]
+  },
+  "gluten|ale|catano pr o0962 black is blended using rums aged b": {
+   "n": 1,
+   "ex": [
+    "0080480005245"
+   ]
+  },
+  "gluten|ale|natural ginger ale flavor": {
+   "n": 1,
+   "ex": [
+    "0074682113631"
+   ]
+  },
+  "gluten|ale|reciclame ginger ale 4": {
+   "n": 1,
+   "ex": [
+    "8414100381808"
+   ]
+  },
+  "gluten|ale|reciclame ginger ale 4 jellies bajo en calorias sa": {
+   "n": 1,
+   "ex": [
+    "8414100381808"
+   ]
+  },
+  "gluten|ale|sodastream v 1 i ginger ale sitoopterb i a ginger ": {
+   "n": 1,
+   "ex": [
+    "8718692616219"
+   ]
+  },
+  "gluten|beer|ack is blended using rums aged between ba a throug": {
+   "n": 1,
+   "ex": [
+    "0080480005245"
+   ]
+  },
+  "gluten|beer|antioxidant acid ascorbic drode berea bundaberg de": {
+   "n": 1,
+   "ex": [
+    "5941882807910"
+   ]
+  },
+  "gluten|beer|brewed ginger beer": {
+   "n": 1,
+   "ex": [
+    "0675783001003"
+   ]
+  },
+  "gluten|beer|brewed ginger beer cane sugar water ginger root": {
+   "n": 1,
+   "ex": [
+    "0675783001003"
+   ]
+  },
+  "gluten|beer|catano pr o0962 black is blended using rums aged b": {
+   "n": 1,
+   "ex": [
+    "0080480005245"
+   ]
+  },
+  "gluten|beer|ginger beer 33 cl neringsindhold pr": {
+   "n": 1,
+   "ex": [
+    "5711018023237"
+   ]
+  },
+  "gluten|beer|ginger beer 33 cl neringsindhold pr to energ 243 k": {
+   "n": 1,
+   "ex": [
+    "5711018023237"
+   ]
+  },
+  "gluten|beer|ginger beer 90 carbonated water": {
+   "n": 1,
+   "ex": [
+    "9334944002044"
+   ]
+  },
+  "gluten|beer|ginger beer carbonated water ginger extract": {
+   "n": 1,
+   "ex": [
+    "0628176629209"
+   ]
+  },
+  "gluten|beer|ginger beer este fabricata dupa o reteta autentica": {
+   "n": 1,
+   "ex": [
+    "5941882807910"
+   ]
+  },
+  "gluten|beer|ginger beer xx 375mle ingrediente apa carbogazorsk": {
+   "n": 1,
+   "ex": [
+    "5941882807910"
+   ]
+  },
+  "gluten|beer|had gas in importator s c sand vita sall ginger be": {
+   "n": 1,
+   "ex": [
+    "5941882807910"
+   ]
+  },
+  "gluten|beer|natural and artificial flavors frostie is a regist": {
+   "n": 1,
+   "ex": [
+    "42140481"
+   ]
+  },
+  "gluten|beer|natural and artificial root beer flavor": {
+   "n": 1,
+   "ex": [
+    "0860973000250"
+   ]
+  },
+  "gluten|beer|natural root beer extract": {
+   "n": 1,
+   "ex": [
+    "0850210004073"
+   ]
+  },
+  "gluten|beer|natural root beer flavor and caramel color from su": {
+   "n": 1,
+   "ex": [
+    "0042175198700"
+   ]
+  },
+  "gluten|beer|root beer flavor caramel color": {
+   "n": 1,
+   "ex": [
+    "0080020400011"
+   ]
+  },
+  "gluten|beer|sand vita sall ginger beer palsest magas janetel": {
+   "n": 1,
+   "ex": [
+    "5941882807910"
+   ]
+  },
+  "gluten|beer|str mousse declaratie nutritional walreput valoare": {
+   "n": 1,
+   "ex": [
+    "5941882807910"
+   ]
+  },
+  "milk|butter|50 spring mix green leaf lettuce mizuna lettuce ta": {
+   "n": 1,
+   "ex": [
+    "0032601900137"
+   ]
+  },
+  "milk|butter|baby butter lettuce leaves": {
+   "n": 1,
+   "ex": [
+    "0032601902933"
+   ]
+  },
+  "milk|butter|baby butter lettuce the ingredients in each packag": {
+   "n": 1,
+   "ex": [
+    "20736583"
+   ]
+  },
+  "milk|butter|baby green butter lettuce": {
+   "n": 1,
+   "ex": [
+    "19204114"
+   ]
+  },
+  "milk|butter|butter lettuce leaves": {
+   "n": 1,
+   "ex": [
+    "0032601033125"
+   ]
+  },
+  "milk|butter|butter lettuces": {
+   "n": 1,
+   "ex": [
+    "0032601033118"
+   ]
+  },
+  "milk|butter|green butter lettuce and red leaf lettuce": {
+   "n": 1,
+   "ex": [
+    "0071279221038"
+   ]
+  },
+  "milk|butter|green leaf lettuce organic butter lettuce": {
+   "n": 1,
+   "ex": [
+    "00500661"
+   ]
+  },
+  "milk|butter|mixed organic baby lettuces organic baby green oak": {
+   "n": 1,
+   "ex": [
+    "00325950"
+   ]
+  },
+  "milk|butter|mixed organic greens organic baby arugula organic ": {
+   "n": 1,
+   "ex": [
+    "00326056"
+   ]
+  },
+  "milk|butter|organic baby butter lettuce leaves and organic bab": {
+   "n": 1,
+   "ex": [
+    "0032601902933"
+   ]
+  },
+  "milk|butter|organic baby lettuce organic red and green leaf or": {
+   "n": 1,
+   "ex": [
+    "0099482452414"
+   ]
+  },
+  "milk|butter|organic baby red butter lettuce": {
+   "n": 1,
+   "ex": [
+    "0041220855643"
+   ]
+  },
+  "milk|butter|organic butter lettuce leaves": {
+   "n": 1,
+   "ex": [
+    "0032601033125"
+   ]
+  },
+  "milk|butter|organic butter lettuces": {
+   "n": 1,
+   "ex": [
+    "0032601033118"
+   ]
+  },
+  "milk|butter|organic ingredients red butter lettuce": {
+   "n": 1,
+   "ex": [
+    "0009520300189"
+   ]
+  },
+  "milk|butter|organic spring mix organic mizuna organic crisp or": {
+   "n": 1,
+   "ex": [
+    "19204114"
+   ]
+  },
+  "milk|butter|plant based butter": {
+   "n": 1,
+   "ex": [
+    "00734660"
+   ]
+  },
+  "milk|butter|plant based butter extra virgin olive oil cocoa bu": {
+   "n": 1,
+   "ex": [
+    "00734660"
+   ]
+  },
+  "milk|butter|span class allergen wheat flour span 100 natural d": {
+   "n": 1,
+   "ex": [
+    "6281100404156"
+   ]
+  },
+  "milk|butter|spring mix green oak leaf red oak leaf summer cris": {
+   "n": 1,
+   "ex": [
+    "0860000030601"
+   ]
+  },
+  "milk|butter|wheat flour 100 natural dates eggs corn starch tab": {
+   "n": 1,
+   "ex": [
+    "6281100404156"
+   ]
+  },
+  "milk|cake|130 g 24 rice cakes approx 5 5 g ingredients 87 br": {
+   "n": 1,
+   "ex": [
+    "8718906268029"
+   ]
+  },
+  "milk|cake|3 meersalz aus kontrolliert okologischer landwirts": {
+   "n": 1,
+   "ex": [
+    "4005009101754"
+   ]
+  },
+  "milk|cake|75 sweet glutinous rice cakes with a 25 peanut but": {
+   "n": 1,
+   "ex": [
+    "4711931036834"
+   ]
+  },
+  "milk|cake|aus kontrolliert okologischer landwirtschaft rice ": {
+   "n": 1,
+   "ex": [
+    "4005009101754"
+   ]
+  },
+  "milk|cake|d18 y3y9 re registered snack a jacks and its logo ": {
+   "n": 1,
+   "ex": [
+    "5000328333991"
+   ]
+  },
+  "milk|cake|fr be plain rice cakes ingredients rice 99 8": {
+   "n": 1,
+   "ex": [
+    "4068706349751"
+   ]
+  },
+  "milk|cake|fr rice cakes round at6cm narediens rice": {
+   "n": 1,
+   "ex": [
+    "3379141822879"
+   ]
+  },
+  "milk|cake|glue organic salted rice cakes and chickpeas": {
+   "n": 1,
+   "ex": [
+    "4104420237971"
+   ]
+  },
+  "milk|cake|gs are still made of pla rice cakes great tasting ": {
+   "n": 1,
+   "ex": [
+    "5000328333991"
+   ]
+  },
+  "milk|cake|rice cakes chia": {
+   "n": 1,
+   "ex": [
+    "3800233070934"
+   ]
+  },
+  "milk|cake|rice cakes very low in salt": {
+   "n": 1,
+   "ex": [
+    "5400111043692"
+   ]
+  },
+  "milk|cake|s i rice cake": {
+   "n": 1,
+   "ex": [
+    "8801005198462"
+   ]
+  },
+  "milk|cake|s i rice cake rice": {
+   "n": 1,
+   "ex": [
+    "8801005198462"
+   ]
+  },
+  "milk|cake|savour bakes lightly salted rice cakes": {
+   "n": 1,
+   "ex": [
+    "4061462288715"
+   ]
+  },
+  "milk|cake|sweet glutinous rice cakes with a 25 peanut butter": {
+   "n": 1,
+   "ex": [
+    "4711931036834"
+   ]
+  },
+  "milk|cake|vegan rice cakes chia": {
+   "n": 1,
+   "ex": [
+    "3800233070934"
+   ]
+  },
+  "milk|en:pine-nuts|may contain": {
+   "n": 1,
+   "ex": [
+    "9300633646837"
+   ]
+  },
+  "milk|tart|juice from pressed tart apples": {
+   "n": 1,
+   "ex": [
+    "0867720000105"
+   ]
+  },
+  "mustard|butter chicken|4 butter chicken barn whole egg": {
+   "n": 1,
+   "ex": [
+    "2021001643872"
+   ]
+  },
+  "peanut|cake|0 rice cakes 99 whole grain rice sesame seeds sea ": {
+   "n": 1,
+   "ex": [
+    "4058172814129"
+   ]
+  },
+  "peanut|cake|130 g 24 rice cakes approx 5 5 g ingredients 87 br": {
+   "n": 1,
+   "ex": [
+    "8718906268029"
+   ]
+  },
+  "peanut|cake|3 meersalz aus kontrolliert okologischer landwirts": {
+   "n": 1,
+   "ex": [
+    "4005009101754"
+   ]
+  },
+  "peanut|cake|40 rice cakes": {
+   "n": 1,
+   "ex": [
+    "4104420054400"
+   ]
+  },
+  "peanut|cake|40 rice cakes 99 whole rice span class allergen se": {
+   "n": 1,
+   "ex": [
+    "4104420053489"
+   ]
+  },
+  "peanut|cake|aus kontrolliert okologischer landwirtschaft rice ": {
+   "n": 1,
+   "ex": [
+    "4005009101754"
+   ]
+  },
+  "peanut|cake|d18 y3y9 re registered snack a jacks and its logo ": {
+   "n": 1,
+   "ex": [
+    "5000328333991"
+   ]
+  },
+  "peanut|cake|fr be plain rice cakes ingredients rice 99 8": {
+   "n": 1,
+   "ex": [
+    "4068706349751"
+   ]
+  },
+  "peanut|cake|fr rice cakes round at6cm narediens rice": {
+   "n": 1,
+   "ex": [
+    "3379141822879"
+   ]
+  }
+ },
+ "strict_terms_not_in_catalogue": [
+  "gluten:durum wheat",
+  "gluten:wheat flour",
+  "gluten:wheat gluten"
+ ],
+ "max_shard_seconds": 3465.162
+}

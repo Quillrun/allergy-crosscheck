@@ -11,7 +11,7 @@ Most food records don't hold enough data to answer an allergy question. This mea
 
 In each of these records, a checker that trusts the allergen list would answer "no allergens". This engine answers "can't confirm", because there is nothing to check the list against.
 
-`unique_scans_n` is the number of distinct IPs that scanned the product in the official Open Food Facts app. It's computed by the Open Food Facts server's `scripts/scanbot.pl`.
+`unique_scans_n` is the number of distinct IPs that scanned the product in the official Open Food Facts app. It's computed by the Open Food Facts server's [`scripts/scanbot.pl`](https://github.com/openfoodfacts/openfoodfacts-server/blob/main/scripts/scanbot.pl).
 
 ## What this does not claim
 
@@ -152,6 +152,8 @@ The engine changes of the same round (more precaution wordings, "not from X" and
 
 Ten rounds were run. Round 9 had been declared the final round (decision 2026-10-09); the operator then asked for a further round (2026-10-10), so round 10 is now the latest and round 9's 93 of 100 stands as measured.
 
+Compare run, 11 October (engine `0a1ceec` against the round-10 engine `17287f8`, `OLD_ENGINE`; not a counted round, no hand check). It checks that the 11 October engine changes (lookalike fixes, Open Food Facts allergen ids mapped, foreign text; see below) open no new gap. `A` and the total are unchanged. `strict_missed` is 8,295 for all records (list empty 2,049, list partial 6,246) and 2,071 for popular ones (717 and 1,354); `B` is 136,763 (popular 64,232); `foreign_exposed` fell from 96 to 68 (popular 57 to 40). 583 records changed (269 popular) and **117 went to none** (40 popular). Every one of the 117 was listed and checked: 116 are lookalikes the engine now leaves alone on purpose (butter lettuce 70, ginger or root beer 26, tiger nuts 7, rice cakes 5, tart apples 4, ginger ale 3, a rum label's "with ginger beer or ginger ale" serving suggestion 1). One was a real gap: a cashew-apple juice (7896288960173). The 117 codes and groups: [`tonone-2026-10-11.tsv`](tonone-2026-10-11.tsv). Cashew apple is now "possible tree nut" (engine `2ec07bc`, after the run; it changes only records that name cashew apple or cashew fruit). Counts: [`results-compare-2026-10-11.json`](results-compare-2026-10-11.json); the slowest shard took 3,465.2 s. The precision figure above stays the round-10 one, measured at `17287f8`.
+
 Round 10 (engine `17287f8`, count rules R1-R14, rules commit `cd8ffb8`, pre-registered before the run; the commit was made at 02:39:51 and the run's start was 02:40:33) found **99 of 100 real** (checker A 49/50, checker B 50/50; the lead agrees with every call), a 95% Wilson interval of 94.6% to 99.8%. **The count is not claimed.** The pre-registered rule needs 100 of 100, so the measured precision is reported instead: 99 of 100. `strict_missed` is **8,298** for all records (list empty 2,050, list partial 6,248) and **2,069** for popular ones (716 and 1,353), down from 8,388 and 2,106 in round 9. The records, verdicts and the lead's re-check are in [`handcheck-strict-2026-10-08.md`](handcheck-strict-2026-10-08.md); the run's counts are in [`results-strict-round10-2026-10-10.json`](results-strict-round10-2026-10-10.json). `A` and the total are unchanged; `B` is 136,392 (popular 64,016); the slowest shard took 2,725.325 s. Against the round-9 engine, 67 records changed and 1 went to none (4064347220411, "Live Kefir Cultures¹": the existing "kefir culture" mask now applies once the superscript is normalised). Determinism: the re-run of shard 2 gave identical counts apart from `seconds` (2,725.3 s in the 8-way run, 2,190.7 s solo).
 
 The one record that was not real: 0722252200693 (milk), "almonds butter", which is almond butter (the plant-butter mask covers "almond butter", not the plural form). Six borderline calls were kept real, and the lead agrees: "egg melang", "wheat starch" (twice), "caramel color (contains sodium bisulfite)", "Organic Almond Butter" and "soy polysaccharides".
@@ -213,6 +215,24 @@ History: round 1 (engine `4e4ef42`) 73/100; round 2 (engine `d9cffca`) 90/100, i
 The foreign-text change in the engine: English ingredient text that contains a word from `FOREIGN_ALLERGEN_WORDS` now carries "Part of the ingredient list isn't in English", so `foreign_exposed` fell from 1,925 to 96 (all records) and from 930 to 57 (scanned). The remaining ones are words the engine deliberately leaves out of its list (ei, ble, mani, latte) but the bench diagnostic keeps.
 
 Each round's rules are in their own commit of `measure.mjs`, so any round can be reproduced from its commit.
+
+## Foreign text filed as English (11 October)
+
+Open Food Facts sometimes files a label in another language as the English ingredient text. The engine reads English only, so that text must give "can't confirm", never "none listed". Two scans of the same snapshot looked for it, each with a person allergic to all 15:
+
+| Scan | Rows found | "No listed allergens" before | After (engine `2ec07bc`) |
+|---|---|---|---|
+| A foreign may-contain phrase in the English text (`foreign_scan.py … phrases`) | 7,566 | 113 (62 scanned; engine `e8b0bea`) | 9: eight cosmetics and one "may contain pits" |
+| Two or more allergen word stems of one of 12 other languages: a whole list left untranslated (`… words`) | 4,702 | 155 (95 scanned; engine `e6ca6ad`) | 1, an OCR-garbled label |
+
+The fixes: more foreign may-contain wordings (Czech, Slovak and Polish plurals, Hungarian, Romanian, Finnish, Slovene, Croatian and Serbian, the Baltic languages, Turkish, Dutch, Vietnamese, Indonesian, and OCR accent slips; engine `e6ca6ad`), and the other languages' words for "ingredients" plus their allergen words in `FOREIGN_ALLERGEN_WORDS` (`0a1ceec`). The candidate lists in `foreign_scan.py` find rows to look at; they are not the engine's lists, and the second scan's stems overlap the words added, so its "after" figure is partly by construction. The independent checks are the compare run above and this spot check: on 1,936 English-labelled records from 12 random row groups (Python `random.seed(7)`, `foreign_scan.py … sample`), 340 were "none listed" before (`e6ca6ad`) and 333 after, and all 7 that changed are untranslated Norwegian, Czech, Spanish (3), Swedish or German text. A simpler rule, "can't confirm when most words are unknown", was tried and dropped: at a 50% threshold it turned 146 of those 340 plain English records into "can't confirm".
+
+Per-scan results: `foreign-2026-10-11-<scan>-<engine commit>.json` (`phrases`, `words`, `sample`; before and after). The "before" engine is a snapshot: `git archive <commit> packages/allergen-guard | tar -x -C snap`, then pass `snap/packages/allergen-guard` as the judge's argument.
+
+```
+python3 -I foreign_scan.py food.parquet phrases > phrases.jsonl
+node --experimental-strip-types foreign_judge.mjs < phrases.jsonl
+```
 
 ## Method
 
@@ -277,4 +297,4 @@ Eight shards took between 20 and 47.5 minutes wall clock on a 10-core laptop, an
 
 ## Data
 
-Data from [Open Food Facts](https://openfoodfacts.org), available under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/). Only aggregate counts are published here.
+Data from [Open Food Facts](https://openfoodfacts.org), available under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/). Published here: aggregate counts, record codes, and short quotes from the hand-checked records.
