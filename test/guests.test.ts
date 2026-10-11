@@ -27,7 +27,9 @@ after(async () => {
 test("a check says an expired guest was not checked, instead of skipping them silently", async () => {
   for (const r of [await call("check_recipe", { ingredients: ["butter"] }), await call("check_product", { barcode: "3017624010701" })]) {
     assert.match(r.structuredContent.speech, /^Leo's visit ended on [A-Z][a-z]+day,? 5 January 2020, so I didn't check for them\./);
-    assert.deepEqual(r.structuredContent.people.map((p: View) => p.name), ["Maya"]);
+    // The screen lists the expired guest too, without a verdict, so it says who wasn't checked.
+    assert.deepEqual(r.structuredContent.people.map((p: View) => [p.name, p.verdict ?? null, p.expired ?? null]), [["Maya", "no_listed_allergens", null], ["Leo", null, true]]);
+    assert.equal(r.structuredContent.people[1].until, "2020-01-05");
   }
 });
 

@@ -74,7 +74,10 @@ export function createApp(opts: AppOptions): Server {
         const code = String(barcode ?? "").replace(/\D/g, "");
         if (!validBarcode(code)) return send(res, 400, { error: "That isn't a valid barcode. Try again, or type the digits." });
         const { product } = await opts.sources.product(code);
-        return send(res, 200, opts.store.saveScan(code, product?.product_name || undefined));
+        // The page's next step names the household, so the prompt on the phone is the one to say.
+        const names = opts.store.activePeople().map((p) => p.name);
+        const who = names.length ? `${names.slice(0, -1).join(", ")}${names.length > 1 ? " and " : ""}${names[names.length - 1]}` : "we";
+        return send(res, 200, { ...opts.store.saveScan(code, product?.product_name || undefined), ask: `Can ${who} have what I just scanned?` });
       }
       if (req.method === "GET" && url.pathname === "/health") return send(res, 200, { ok: true, llm: Boolean(opts.llm) });
 

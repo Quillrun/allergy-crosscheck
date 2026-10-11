@@ -65,7 +65,7 @@ test("two checks in one turn: the unsafe one is spoken first whichever call came
     const turn = await res.json();
     assert.deepEqual(turn.views.map((v: { overall: string }) => v.overall), order, text);
     assert.match(turn.speech, /^Maya should avoid this: it contains peanuts/, text);
-    assert.match(turn.speech, /I didn't find peanuts listed for Maya/, text);
+    assert.match(turn.speech, /Nothing listed for Maya's allergies, but check the label/, text);
   }
 });
 

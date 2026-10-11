@@ -46,7 +46,7 @@
     <div class="label">Scanned</div>
     <div class="name" id="name"></div>
     <div class="code" id="code"></div>
-    <div class="ask">Now ask Alexa: “Can we have what I just scanned?”</div>
+    <div class="ask" id="ask">Now ask Alexa: “Can we have what I just scanned?”</div>
   </div>
   <div class="card err" id="error" hidden aria-live="assertive"></div>
   <form id="manual" autocomplete="off">
@@ -112,6 +112,7 @@
       if (!res.ok) throw new Error(body.error);
       $("name").textContent = body.name || "A product without a name in the data";
       $("code").textContent = body.barcode;
+      if (body.ask) $("ask").textContent = `Now ask Alexa: “${body.ask}”`;
       $("found").hidden = false;
       msg.textContent = "Saved. Now ask Alexa.";
     } catch (err) {

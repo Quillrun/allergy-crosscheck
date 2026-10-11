@@ -157,18 +157,24 @@
 
   function render(v) {
     if (!v) return;
+    // When the people disagree, the banner says who the verdict is for: "Avoid for Leo".
+    const judged = (v.people ?? []).filter((p) => p.verdict);
+    const label = v.overall && judged.some((p) => p.verdict !== v.overall) ? `${LABEL[v.overall]} for ${judged.filter((p) => p.verdict === v.overall).map((p) => esc(p.name)).join(" and ")}` : LABEL[v.overall];
     const parts = v.overall
-      ? [`<div class="banner ${v.overall}" role="status"><span class="icon" aria-hidden="true">${ICON[v.overall]}</span><span class="label">${LABEL[v.overall]}</span><div class="ctx"><h1>${esc(v.title)}</h1><div class="sub">${SUB[v.overall]}</div></div></div>`]
+      ? [`<div class="banner ${v.overall}" role="status"><span class="icon" aria-hidden="true">${ICON[v.overall]}</span><span class="label">${label}</span><div class="ctx"><h1>${esc(v.title)}</h1><div class="sub">${SUB[v.overall]}</div></div></div>`]
       : [`<h1>${esc(v.title)}</h1>`];
     const cards = [];
     if (v.people?.length && v.kind !== "shopping") {
       const rows = v.people.map((p) => {
-        const right = v.overall
+        const right = v.overall && p.verdict
           ? `<span class="pill ${p.verdict}">${LABEL[p.verdict]}</span>`
-          : `<span class="chip">${p.guest ? `guest${p.until ? ` · ${p.expired ? "ended" : "until"} ${esc(day(p.until))}` : ""}` : "household"}</span>`;
+          : v.overall
+            ? `<span class="chip">guest · visit ended ${esc(day(p.until))} · not checked</span>` // an expired guest on a check: listed, not judged
+            : `<span class="chip">${p.guest ? `guest${p.until ? ` · ${p.expired ? "ended" : "until"} ${esc(day(p.until))}` : ""}` : "household"}</span>`;
         // On a recipe the "Watch out for" card names the ingredients, so a person's row keeps only the allergen.
-        const reasons = v.kind === "recipe_check" ? (p.reasons ?? []).map((r) => r.split(":")[0]) : p.reasons ?? [];
-        const why = v.overall ? [...new Set(reasons)].map(esc).join(v.kind === "recipe_check" ? ", " : "<br>") : esc((p.allergies ?? []).join(", "));
+        // Same-kind reasons merge: "Contains celery and milk".
+        const reasons = v.kind === "recipe_check" ? merge((p.reasons ?? []).map((r) => r.split(":")[0])) : p.reasons ?? [];
+        const why = v.overall && p.verdict ? [...new Set(reasons)].map(esc).join(v.kind === "recipe_check" ? ", " : "<br>") : v.overall ? "" : esc((p.allergies ?? []).join(", "));
         return `<div class="person"><div class="name">${esc(p.name)}</div>${right}<div class="why">${why}</div></div>`;
       }).join("");
       cards.push(`<section class="card who">${v.overall ? "<h2>Who's eating</h2>" : ""}${rows}</section>`);
@@ -216,6 +222,17 @@
   }
 
   const day = (iso) => { const [y, m, d] = String(iso).split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }); };
+
+  // ["Contains celery", "Contains milk", "May contain egg"] -> ["Contains celery and milk", "May contain egg"]
+  function merge(reasons) {
+    const groups = new Map();
+    for (const r of new Set(reasons)) {
+      const m = r.match(/^(Contains|May contain) (.+)$/);
+      if (!m) { groups.set(r, null); continue; }
+      groups.set(m[1], [...(groups.get(m[1]) ?? []), m[2]]);
+    }
+    return [...groups].map(([k, xs]) => (xs ? `${k} ${xs.length > 1 ? `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}` : xs[0]}` : k));
+  }
 
   function dedupe(flags) {
     const seen = new Set();

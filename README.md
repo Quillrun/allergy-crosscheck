@@ -44,7 +44,7 @@ Allergy Crosscheck:
 | Database offline or timing out | **Can't confirm** |
 | Product name matches several products | **Asks which one** when several match (a single match is used without asking) |
 | Nobody's allergies saved, or an unknown name in "for" | Says so |
-| Nothing found | "I didn't find *X* listed… check the label" |
+| Nothing found | "Nothing listed for *name*'s allergies, but check the label" |
 
 In the simulator, a **verdict lock** applies: after a check, the spoken answer is the tool's own sentence, so the model can't soften "avoid" into "should be fine". A **no-tool guard** covers the other way a model goes wrong: answering from memory. When no tool has returned a result, a keyword filter blocks common verdict and action phrases ("safe", "fine", "saved"…). It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
 

@@ -49,6 +49,7 @@ test("a scan is looked up, saved, and checked when asked about", async () => {
   const body = await res.json();
   assert.equal(body.barcode, "3017624010701");
   assert.equal(body.name, "Nutella");
+  assert.equal(body.ask, "Can Maya have what I just scanned?"); // the prompt on the phone names the household
   const r = await call("check_product", { scanned: true });
   assert.equal(r.structuredContent.kind, "product_check");
   assert.equal(r.structuredContent.title, "Nutella");

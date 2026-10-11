@@ -38,7 +38,8 @@ export type View = {
   title: string;
   speech: string;
   overall?: Verdict;
-  people?: { name: string; verdict: Verdict; reasons: string[]; guest?: boolean; expired?: boolean; allergies?: string[]; until?: string }[];
+  /** A row without `verdict` is an expired guest: listed on a check so the screen says they weren't checked. */
+  people?: { name: string; verdict?: Verdict; reasons?: string[]; guest?: boolean; expired?: boolean; allergies?: string[]; until?: string }[];
   items?: { text: string; flags: { allergen: string; kind: string }[] }[];
   swaps?: Swap[];
   /** `ref`: the barcode's tail, only on choices that would otherwise look the same on screen. */
@@ -284,8 +285,8 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
         kind: "recipe_check",
         title: recipe_name ? `${recipe_name}` : "Recipe check",
         overall: result.overall,
-        speech: withMissing(result, missing, expired) + note + (swaps.length ? " I've put swaps on the screen." : ""),
-        people: verdictRows(result, store),
+        speech: withMissing(result, missing, expired) + note + (swaps.length ? " Swaps are on the screen." : ""),
+        people: verdictRows(result, store, expired),
         items: result.lines
           .map((l) => ({
             text: l.text,
@@ -418,7 +419,7 @@ function productReply(label: string, result: CheckResult, people: Person[], stor
     title: label,
     overall: result.overall,
     speech: lead + withMissing(result, missing, expired),
-    people: verdictRows(result, store),
+    people: verdictRows(result, store, expired),
     items: groupHits(result, people),
     dataIssues: result.dataIssues,
     source,
@@ -472,11 +473,16 @@ function withMissing(result: CheckResult, missing: string[], expired: Profile[] 
   return expired.length ? `${notes.join(" ")} Tell me who's eating and what they're allergic to.` : notes.join(" ");
 }
 
-function verdictRows(result: CheckResult, store: Store): View["people"] {
-  return result.people.map((r) => {
-    const p = store.find(r.name);
-    return { name: r.name, verdict: r.verdict, reasons: r.reasons, guest: p?.guest, allergies: p?.allergies.map((a) => ALLERGENS[a].label) };
-  });
+// Expired guests (only when nobody was named: `pick` returns them then) get a row with no verdict, so the screen shows
+// who wasn't checked, as the speech does.
+function verdictRows(result: CheckResult, store: Store, expired: Profile[] = []): View["people"] {
+  return [
+    ...result.people.map((r) => {
+      const p = store.find(r.name);
+      return { name: r.name, verdict: r.verdict, reasons: r.reasons, guest: p?.guest, allergies: p?.allergies.map((a) => ALLERGENS[a].label) };
+    }),
+    ...expired.map((p) => ({ name: p.name, guest: true, expired: true, until: p.until, allergies: p.allergies.map((a) => ALLERGENS[a].label) })),
+  ];
 }
 
 // Choices that look the same on screen (same name, brand and size) get the shortest barcode tail, from 4 digits, that tells them apart.
