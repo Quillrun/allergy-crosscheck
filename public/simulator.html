@@ -101,18 +101,29 @@
   }
 
   // --- voice
+  // One utterance; resolves when it has been spoken (at once when the browser has no speech).
+  function utter(text) {
+    return new Promise((resolve) => {
+      if (!("speechSynthesis" in window)) return resolve();
+      const u = new SpeechSynthesisUtterance(text);
+      const voice = speechSynthesis.getVoices().find((v) => /en-US/.test(v.lang) && /Samantha|Google US|Aria|Jenny/.test(v.name)) || speechSynthesis.getVoices().find((v) => /^en/.test(v.lang));
+      if (voice) u.voice = voice;
+      u.onstart = () => ring.classList.add("speaking");
+      u.onend = () => { ring.classList.remove("speaking"); resolve(); };
+      u.onerror = () => { ring.classList.remove("speaking"); resolve(); };
+      speechSynthesis.speak(u);
+    });
+  }
   function speak(text) {
     said.textContent = text;
     add("alexa", text);
-    if (!("speechSynthesis" in window)) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    const voice = speechSynthesis.getVoices().find((v) => /en-US/.test(v.lang) && /Samantha|Google US|Aria|Jenny/.test(v.name)) || speechSynthesis.getVoices().find((v) => /^en/.test(v.lang));
-    if (voice) u.voice = voice;
-    u.onstart = () => ring.classList.add("speaking");
-    u.onend = () => ring.classList.remove("speaking");
-    speechSynthesis.speak(u);
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    return utter(text);
   }
+
+  // A turn whose answer comes from several tools: each sentence is spoken with the screen that produced it.
+  let pending = null;
+  window.simShow = (i) => show(pending.views[pending.parts[i].view]);
 
   const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
   ring.addEventListener("click", () => {
@@ -140,8 +151,16 @@
     const body = await res.json();
     if (!res.ok) { said.textContent = body.error; add("sys", body.error); return; }
     history = body.history;
-    body.views.forEach(show);
-    speak(body.speech);
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    const parts = body.parts || [];
+    const spoken = new Set(parts.map((p) => p.view));
+    body.views.forEach((v, i) => { if (!spoken.has(i)) show(v); });
+    if (!parts.length) { speak(body.speech); return; }
+    said.textContent = body.speech;
+    add("alexa", body.speech);
+    pending = { views: body.views, parts };
+    if (window.simDriver) { window.simShow(0); return; }  // the recorder advances the queue itself
+    for (let i = 0; i < parts.length; i++) { window.simShow(i); await utter(parts[i].text); }
   }
 
   async function tool(name, args, announce = true) {

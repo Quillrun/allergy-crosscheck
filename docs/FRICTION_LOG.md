@@ -52,7 +52,7 @@ Each entry is something that happened while building Allergy Crosscheck. Every e
 - **Severity:** High. For health and safety add-ons (allergies, medication, recalls) a paraphrased verdict can hurt someone. Low for most other add-ons.
 - **Workaround:**
   - Check results lead with a `VERDICT:` line, every result carries a `Say to the user: …` line, and the tool descriptions tell the model to repeat verdicts exactly.
-  - In my simulator I added two guards that Alexa+ doesn't offer: a verdict lock (after a check, the spoken answer is the tool's sentence) and a no-tool guard (when no tool has returned a result, a keyword filter blocks common verdict and action phrases).
+  - In my simulator I added two guards that Alexa+ doesn't offer: a verdict lock (after a check or a change, the spoken answer is the tools' own sentences, verdicts first) and a no-tool guard (when no tool has returned a result, a keyword filter blocks common verdict and action phrases).
 - **Suggestion:** to the MCP Toolkit team (tool result format, and certification):
   - Support a `_meta` hint on tool results, for example `speech: { text, verbatim: true }`, that Alexa+ honours or at least only shortens.
   - Have certification test that safety verdicts survive paraphrase.

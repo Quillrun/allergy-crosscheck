@@ -46,7 +46,7 @@ Allergy Crosscheck:
 | Nobody's allergies saved, or an unknown name in "for" | Says so |
 | Nothing found | "Nothing listed for *name*'s allergies, but check the label" |
 
-In the simulator, a **verdict lock** applies: after a check, the spoken answer is the tool's own sentence, so the model can't soften "avoid" into "should be fine". A **no-tool guard** covers the other way a model goes wrong: answering from memory. When no tool has returned a result, a keyword filter blocks common verdict and action phrases ("safe", "fine", "saved"…). It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
+In the simulator, a **verdict lock** applies: after a check, or a change to the household or the shopping list, the spoken answer is the tools' own sentences, verdicts first (the worst first), then the changes in call order, so the model can't soften "avoid" into "should be fine" or claim a change it didn't make. When one answer comes from two tools, the simulator shows each tool's screen as its sentence is spoken. A **no-tool guard** covers the other way a model goes wrong: answering from memory. When no tool has returned a result, a keyword filter blocks common verdict and action phrases ("safe", "fine", "saved"…). It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
 
 ## Run it
 
@@ -142,7 +142,7 @@ Every tool result has a short `speech` line for voice, a `Say to the user:` sent
 ## Tests
 
 ```bash
-npm test          # 146 tests (92 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
+npm test          # 148 tests (92 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -164,7 +164,7 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, phone scan, simulator guards | 146 automated tests, 92 of them in the engine package (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 148 automated tests, 92 of them in the engine package (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The screen and the tap-to-choose flow | Headless Chrome, with every demo button's screen measured at the guide's 768×480 base canvas (dark and light), at 1280×800 with the 1.667 root scale (dark theme only), and in the simulator's Echo Show 8 frame: all fit with no scrolling. The tap-to-choose click was checked in that scaled frame. Not tested on a real Echo Show |

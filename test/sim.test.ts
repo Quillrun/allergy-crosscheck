@@ -16,8 +16,20 @@ const fakeLlm = createServer(async (req, res) => {
   const body = JSON.parse(Buffer.concat(chunks).toString());
   llmCalls++;
   const sawTool = body.messages.some((m: { role: string }) => m.role === "tool");
+  const toolMsgs = body.messages.filter((m: { role: string }) => m.role === "tool").length;
   const asked = body.messages.find((m: { role: string }) => m.role === "user").content as string;
-  const message = /pesto/.test(asked)
+  const call = (id: string, name: string, args: unknown) => ({ id, type: "function", function: { name, arguments: JSON.stringify(args) } });
+  const message = /chain/.test(asked)
+    ? toolMsgs === 0
+      ? { role: "assistant", content: null, tool_calls: [call("c1", "check_recipe", { ingredients: ["satay sauce", "rice"] })] }
+      : toolMsgs === 1
+      ? { role: "assistant", content: null, tool_calls: [call("c2", "add_to_shopping_list", { items: ["sunflower seed butter"] })] }
+      : { role: "assistant", content: "Done, and it's totally safe now!" }
+    : /save Sam/.test(asked)
+    ? toolMsgs === 0
+      ? { role: "assistant", content: null, tool_calls: [call("c1", "save_person", { name: "Sam", allergies: ["egg"] })] }
+      : { role: "assistant", content: "Saved Sam, he's all set!" }
+    : /pesto/.test(asked)
     ? { role: "assistant", content: "Pesto is fine for Maya." }
     : /thanks/i.test(asked)
     ? { role: "assistant", content: "You're welcome!" }
@@ -67,6 +79,26 @@ test("two checks in one turn: the unsafe one is spoken first whichever call came
     assert.match(turn.speech, /^Maya should avoid this: it contains peanuts/, text);
     assert.match(turn.speech, /Nothing listed for Maya's allergies, but check the label/, text);
   }
+});
+
+test("a check and a list add in one turn: both tools' sentences are spoken, each with its screen", async () => {
+  const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "chain: check satay and put the swap on my list" }) });
+  const turn = await res.json();
+  assert.equal(res.status, 200);
+  assert.match(turn.speech, /^Maya should avoid this: it contains peanuts/);
+  assert.doesNotMatch(turn.speech, /totally safe/);
+  assert.equal(turn.parts.length, 2);
+  assert.equal(turn.views[turn.parts[0].view].kind, "recipe_check");
+  assert.equal(turn.views[turn.parts[1].view].kind, "shopping");
+  assert.ok(turn.speech.endsWith(turn.views[turn.parts[1].view].speech));
+});
+
+test("a save without a check speaks the tool's sentence, not the model's", async () => {
+  const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "save Sam, allergic to egg" }) });
+  const turn = await res.json();
+  assert.equal(turn.speech, turn.views[0].speech);
+  assert.doesNotMatch(turn.speech, /all set/);
+  assert.equal(turn.parts.length, 1);
 });
 
 test("a verdict without a tool call is never spoken", async () => {

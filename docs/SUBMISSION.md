@@ -54,11 +54,11 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 - **Open-source engine, `allergen-guard`**, MIT, with zero dependencies. It covers the EU 14 and US Big 9 allergens, with wheat separate from gluten, and has an ingredient dictionary with exclusions (peanut butter isn't dairy; oyster mushrooms aren't shellfish). Swaps declare their own allergens and are never a plant relative of what they replace. Coconut swaps (coconut cream for crème fraîche) are not treated as tree nuts: coconut is not among the EU's 14 allergens, and the FDA dropped it from its tree-nut list in its January 2025 allergen labeling guidance.
 - **Phone scan page:** the camera reads the barcode with the browser's BarcodeDetector, or a WebAssembly decoder for Safari that the server serves itself. The server keeps the scan for 30 minutes as "what I just scanned".
 - **Simulated Alexa+**, because the Alexa+ docs say the MCP Toolkit is available in the United States ([MCP Toolkit overview](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-overview.html)) and I'm outside the US; I did not attempt a deployment. An LLM drives the server through a real MCP client, and the browser handles voice and hosts the MCP Apps screen. The simulator adds two guards, as a test harness rather than part of the add-on:
-  - a **verdict lock**: after a check, the spoken answer is the tool's own sentence;
+  - a **verdict lock**: after a check or a change, the spoken answer is the tools' own sentences, verdicts first;
   - a **no-tool guard**: a keyword filter that blocks common verdict and action phrases when no tool has returned a result.
 
   On a real Alexa+, add-ons can't script speech. What ships is the server's side: every check result starts with a `VERDICT:` line, and every result carries the exact sentence to say. A verbatim hint for safety answers is the top feature request below.
-- **146 automated tests** (92 of them in the engine package), including:
+- **148 automated tests** (92 of them in the engine package), including:
   - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
   - MCP end to end over HTTP;
@@ -67,7 +67,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 
 ### What was and wasn't tested
 - **Tested:**
-  - the 146 automated tests;
+  - the 148 automated tests;
   - the full demo conversation, end to end in the simulator, on a local Qwen3.5 9B model with live data;
   - the scan page in headless Chrome, with a camera feed of a real barcode;
   - every demo screen, measured in headless Chrome at 768×480 (the guide's base canvas, dark and light) and at 1280×800 with the 1.667 root scale (dark theme only; the simulator's Echo Show 8 frame).
@@ -138,7 +138,7 @@ The demo-script buttons call the MCP tools directly and need no model or API key
 - the spread with no ingredient list gives "Can't confirm";
 - the cocoa mix whose tags carry milk only as "may contain" gives "Avoid" for Leo, with the milk ingredients named.
 
-To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 146 tests.
+To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 148 tests.
 
 ### New or existing project
 New: the repository's first commit is 4 October 2026, after the submission period opened on 31 August 2026 ([rules](https://amazonappdev2026.devpost.com/rules)).

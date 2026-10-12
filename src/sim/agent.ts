@@ -1,6 +1,10 @@
 // The simulated Alexa+ turn: an LLM (any OpenAI-compatible endpoint) drives the
-// MCP server through a real MCP client. Verdict lock: when a check tool ran, the
-// spoken answer is the tool's own sentence, so the model can never soften it.
+// MCP server through a real MCP client. Verdict lock: when a check ran, or a change to
+// the household or the shopping list, the spoken answer is the tools' own sentences,
+// verdicts first (the worst first), then the changes in call order, so the model can
+// never soften a verdict or claim a change it didn't make. Each sentence is returned
+// with the index of the screen that produced it (`parts`), so the simulator can show
+// each tool's screen as its sentence is spoken.
 // No-tool guard: without a tool call the model may ask a question or make small talk, never assert a verdict or an action.
 // It gets one nudge to call a tool; after that its claim is replaced.
 
@@ -12,7 +16,10 @@ export type Llm = { baseUrl: string; model: string; apiKey?: string };
 export type ChatMessage = { role: "system" | "user" | "assistant" | "tool"; content: string | null; tool_calls?: ToolCall[]; tool_call_id?: string };
 type ToolCall = { id: string; type: "function"; function: { name: string; arguments: string } };
 
-export type TurnResult = { speech: string; views: View[]; history: ChatMessage[] };
+/** `parts`: the spoken sentences and the view each came from, in speaking order; empty when the model's own sentence is spoken. */
+export type TurnResult = { speech: string; views: View[]; parts: { text: string; view: number }[]; history: ChatMessage[] };
+
+const WRITE_TOOLS = new Set(["save_person", "remove_person", "add_to_shopping_list", "remove_from_shopping_list"]);
 
 const system = (now: Date) => `You are Alexa, running the Allergy Crosscheck add-on in a family kitchen. Today is ${day(now, 0)}. The next days: ${[1, 2, 3, 4, 5, 6, 7].map((n) => day(now, n)).join(", ")}.
 - Use the tools for anything about allergies, recipes, products or the shopping list. Never answer allergy questions from memory.
@@ -42,6 +49,7 @@ export async function runTurn(client: Client, llm: Llm, history: ChatMessage[], 
   const fns = tools.map((t) => ({ type: "function" as const, function: { name: t.name, description: t.description ?? "", parameters: t.inputSchema } }));
   const messages: ChatMessage[] = [{ role: "system", content: system(new Date()) }, ...history, { role: "user", content: text }];
   const views: View[] = [];
+  const by: string[] = [];
   let nudged = false;
   let nudge: ChatMessage[] = [];
 
@@ -59,7 +67,10 @@ export async function runTurn(client: Client, llm: Llm, history: ChatMessage[], 
         }
         const result = await client.callTool({ name: call.function.name, arguments: args });
         const view = result.structuredContent as View | undefined;
-        if (view) views.push(view);
+        if (view) {
+          views.push(view);
+          by.push(call.function.name);
+        }
         const textOut = (result.content as { type: string; text?: string }[]).map((c) => c.text ?? "").join("\n");
         messages.push({ role: "tool", tool_call_id: call.id, content: textOut });
       }
@@ -76,26 +87,32 @@ export async function runTurn(client: Client, llm: Llm, history: ChatMessage[], 
     }
     // A reply to the nudge that talks about tools is meta-talk, not an answer for the kitchen.
     if (!views.length && nudged && /\btools?\b/i.test(said)) return done(messages, SMALL_TALK, views);
-    const checks = views.filter((v) => v.overall || v.kind === "needs_choice");
-    return done(messages, checks.length ? spokenChecks(checks) : said || views.at(-1)?.speech || "Sorry, I didn't catch that.", views);
+    const parts = lockedParts(views, by);
+    return done(messages, parts.length ? parts.map((p) => p.text).join(" ") : said || views.at(-1)?.speech || "Sorry, I didn't catch that.", views, parts);
   }
   return done(messages, views.at(-1)?.speech ?? "Sorry, I couldn't finish that.", views);
 }
 
-// Two checks in one turn are both spoken, the worst first, so an unsafe one is never lost behind a later clean one.
+// The lock: checks first, the worst first (an unsafe one is never lost behind a later clean one),
+// then the household and shopping-list changes in call order; the same sentence is never said twice.
 const RANK: Record<string, number> = { unsafe: 2, cannot_confirm: 1, no_listed_allergens: 0 };
-const spokenChecks = (checks: View[]): string =>
-  [...new Set(checks.map((v, i) => ({ v, i })).sort((a, b) => (RANK[b.v.overall ?? "cannot_confirm"] - RANK[a.v.overall ?? "cannot_confirm"]) || a.i - b.i).map(({ v }) => v.speech))].join(" ");
+const lockedParts = (views: View[], by: string[]): { text: string; view: number }[] => {
+  const indexed = views.map((v, i) => ({ v, i }));
+  const checks = indexed.filter(({ v }) => v.overall || v.kind === "needs_choice").sort((a, b) => (RANK[b.v.overall ?? "cannot_confirm"] - RANK[a.v.overall ?? "cannot_confirm"]) || a.i - b.i);
+  const writes = indexed.filter(({ v, i }) => !(v.overall || v.kind === "needs_choice") && WRITE_TOOLS.has(by[i]));
+  const seen = new Set<string>();
+  return [...checks, ...writes].flatMap(({ v, i }) => (seen.has(v.speech) ? [] : (seen.add(v.speech), [{ text: v.speech, view: i }])));
+};
 
 // History keeps the tool results (so "add the swaps" knows what the swaps were) and
 // ends with what was actually spoken, not what the model drafted. It is trimmed at a
 // user turn, so a tool result is never separated from the call that produced it.
 const HISTORY_LIMIT = 40;
-const done = (messages: ChatMessage[], speech: string, views: View[]): TurnResult => {
+const done = (messages: ChatMessage[], speech: string, views: View[], parts: { text: string; view: number }[] = []): TurnResult => {
   const all: ChatMessage[] = [...messages.slice(1), { role: "assistant", content: speech }];
   const turns = all.flatMap((m, i) => (m.role === "user" ? [i] : []));
   const start = turns.find((i) => i >= all.length - HISTORY_LIMIT) ?? turns.at(-1) ?? 0;
-  return { speech, views, history: all.slice(start) };
+  return { speech, views, parts, history: all.slice(start) };
 };
 
 
