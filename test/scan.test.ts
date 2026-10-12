@@ -4,7 +4,7 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { validBarcode } from "../src/server/app.ts";
+import { normalizeBarcode, validBarcode } from "../src/server/app.ts";
 import { SCAN_TTL_MS } from "../src/server/store.ts";
 import { startApp } from "./helpers.ts";
 
@@ -102,4 +102,14 @@ test("a malformed JSON body is a 400 with a plain message, not a 500 with the pa
     assert.doesNotMatch(text, /SyntaxError|Unexpected token|position/, path);
     assert.match(text, /isn't valid JSON/, path);
   }
+});
+
+test("a valid UPC-E is accepted and looked up as its UPC-A", async () => {
+  assert.ok(validBarcode("04252614"));
+  assert.equal(normalizeBarcode("04252614"), "042100005264"); // a real UPC-E and the UPC-A it expands to
+  assert.ok(!validBarcode("04252615"), "wrong check digit");
+  assert.equal(normalizeBarcode("96385074"), "96385074", "a valid EAN-8 is left alone");
+  const res = await scan("04252614");
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).barcode, "042100005264");
 });
