@@ -218,6 +218,39 @@ The foreign-text change in the engine: English ingredient text that contains a w
 
 Each round's rules are in their own commit of `measure.mjs`, so any round can be reproduced from its commit.
 
+## Decisive answers on scanned products (run 12 October 2026)
+
+How often does the engine give a decisive answer ("avoid" or "no listed allergens") rather than "can't confirm", for a real household profile, on products people actually scan? Measured over every record with `unique_scans_n > 0` in the 7 October 2026 snapshot (1,552,376 of 4,784,317 records), engine commit `77d5fd7`, three profiles, each record checked once per profile with `checkProduct`. Started 00:37, finished 01:45 (8 shards).
+
+| Profile | Decisive (avoid or no listed allergens) | Can't confirm | Decisive among the 264,667 records with English ingredient text | Decisive among the 1,287,709 without |
+|---|---|---|---|---|
+| milk | 463,764 (29.9%) | 1,088,612 (70.1%) | 188,717 (71.3%) | 275,047 (21.4%) |
+| peanut + tree nuts | 355,484 (22.9%) | 1,196,892 (77.1%) | 151,581 (57.3%) | 203,903 (15.8%) |
+| milk + celery | 473,247 (30.5%) | 1,079,129 (69.5%) | 190,629 (72.0%) | 282,618 (21.9%) |
+
+Of the decisive answers for the milk profile, 277,847 are "avoid" and 185,917 "no listed allergens". Records without English ingredient text can only be decisive through their allergen and traces tags, since the engine reads English text only. Both bases are given so the two numbers are not confused: 17.0% of scanned records carry English ingredient text. This counts verdicts, not correctness; the precision work above is the check on that.
+
+Command (from `bench/`): `for i in 0 1 2 3 4 5 6 7; do python3 -I off_rows.py food.parquet $i 8 | node --experimental-strip-types decisive.mjs > shard_$i.json & done; wait`, with `decisive.mjs` as kept in the run folder (the same loop as `measure.mjs`, calling `checkProduct` per profile and counting `overall`).
+
+### Second base: scanned products sold in the US or UK (run 12 October 2026)
+
+The same measurement restricted to scanned records whose `countries_tags` include `en:united-states` or `en:united-kingdom` (230,858 of the 1,552,376 scanned records; 134,213 of them, 58.1%, carry English ingredient text). Same snapshot, engine commit `77d5fd7`, started 12:39, finished 13:11 (8 shards).
+
+| Profile | Decisive (avoid or no listed allergens) | Can't confirm | Decisive among the 134,213 records with English ingredient text | Decisive among the 96,645 without |
+|---|---|---|---|---|
+| milk | 98,456 (42.6%) | 132,402 (57.4%) | 96,277 (71.7%) | 2,179 (2.3%) |
+| peanut + tree nuts | 79,947 (34.6%) | 150,911 (65.4%) | 78,424 (58.4%) | 1,523 (1.6%) |
+| milk + celery | 99,446 (43.1%) | 131,412 (56.9%) | 97,206 (72.4%) | 2,240 (2.3%) |
+
+Per country (a record can carry both tags, so the rows overlap):
+
+| Country | Scanned records | With English ingredient text | Decisive, milk | Decisive, peanut + tree nuts | Decisive, milk + celery |
+|---|---|---|---|---|---|
+| US | 133,453 | 86,266 (64.6%) | 46.4% | 37.5% | 47.1% |
+| UK | 98,268 | 48,665 (49.5%) | 37.7% | 30.9% | 37.8% |
+
+Command (from `bench/`): the loop above with `off_rows_country.py` (adds the country filter and `countries_tags`) and `decisive_country.mjs`.
+
 ## Foreign text filed as English (11 October)
 
 Open Food Facts sometimes files a label in another language as the English ingredient text. The engine reads English only, so that text must give "can't confirm", never "none listed". Two scans of the same snapshot looked for it, each with a person allergic to all 15:

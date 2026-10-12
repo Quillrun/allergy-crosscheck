@@ -27,7 +27,7 @@ The stakes are high. In the US, about 1 in 15 adults (6.7%) and 1 in 19 children
 Alexa+ already remembers a family's allergies. Amazon says it understands "your family's dietary preferences, allergies, and weekly traditions" ([Amazon](https://aboutamazon.com/news/devices/amazon-2025-devices-alexa-event-live-updates)). But remembering an allergy isn't the same as checking food for it.
 
 ### What it does
-Allergy Crosscheck tells you who at the table can eat a dish or a product, and why. It checks recipes and scanned products against everyone at your table, guests included, and cross-checks a product's allergen list against its ingredient text. It treats missing data as unsafe: it says "I can't confirm" instead of "allergen-free".
+Allergy Crosscheck tells you who at the table can eat a dish or a product, and why. It checks recipes and scanned products against everyone at your table, guests included, and cross-checks a product's allergen list against its ingredient text. It treats missing data as unsafe: it says "I can't confirm" instead of "allergen-free". On the 1,552,376 products people have scanned in the Open Food Facts app, that gives a decisive answer (avoid, or no listed allergens) for 29.9% of records with a milk allergy, 22.9% with peanut and tree nuts, and 30.5% with milk and celery; among the 264,667 records that carry English ingredient text, 71.3%, 57.3% and 72.0% (measured on 12 October 2026, details in the engine's bench README).
 
 Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have dairy or celery, is coming on Saturday. "Check tonight's lasagne" gives each of them a verdict on the Echo Show, names the risky ingredients, and suggests swaps checked against both of them, so a fix for Leo never trips Maya.
 
