@@ -77,7 +77,7 @@ export function createApp(opts: AppOptions): Server {
       }
       if (req.method === "POST" && url.pathname === "/scan") {
         const { barcode } = (await readJson(req)) as { barcode?: string };
-        const code = String(barcode ?? "").replace(/\D/g, "");
+        const code = String(barcode ?? "").slice(0, 64).replace(/\D/g, "");
         if (!validBarcode(code)) return send(res, 400, { error: "That isn't a valid barcode. Try again, or type the digits." });
         const { product } = await opts.sources.product(code);
         // The page's next step names the household, so the prompt on the phone is the one to say.
@@ -96,6 +96,7 @@ export function createApp(opts: AppOptions): Server {
       if (req.method === "POST" && url.pathname === "/sim/turn") {
         if (!opts.llm) return send(res, 503, { error: "No LLM configured. Set LLM_BASE_URL and LLM_MODEL, or use the demo buttons." });
         const { history, text } = (await readJson(req)) as { history?: ChatMessage[]; text: string };
+        if (typeof text !== "string" || text.length > 2000 || (history !== undefined && (!Array.isArray(history) || history.length > 200))) return send(res, 400, { error: "text must be a string of at most 2000 characters, history at most 200 messages." });
         client ??= await connect(http, opts.mcpToken);
         const turn = await runTurn(client, opts.llm, history ?? [], text);
         return send(res, 200, turn);
@@ -103,6 +104,11 @@ export function createApp(opts: AppOptions): Server {
       send(res, 404, { error: "not found" });
     } catch (err) {
       // A malformed body is the caller's mistake, not a server fault, and the parser's message is not shown.
+      if (err instanceof TooLarge) {
+        if (res.headersSent) return;
+        res.setHeader("Connection", "close");
+        return send(res, 413, { error: `The request body is over ${MAX_BODY / 1024} KB.` });
+      }
       if (err instanceof BadJson) {
         if (res.headersSent) return;
         return req.url?.startsWith("/mcp")
@@ -144,7 +150,12 @@ async function connect(http: Server, token?: string): Promise<Client> {
 
 async function readJson(req: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = [];
-  for await (const c of req) chunks.push(c as Buffer);
+  let size = 0;
+  for await (const c of req) {
+    size += (c as Buffer).length;
+    if (size > MAX_BODY) throw new TooLarge();
+    chunks.push(c as Buffer);
+  }
   const raw = Buffer.concat(chunks).toString("utf8");
   try {
     return raw ? JSON.parse(raw) : {};
@@ -153,6 +164,8 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   }
 }
 class BadJson extends Error {}
+class TooLarge extends Error {}
+export const MAX_BODY = 256 * 1024;
 
 function send(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });

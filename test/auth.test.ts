@@ -66,3 +66,25 @@ test("/sim/* refuses a non-loopback host unless SIM_PUBLIC", async () => {
     await open.close();
   }
 });
+
+test("a body over 256 KB gets 413", async () => {
+  const app = await startApp();
+  try {
+    assert.equal((await post(`${app.url}/mcp`, JSON.stringify({ pad: "x".repeat(300 * 1024) }))).status, 413);
+    assert.equal((await post(`${app.url}/scan`, JSON.stringify({ barcode: "3017624010701" }))).status, 200);
+  } finally {
+    await app.close();
+  }
+});
+
+test("an over-long ingredient list is refused by the tool schema", async () => {
+  const app = await startApp();
+  try {
+    const call = (args: unknown) => post(`${app.url}/mcp`, JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "check_recipe", arguments: args } })).then((r) => r.json());
+    assert.equal((await call({ ingredients: "zorb, ".repeat(1000) })).result.isError, true);
+    assert.equal((await call({ ingredients: Array(201).fill("salt") })).result.isError, true);
+    assert.notEqual((await call({ ingredients: "salt, flour" })).result.isError, true);
+  } finally {
+    await app.close();
+  }
+});

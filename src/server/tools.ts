@@ -90,7 +90,7 @@ function registerSavePerson(server: McpServer, { store }: Deps): void {
         "Save or update a household member or guest and their food allergies, e.g. 'Maya is allergic to peanuts' or 'the Johnsons' boy Leo is coming Saturday, he can't have sesame'. Guests can have an end date.",
       inputSchema: {
         name: z.string().min(1).max(60).describe("Person's name"),
-        allergies: z.array(z.string()).min(1).describe("Allergies in plain words: peanuts, tree nuts, dairy, egg, wheat, gluten, soy, sesame, fish, shellfish, celery, mustard, lupin, sulphites"),
+        allergies: z.array(z.string().max(100)).min(1).max(50).describe("Allergies in plain words: peanuts, tree nuts, dairy, egg, wheat, gluten, soy, sesame, fish, shellfish, celery, mustard, lupin, sulphites"),
         guest: z.boolean().optional().describe("True for a visitor rather than a household member"),
         until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Last day a guest's allergies apply (YYYY-MM-DD)"),
         replace: z.boolean().optional().describe("True only when the user says an allergy no longer applies; the list then replaces what's saved. Otherwise new allergies are added"),
@@ -163,7 +163,7 @@ function registerRemovePerson(server: McpServer, { store }: Deps): void {
     {
       title: "Remove someone",
       description: "Stop checking for a household member or guest.",
-      inputSchema: { name: z.string().min(1) },
+      inputSchema: { name: z.string().min(1).max(60) },
       annotations: { destructiveHint: true, idempotentHint: true },
       _meta: ui("Removing…", "Removed"),
     },
@@ -210,7 +210,7 @@ function registerFindRecipe(server: McpServer, { sources }: Deps): void {
     {
       title: "Find a recipe",
       description: "Look up a recipe's ingredient list by dish name (for example 'lasagne'), so it can be checked with check_recipe.",
-      inputSchema: { dish: z.string().min(1) },
+      inputSchema: { dish: z.string().min(1).max(100) },
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: ui("Finding the recipe…", "Recipe found"),
     },
@@ -243,10 +243,10 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
       title: "Check a recipe",
       description: `Check food against everyone's allergies (or only the people named in 'for'): a dish ('lasagne'), a single food or ingredient ('hummus', 'a banana', 'oyster sauce'), or a list of ingredients. Returns a verdict per person, the risky ingredients, and swaps that don't trip anyone else's allergy. ${VOICE_RULE}`,
       inputSchema: {
-        ingredients: z.union([z.array(z.string()), z.string()]).optional().describe("Ingredient lines, or the ingredient list as text. If the user lists ingredients, always pass them here, even when they also name the dish"),
-        dish: z.string().optional().describe("Only when the user gives no ingredients: a dish name to look up, e.g. 'lasagne'"),
-        recipe_name: z.string().optional().describe("A name to show for the recipe, e.g. 'Grandma's pesto'"),
-        for: z.array(z.string()).optional().describe("Only check for these people; default is everyone currently saved"),
+        ingredients: z.union([z.array(z.string().max(500)).max(200), z.string().max(4000)]).optional().describe("Ingredient lines, or the ingredient list as text. If the user lists ingredients, always pass them here, even when they also name the dish"),
+        dish: z.string().max(100).optional().describe("Only when the user gives no ingredients: a dish name to look up, e.g. 'lasagne'"),
+        recipe_name: z.string().max(200).optional().describe("A name to show for the recipe, e.g. 'Grandma's pesto'"),
+        for: z.array(z.string().max(60)).max(50).optional().describe("Only check for these people; default is everyone currently saved"),
       },
       annotations: { readOnlyHint: true, openWorldHint: true }, // looks a dish up on TheMealDB
       _meta: ui("Checking the recipe…", "Recipe checked"),
@@ -311,10 +311,10 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
       title: "Check a product",
       description: `Check one specific packaged product against everyone's allergies: the one the user just scanned on their phone (set scanned), by barcode, or by its product or brand name ('Nutella', 'Heinz ketchup'). For a plain food or ingredient with no brand ('hummus', 'a banana'), use check_recipe with ingredients instead. If a name matches several products, this returns the choices instead of guessing; ask the user which one, then call again with its barcode. ${VOICE_RULE}`,
       inputSchema: {
-        barcode: z.string().optional().describe("The barcode (EAN/UPC digits), e.g. from a choice returned earlier"),
-        name: z.string().optional().describe("Product name, e.g. 'Nutella' or 'Kellogg's granola'"),
+        barcode: z.string().max(20).optional().describe("The barcode (EAN/UPC digits), e.g. from a choice returned earlier"),
+        name: z.string().max(200).optional().describe("Product name, e.g. 'Nutella' or 'Kellogg's granola'"),
         scanned: z.boolean().optional().describe("true when the user means the product they just scanned with the Allergy Crosscheck scan page ('what I just scanned', 'this one I scanned')"),
-        for: z.array(z.string()).optional().describe("Only check for these people; default is everyone currently saved"),
+        for: z.array(z.string().max(60)).max(50).optional().describe("Only check for these people; default is everyone currently saved"),
       },
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: ui("Checking the product…", "Product checked"),
@@ -365,7 +365,7 @@ function registerAddToShoppingList(server: McpServer, { store }: Deps): void {
     {
       title: "Add to shopping list",
       description: "Add items (for example the swaps from a recipe check) to the household shopping list.",
-      inputSchema: { items: z.array(z.string()).min(1), note: z.string().optional() },
+      inputSchema: { items: z.array(z.string().max(200)).min(1).max(100), note: z.string().max(500).optional() },
       _meta: ui("Adding to the list…", "List updated"),
     },
     async ({ items, note }) => {
@@ -402,7 +402,7 @@ function registerRemoveFromShoppingList(server: McpServer, { store }: Deps): voi
     {
       title: "Remove from shopping list",
       description: "Remove one item from the shopping list.",
-      inputSchema: { item: z.string().min(1) },
+      inputSchema: { item: z.string().min(1).max(200) },
       annotations: { destructiveHint: true, idempotentHint: true },
       _meta: ui("Removing from the list…", "List updated"),
     },
