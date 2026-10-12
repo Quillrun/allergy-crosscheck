@@ -59,7 +59,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   - a **no-tool guard**: a keyword filter that blocks common verdict and action phrases when no tool has returned a result.
 
   On a real Alexa+, add-ons can't script speech. What ships is the server's side: every check result starts with a `VERDICT:` line, and every result carries the exact sentence to say. A verbatim hint for safety answers is the top feature request below.
-- **148 automated tests** (92 of them in the engine package), including:
+- **158 automated tests** (93 of them in the engine package), including:
   - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
   - MCP end to end over HTTP;
@@ -68,7 +68,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 
 ### What was and wasn't tested
 - **Tested:**
-  - the 148 automated tests;
+  - the 158 automated tests;
   - the full demo conversation, end to end in the simulator, on a local Qwen3.5 9B model with live data;
   - the scan page in headless Chrome, with a camera feed of a real barcode;
   - every demo screen, measured in headless Chrome at 768×480 (the guide's base canvas, dark and light) and at 1280×800 with the 1.667 root scale (dark theme only; the simulator's Echo Show 8 frame).

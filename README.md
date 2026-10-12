@@ -46,7 +46,7 @@ Allergy Crosscheck:
 | Nobody's allergies saved, or an unknown name in "for" | Says so |
 | Nothing found | "Nothing listed for *name*'s allergies, but check the label" |
 
-In the simulator, a **verdict lock** applies: after a check, or a change to the household or the shopping list, the spoken answer is the tools' own sentences, verdicts first (the worst first), then the changes in call order, so the model can't soften "avoid" into "should be fine" or claim a change it didn't make. When one answer comes from two tools, the simulator shows each tool's screen as its sentence is spoken. A **no-tool guard** covers the other way a model goes wrong: answering from memory. When no tool has returned a result, a keyword filter blocks common verdict and action phrases ("safe", "fine", "saved"…). It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
+In the simulator, a **verdict lock** applies: after a check, or a change to the household or the shopping list, the spoken answer is the tools' own sentences, verdicts first (the worst first), then the changes in call order, so the model can't soften "avoid" into "should be fine" or claim a change it didn't make. When one answer comes from two tools, the simulator shows each tool's screen as its sentence is spoken. A **no-tool guard** covers the other way a model goes wrong: answering from memory. When no tool has returned a verdict or a change to speak for (including after a lookup like `find_recipe`), a keyword filter blocks common verdict and action phrases ("safe", "fine", "saved"…). It gets one nudge to call a tool, and after that its answer is replaced with "I couldn't check that". Both have tests (`test/sim.test.ts`). The full demo conversation was run end to end on a local Qwen3.5 9B (4-bit, MLX).
 
 ## Run it
 
@@ -144,7 +144,7 @@ Every tool result has a short `speech` line for voice, a `Say to the user:` sent
 ## Tests
 
 ```bash
-npm test          # 148 tests (92 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
+npm test          # 158 tests (93 in the engine package): engine, store, MCP over Streamable HTTP, phone scan, simulator verdict lock, no-tool guard, history trimming
 npm run typecheck
 ```
 
@@ -166,7 +166,7 @@ test/                      integration tests
 
 | | |
 |---|---|
-| Engine, store, MCP over real HTTP, phone scan, simulator guards | 148 automated tests, 92 of them in the engine package (`npm test`) |
+| Engine, store, MCP over real HTTP, phone scan, simulator guards | 158 automated tests, 93 of them in the engine package (`npm test`) |
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The screen and the tap-to-choose flow | Headless Chrome, with every demo button's screen measured at the guide's 768×480 base canvas (dark and light), at 1280×800 with the 1.667 root scale (dark theme only), and in the simulator's Echo Show 8 frame: all fit with no scrolling. The tap-to-choose click was checked in that scaled frame. Not tested on a real Echo Show |
@@ -178,7 +178,7 @@ The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`
 ## Limits, stated plainly
 
 - English ingredient text only. Products without it get "can't confirm".
-- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". Across all 790 TheMealDB recipes, 2.6% of ingredient lines hit that rule (a one-off check before the 2026-10-11 engine fixes, which changed the filler words and so this rate; its script and result are not in this repo, so it can't be re-run from here); the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every answer ends with "check the label".
+- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". Across all 790 TheMealDB recipes, 2.6% of ingredient lines hit that rule (a one-off check before the 2026-10-11 engine fixes, which changed the filler words and so this rate; its script and result are not in this repo, so it can't be re-run from here); the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every "can't confirm" and "nothing listed" answer ends with "check the label" in its spoken sentence; the "avoid" answers don't say it, but every tool result carries the on-screen disclaimer "Data can be wrong: always check the label".
 - Product checks read the label's declared allergens, traces and English ingredient text; unrecognised words there don't block an answer, because the declaration is the legal record. The exceptions give "can't confirm": a foreign allergen word, letters from a non-Latin script, a foreign "may contain" warning that names nothing the engine knows, or text that isn't an ingredient list ("-", "n/a", "see pack", or only unknown words with accented letters).
 - Saying someone is "also allergic to" something adds it; only "no longer allergic" replaces the list.
 - It isn't medical advice and isn't an emergency service.
