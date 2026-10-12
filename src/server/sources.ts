@@ -45,6 +45,7 @@ export class Sources {
 
   /** A dish by name. If the full name isn't found, leading words are dropped ("shrimp pad thai" -> "pad thai"). */
   async recipe(name: string): Promise<{ recipe?: Recipe; error?: string }> {
+    if (!name.trim()) return {}; // an empty TheMealDB search returns an arbitrary meal
     const words = name.trim().split(/\s+/);
     let meal: Record<string, string | null> | undefined;
     for (let i = 0; i < words.length && !meal; i++) {

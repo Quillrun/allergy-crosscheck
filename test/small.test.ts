@@ -68,3 +68,11 @@ test("check_recipe declares openWorldHint (it can call TheMealDB); the local-onl
   assert.equal(hint("check_recipe")?.readOnlyHint, true);
   assert.equal(hint("list_people")?.openWorldHint, undefined);
 });
+
+test("a blank dish name never reaches TheMealDB", async () => {
+  const { Sources } = await import("../src/server/sources.ts");
+  let fetched = 0;
+  const sources = new Sources((async () => { fetched++; return new Response(JSON.stringify({ meals: [{ strMeal: "Flan" }] })); }) as never, 2000);
+  assert.deepEqual(await sources.recipe("   "), {});
+  assert.equal(fetched, 0);
+});

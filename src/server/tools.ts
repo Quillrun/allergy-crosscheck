@@ -214,7 +214,8 @@ function registerFindRecipe(server: McpServer, { sources }: Deps): void {
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: ui("Finding the recipe…", "Recipe found"),
     },
-    async ({ dish }) => {
+    async ({ dish: rawDish }) => {
+      const dish = rawDish.trim() || "that dish";
       const { recipe, error } = await sources.recipe(dish);
       if (!recipe) {
         return reply({
