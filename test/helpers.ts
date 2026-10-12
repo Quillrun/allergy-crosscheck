@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AddressInfo } from "node:net";
 import { createApp } from "../src/server/app.ts";
+import type { AppOptions } from "../src/server/app.ts";
 import type { Llm } from "../src/sim/agent.ts";
 import { Sources } from "../src/server/sources.ts";
 import type { Fetcher } from "../src/server/sources.ts";
@@ -53,10 +54,10 @@ export const fakeFetch: Fetcher = (async (input: string | URL | Request) => {
   return json({}, 404);
 }) as Fetcher;
 
-export async function startApp(llm?: Llm) {
+export async function startApp(llm?: Llm, extra: Partial<AppOptions> = {}) {
   const dir = mkdtempSync(join(tmpdir(), "allergy-crosscheck-"));
   const store = new Store(join(dir, "household.json"));
-  const http = createApp({ store, sources: new Sources(fakeFetch, 2000), llm });
+  const http = createApp({ store, sources: new Sources(fakeFetch, 2000), llm, ...extra });
   await new Promise<void>((r) => http.listen(0, "127.0.0.1", r));
   const port = (http.address() as AddressInfo).port;
   return {

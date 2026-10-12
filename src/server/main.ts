@@ -10,7 +10,7 @@ const store = new Store(resolve(env.DATA_FILE ?? "data/household.json"));
 const llm = env.LLM_BASE_URL && env.LLM_MODEL ? { baseUrl: env.LLM_BASE_URL, model: env.LLM_MODEL, apiKey: env.LLM_API_KEY } : undefined;
 const allowedHosts = (env.ALLOWED_HOSTS ?? "").split(",").map((h) => h.trim()).filter(Boolean);
 
-createApp({ store, sources: new Sources(), llm, allowedHosts }).listen(port, host, () => {
+createApp({ store, sources: new Sources(), llm, allowedHosts, mcpToken: env.MCP_TOKEN || undefined, simPublic: env.SIM_PUBLIC === "1" }).listen(port, host, () => {
   console.log(`Allergy Crosscheck MCP server: http://${host}:${port}/mcp  (Streamable HTTP, MCP 2025-11-25)`);
   console.log(`Alexa+ simulator:         http://${host}:${port}/  ${llm ? `(LLM: ${llm.model})` : "(no LLM: demo buttons only)"}`);
 });

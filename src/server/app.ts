@@ -1,5 +1,6 @@
 // HTTP: the MCP endpoint (Streamable HTTP, stateless), the Alexa+ simulator, and the phone scan page.
 
+import { timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createServer as createHttpServer } from "node:http";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
@@ -12,7 +13,7 @@ import type { Sources } from "./sources.ts";
 import type { Store } from "./store.ts";
 import { createServer } from "./tools.ts";
 
-export type AppOptions = { store: Store; sources: Sources; llm?: Llm; allowedHosts?: string[] };
+export type AppOptions = { store: Store; sources: Sources; llm?: Llm; allowedHosts?: string[]; mcpToken?: string; simPublic?: boolean };
 
 const page = (file: string) => readFileSync(new URL(`../../public/${file}`, import.meta.url), "utf8");
 // Barcode decoding for browsers without a native BarcodeDetector (Safari): served from here, never a CDN.
@@ -47,6 +48,11 @@ export function createApp(opts: AppOptions): Server {
         if (origin !== undefined && !sameOrigin(origin, req.headers.host)) return send(res, 403, { error: "cross-origin request refused" });
         if (!/^application\/json\s*(;|$)/i.test(req.headers["content-type"] ?? "")) return send(res, 415, { error: "Content-Type must be application/json" });
       }
+
+      // Optional bearer token on /mcp (MCP_TOKEN); unset = open, since the Alexa+ connection may send no header.
+      if (url.pathname === "/mcp" && opts.mcpToken && !tokenOk(req.headers.authorization, opts.mcpToken)) return send(res, 401, { error: "unauthorized" });
+      // /sim/* spends the operator's LLM key and drives the household tools: loopback only (socket and Host, since a tunnel connects from loopback), unless SIM_PUBLIC=1.
+      if (url.pathname.startsWith("/sim/") && !opts.simPublic && !(isLoopback(req.socket.remoteAddress) && LOOPBACK_HOSTS.has(host))) return send(res, 403, { error: "the simulator is local only (set SIM_PUBLIC=1 to expose it)" });
 
       if (url.pathname === "/mcp") {
         if (req.method !== "POST") return send(res, 405, { jsonrpc: "2.0", error: { code: -32000, message: "Method not allowed (stateless server: use POST)" }, id: null });
@@ -83,14 +89,14 @@ export function createApp(opts: AppOptions): Server {
 
       if (req.method === "POST" && url.pathname === "/sim/tool") {
         const { name, args } = (await readJson(req)) as { name: string; args?: Record<string, unknown> };
-        client ??= await connect(http);
+        client ??= await connect(http, opts.mcpToken);
         const result = await client.callTool({ name, arguments: args ?? {} });
         return send(res, 200, { view: result.structuredContent, isError: result.isError ?? false });
       }
       if (req.method === "POST" && url.pathname === "/sim/turn") {
         if (!opts.llm) return send(res, 503, { error: "No LLM configured. Set LLM_BASE_URL and LLM_MODEL, or use the demo buttons." });
         const { history, text } = (await readJson(req)) as { history?: ChatMessage[]; text: string };
-        client ??= await connect(http);
+        client ??= await connect(http, opts.mcpToken);
         const turn = await runTurn(client, opts.llm, history ?? [], text);
         return send(res, 200, turn);
       }
@@ -111,6 +117,14 @@ export function createApp(opts: AppOptions): Server {
   return http;
 }
 
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+const isLoopback = (addr: string | undefined) => addr === "127.0.0.1" || addr === "::1" || addr === "::ffff:127.0.0.1";
+function tokenOk(header: string | undefined, token: string): boolean {
+  const given = Buffer.from(/^Bearer (.+)$/i.exec(header ?? "")?.[1] ?? "");
+  const want = Buffer.from(token);
+  return given.length === want.length && timingSafeEqual(given, want);
+}
+
 function sameOrigin(origin: string, host: string | undefined): boolean {
   try {
     return Boolean(host) && new URL(origin).host.toLowerCase() === host!.toLowerCase();
@@ -120,11 +134,11 @@ function sameOrigin(origin: string, host: string | undefined): boolean {
 }
 
 /** The simulator talks to the MCP endpoint over real Streamable HTTP, like Alexa+ would. */
-async function connect(http: Server): Promise<Client> {
+async function connect(http: Server, token?: string): Promise<Client> {
   const addr = http.address();
   const port = typeof addr === "object" && addr ? addr.port : 8787;
   const client = new Client({ name: "alexa-plus-simulator", version: "0.1.0" });
-  await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${port}/mcp`)));
+  await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${port}/mcp`), token ? { requestInit: { headers: { Authorization: `Bearer ${token}` } } } : undefined));
   return client;
 }
 

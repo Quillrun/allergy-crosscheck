@@ -71,6 +71,8 @@ LLM_BASE_URL=https://api.openai.com/v1 LLM_MODEL=gpt-4.1-mini LLM_API_KEY=... np
 | `PORT` / `HOST` | `8787` / `127.0.0.1` | |
 | `DATA_FILE` | `data/household.json` | The household's profiles and shopping list |
 | `ALLOWED_HOSTS` | — | Extra Host headers to accept, e.g. a tunnel hostname (DNS-rebinding guard) |
+| `MCP_TOKEN` | — | When set, `/mcp` requires `Authorization: Bearer <token>` (401 otherwise); unset leaves it open |
+| `SIM_PUBLIC` | — | `1` lets non-loopback callers use `/sim/*`; by default they get 403 |
 | `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` | — | Simulator voice mode |
 
 ### Connect a real MCP client
@@ -86,7 +88,7 @@ npx @modelcontextprotocol/inspector   # transport: Streamable HTTP, URL: http://
 The Alexa+ MCP Toolkit currently serves US accounts. To connect this server to Alexa+:
 
 1. Run Amazon's Local Inspector against it (installed from the Developer Console): `addon-local-inspector http://127.0.0.1:8787/mcp`. It writes a certification verdict to `/tmp/alexaplus-addon-local-inspector-live/`.
-2. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://127.0.0.1:8787`, and add the tunnel host to `ALLOWED_HOSTS`.
+2. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://127.0.0.1:8787`, and add the tunnel host to `ALLOWED_HOSTS`. Set `MCP_TOKEN` if the connection can send a bearer header, since otherwise anyone with the URL can read and change the household's allergies; `/sim/*` answers loopback callers only (a tunnel counts as remote) unless `SIM_PUBLIC=1`.
 3. Scaffold an add-on with `alexa-ai new mcp` pointing at `https://<host>/mcp`, then `alexa-ai deploy`.
 4. Test in the Alexa+ web simulator.
 
