@@ -1,5 +1,5 @@
 import { createInterface } from "node:readline";
-import { checkProduct } from "./packages/allergen-guard/src/engine.ts";
+import { checkProduct } from "../src/engine.ts";
 const profiles = { milk: ["milk"], peanut_treenut: ["peanut", "tree_nut"], milk_celery: ["milk", "celery"] };
 const mk = () => ({ unsafe: 0, no_listed_allergens: 0, cannot_confirm: 0 });
 const out = { scanned: 0, with_text: 0, no_text: 0, by: {}, by_country: {} };
