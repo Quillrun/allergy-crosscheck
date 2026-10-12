@@ -118,6 +118,7 @@ Files are in `docs/video/gallery/`, padded to 3:2.
 3. `3-product-check.png`: "The allergen tags say soy, and milk only as a 'may contain'. The ingredient text shows the milk is in it."
 4. `4-phone-scan.png`: "Scan on your phone, then ask about 'what I just scanned'."
 5. `5-sunday.png`: "A new session the day after: the household is remembered, the guest's visit is over."
+6. `6-shopping-list.png`: "'Add the swaps to my shopping list': check → swaps → list, in one conversation."
 
 ## Additional info (the hackathon's questions)
 
@@ -170,7 +171,7 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
 - **Onboarding:** the spec plus the Alexa+ design guide was enough to get a first screen. The host shim I built to test it is part of the simulator.
 
 **Alexa developer console: Voice & Tone** (Test tab)
-- **Used for:** Alexa's six lines in the demo video, in Amazon's own Alexa voice.
+- **Used for:** Alexa's seven lines in the demo video, in Amazon's own Alexa voice.
 - **Worked well:** the voice is the real one, and the page's own `getTTS` call returns the audio as a base64 MP3.
 - **Needs work:** no export or download control, and the editor adds its own closing `</speak>` tag, so a typed one causes a 400 (friction log 6).
 - **Onboarding:** the Test tab only opens once a skill exists, so I created an empty private skill for it. Account sign-up also rejected a diacritic in my legal name (friction log 7).
@@ -255,16 +256,17 @@ Built for Amazon's Build, Ship, Shape hackathon (Alexa+ track): a self-hosted MC
 
 Code: <repository URL>
 
-0:00 Cold open: the lasagne verdict
-0:06 The problem: a record with an empty allergen list
-0:32 The simulator
-0:38 Saving the household and a guest
-0:58 Checking the lasagne for everyone
-1:25 Scan on a phone: missing data means "can't confirm"
-1:44 A cocoa mix: the tags say "may contain" milk, the ingredients show it is in
-2:07 Sunday: the guest's visit is over
-2:19 How it's built
-2:31 Who it's for, and the open engine
+0:00 A record with no ingredient list: no list, no guess
+0:12 Alexa's answer for it: "can't confirm"
+0:18 Eight scans in ten have no list; with one, a decisive answer 7 times in 10
+0:36 The simulator
+0:43 Saving the household and a guest
+1:02 Checking the lasagne for everyone
+1:29 The swaps go onto the shopping list
+1:37 Scan on a phone: missing data means "can't confirm"
+1:53 A cocoa mix: the tags say "may contain" milk, the ingredients show it is in
+2:20 Sunday: the guest's visit is over
+2:31 How it's built, and what the server ships
 ```
 
 ## Repository access (not part of the Devpost form)
