@@ -29,6 +29,10 @@ const fakeLlm = createServer(async (req, res) => {
     ? toolMsgs === 0
       ? { role: "assistant", content: null, tool_calls: [call("c1", "save_person", { name: "Sam", allergies: ["egg"] })] }
       : { role: "assistant", content: "Saved Sam, he's all set!" }
+    : /lasagne/.test(asked)
+    ? toolMsgs === 0
+      ? { role: "assistant", content: null, tool_calls: [call("c1", "find_recipe", { dish: "lasagne" })] }
+      : { role: "assistant", content: "Lasagne is safe for Maya." }
     : /pesto/.test(asked)
     ? { role: "assistant", content: "Pesto is fine for Maya." }
     : /thanks/i.test(asked)
@@ -106,6 +110,15 @@ test("a verdict without a tool call is never spoken", async () => {
   const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Can Maya eat pesto?" }) });
   const turn = await res.json();
   assert.equal(llmCalls - before, 2); // one nudge, then replaced
+  assert.equal(turn.speech, NO_TOOL);
+});
+
+test("after a lookup tool (no verdict) a claim of 'safe' is still blocked", async () => {
+  const before = llmCalls;
+  const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Find the lasagne recipe, is it ok for Maya?" }) });
+  const turn = await res.json();
+  assert.equal(turn.views[0].kind, "recipe");
+  assert.equal(llmCalls - before, 3); // the lookup, the claim, then the claim again after the nudge
   assert.equal(turn.speech, NO_TOOL);
 });
 

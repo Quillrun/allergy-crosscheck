@@ -77,7 +77,9 @@ export async function runTurn(client: Client, llm: Llm, history: ChatMessage[], 
       continue;
     }
     const said = stripThinking(msg.content ?? "");
-    if (!views.length && !said.endsWith("?") && CLAIM.test(said.replace(SIGN_OFF, ""))) {
+    const parts = lockedParts(views, by);
+    // No check verdict and no write to speak for: whatever the model asserts is from memory, even after a lookup tool.
+    if (!parts.length && !said.endsWith("?") && CLAIM.test(said.replace(SIGN_OFF, ""))) {
       if (!nudged) {
         nudged = true;
         nudge = [{ role: "assistant", content: said }, { role: "user", content: NUDGE }];
@@ -86,8 +88,7 @@ export async function runTurn(client: Client, llm: Llm, history: ChatMessage[], 
       return done(messages, NO_TOOL, views);
     }
     // A reply to the nudge that talks about tools is meta-talk, not an answer for the kitchen.
-    if (!views.length && nudged && /\btools?\b/i.test(said)) return done(messages, SMALL_TALK, views);
-    const parts = lockedParts(views, by);
+    if (!parts.length && nudged && /\btools?\b/i.test(said)) return done(messages, SMALL_TALK, views);
     return done(messages, parts.length ? parts.map((p) => p.text).join(" ") : said || views.at(-1)?.speech || "Sorry, I didn't catch that.", views, parts);
   }
   return done(messages, views.at(-1)?.speech ?? "Sorry, I couldn't finish that.", views);
