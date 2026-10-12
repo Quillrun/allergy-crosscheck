@@ -111,7 +111,7 @@ Each entry is something that happened while building Allergy Crosscheck. Every e
 
 ## 6. Getting Alexa's own voice for a demo video
 
-- **Task attempted:** render five Alexa lines in Alexa's real voice for the demo video.
+- **Task attempted:** render Alexa's lines in Alexa's real voice for the demo video: five on the first day (the steps below), seven in all.
 - **Steps taken:**
   1. Sign in at https://developer.amazon.com/alexa/console/ask.
   2. Click "Create Skill" and create a private skill named "AG voice test". It exists only so the Test tab opens.
