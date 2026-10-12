@@ -210,6 +210,15 @@ test("a free-from claim is 'check the label', not 'contains'", () => {
   assert.equal(r.overall, "cannot_confirm");
 });
 
+test("an explicit 'contains X' beats free-from wording in the same item", () => {
+  const sam: Person[] = [{ name: "Sam", allergies: ["milk", "egg"] }];
+  assert.equal(checkIngredients(["dairy free chocolate (contains milk)"], sam).overall, "unsafe");
+  assert.equal(checkIngredients(["egg-free mayonnaise contains egg"], sam).overall, "unsafe");
+  // A bare claim, or "contains no milk", still only gives "check the label".
+  assert.equal(checkIngredients(["dairy free chocolate"], sam).overall, "cannot_confirm");
+  assert.notEqual(checkIngredients(["dairy free chocolate, contains no milk"], sam).overall, "unsafe");
+});
+
 test("look-alike characters can't sneak an allergen past", () => {
   const leo: Person[] = [{ name: "Leo", allergies: ["milk"] }];
   for (const tricky of ["Ｍｉｌｋ", "m\u200Bilk", "MILK", "Crème fraîche"]) assert.equal(checkIngredients([tricky], leo).overall, "unsafe", tricky);
