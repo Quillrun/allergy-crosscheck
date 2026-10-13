@@ -25,6 +25,8 @@ const fakeLlm = createServer(async (req, res) => {
       : toolMsgs === 1
       ? { role: "assistant", content: null, tool_calls: [call("c2", "add_to_shopping_list", { items: ["sunflower seed butter"] })] }
       : { role: "assistant", content: "Done, and it's totally safe now!" }
+    : /never stops/.test(asked)
+    ? { role: "assistant", content: null, tool_calls: [call(`n${toolMsgs}`, "check_recipe", { ingredients: [toolMsgs === 0 ? "peanut butter" : "rice"], for: ["Maya"] })] }
     : /save Sam/.test(asked)
     ? toolMsgs === 0
       ? { role: "assistant", content: null, tool_calls: [call("c1", "save_person", { name: "Sam", allergies: ["egg"] })] }
@@ -136,6 +138,18 @@ test("long history is trimmed at a user turn, never between a tool call and its 
   assert.ok(history.length <= 40);
   assert.equal(history[0].role, "user");
   assert.ok(history.some((m) => m.role === "tool"));
+});
+
+test("the verdict lock holds when the tool loop runs out: an earlier unsafe check is still spoken", async () => {
+  const before = llmCalls;
+  const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "A model that never stops calling tools" }) });
+  const turn = await res.json();
+  assert.equal(llmCalls - before, 6); // the loop ran out
+  assert.equal(turn.views.at(-1).overall, "no_listed_allergens"); // the last screen is a clean one...
+  assert.equal(turn.views[0].overall, "unsafe");
+  assert.match(turn.speech, /^Maya should avoid this/); // ...but the unsafe verdict comes first and is not lost
+  assert.equal(turn.parts[0].view, 0);
+  assert.equal(turn.parts.map((p: { text: string }) => p.text).join(" "), turn.speech);
 });
 
 test("small talk without a tool is spoken as is", async () => {

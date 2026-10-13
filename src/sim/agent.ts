@@ -91,7 +91,9 @@ export async function runTurn(client: Client, llm: Llm, history: ChatMessage[], 
     if (!parts.length && nudged && /\btools?\b/i.test(said)) return done(messages, SMALL_TALK, views);
     return done(messages, parts.length ? parts.map((p) => p.text).join(" ") : said || views.at(-1)?.speech || "Sorry, I didn't catch that.", views, parts);
   }
-  return done(messages, views.at(-1)?.speech ?? "Sorry, I couldn't finish that.", views);
+  // The loop ran out: the lock still applies, so an unsafe check made in an earlier round is not lost behind the last view.
+  const parts = lockedParts(views, by);
+  return done(messages, parts.length ? parts.map((p) => p.text).join(" ") : (views.at(-1)?.speech ?? "Sorry, I couldn't finish that."), views, parts);
 }
 
 // The lock: checks first, the worst first (an unsafe one is never lost behind a later clean one),
