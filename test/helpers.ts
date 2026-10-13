@@ -1,4 +1,4 @@
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AddressInfo } from "node:net";
@@ -9,7 +9,7 @@ import { Sources } from "../src/server/sources.ts";
 import type { Fetcher } from "../src/server/sources.ts";
 import { Store } from "../src/server/store.ts";
 
-export const NUTELLA = {
+const NUTELLA = {
   code: "3017624010701",
   product_name: "Nutella",
   brands: "Ferrero",
@@ -19,7 +19,7 @@ export const NUTELLA = {
 };
 
 /** Milk is named only in the ingredient text: allergens_tags and traces_tags are empty, as Open Food Facts often has them. */
-export const MILK_IN_TEXT = {
+const MILK_IN_TEXT = {
   code: "4001112223338",
   product_name: "Creamy Oat Bar",
   brands: "Acme",
@@ -29,7 +29,7 @@ export const MILK_IN_TEXT = {
 };
 
 /** Open Food Facts often returns product_name: "" for a record that has a barcode and nothing else. */
-export const NAMELESS = { code: "4001112224441", product_name: "", allergens_tags: [], traces_tags: [], ingredients_text_en: "water, salt" };
+const NAMELESS = { code: "4001112224441", product_name: "", allergens_tags: [], traces_tags: [], ingredients_text_en: "water, salt" };
 
 /** Offline stand-ins for Open Food Facts and TheMealDB. */
 export const fakeFetch: Fetcher = (async (input: string | URL | Request) => {
@@ -77,9 +77,8 @@ export async function startApp(llm?: Llm, extra: Partial<AppOptions> = {}) {
   const port = (http.address() as AddressInfo).port;
   return {
     store,
-    dir,
     port,
     url: `http://127.0.0.1:${port}`,
-    close: () => new Promise<void>((r) => { http.closeAllConnections(); http.close(() => r()); }),
+    close: () => new Promise<void>((r) => { http.closeAllConnections(); http.close(() => { rmSync(dir, { recursive: true, force: true }); r(); }); }),
   };
 }

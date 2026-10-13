@@ -10,9 +10,9 @@
      is not read), so nothing below is sized per device. Layout uses no viewport-width breakpoints except the phone fallback:
      under zoom a media query still sees the host's pixels. */
   :root {
-    --t-display2: 40px; --t-display3: 32px; --t-display4: 28px; --t-display5: 24px; --t-headline1: 20px; --t-headline2: 18px; --t-body1: 16px; --t-body2: 14px;
+    --t-display2: 40px; --t-display4: 28px; --t-display5: 24px; --t-headline1: 20px; --t-headline2: 18px; --t-body1: 16px; --t-body2: 14px;
     --s-4xs: 2px; --s-2xs: 6px; --s-xs: 8px; --s-sm: 12px; --s-md: 16px;
-    --r-xs: 4px; --r-sm: 8px; --r-md: 12px; --r-lg: 16px;
+    --r-xs: 4px; --r-sm: 8px;
     --face-display: "Helvetica Neue", "Roboto Condensed", "sans-serif-condensed", "Arial Narrow", sans-serif;
     --face-text: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
     --stock: #1a1a1a; --ink: #f5f5f5; --ink-2: #b3b3b3; --rule: #6e6e6e; --hair: #3d3d3d;
@@ -43,8 +43,10 @@
   .grid.one button.choice { font-size: var(--t-headline1); }
   .grid.recipe { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); grid-template-areas: "who swaps" "watch swaps"; }
   .grid.recipe .who { grid-area: who; } .grid.recipe .watch { grid-area: watch; } .grid.recipe .swaps { grid-area: swaps; }
-  @media (max-width: 560px) { .banner { flex-wrap: wrap; } .banner .ctx { flex-basis: 100%; } }
-  @media (max-width: 560px) { .grid, .grid.recipe { grid-template-columns: minmax(0, 1fr); grid-template-areas: none; } .grid.recipe > * { grid-area: auto; } }
+  @media (max-width: 560px) {
+    .banner { flex-wrap: wrap; } .banner .ctx { flex-basis: 100%; }
+    .grid, .grid.recipe { grid-template-columns: minmax(0, 1fr); grid-template-areas: none; } .grid.recipe > * { grid-area: auto; }
+  }
   .card { border: 2px solid var(--rule); border-radius: var(--r-sm); padding: calc(var(--s-xs) - 1px) calc(var(--s-sm) - 1px); }
   .card.picks { border: 0; padding: 0; }
   .card h2 { font-size: var(--t-headline2); line-height: 1; font-weight: 800; margin: 0; padding-bottom: var(--s-4xs); border-bottom: 3px solid var(--rule); }
@@ -196,14 +198,14 @@
         const byKind = new Map();
         for (const f of dedupe(i.flags ?? [])) byKind.set(f.kind, [...(byKind.get(f.kind) ?? []), f.allergen]);
         const chips = [...byKind].map(([kind, names]) => `<span class="chip ${kind}">${kind === "possible" ? "may hide " : kind === "may_contain" ? "may contain " : ""}<b>${names.map(esc).join(", ")}</b></span>`).join("");
-        return `<li><span class="${i.flags?.length ? "flagged" : ""}">${esc(i.text)}</span>${chips}</li>`;
+        return `<li><span>${esc(i.text)}</span>${chips}</li>`;
       });
       if (rest > 0) rows.push(`<li class="more">${v.overall ? `${shown.length ? "+ " : ""}${rest} ${shown.length ? "other " : ""}ingredient${rest === 1 ? "" : "s"}: nothing listed for these allergies` : `and ${rest} more`}</li>`);
       const heading = v.kind === "product_check" ? "What I found" : v.overall ? "Watch out for" : "Ingredients";
       cards.push(`<section class="card watch"><h2>${heading}</h2><ul>${rows.join("")}</ul></section>`);
     }
     if (v.swaps?.length) {
-      const rows = v.swaps.map((s) => `<li class="swap"><span class="flagged">${esc(s.replace)}</span><span class="arrow">→</span><span>${s.options.map(esc).join(" · ")}</span><span class="chip">${esc(s.because)}</span></li>`).join("");
+      const rows = v.swaps.map((s) => `<li class="swap"><span>${esc(s.replace)}</span><span class="arrow">→</span><span>${s.options.map(esc).join(" · ")}</span><span class="chip">${esc(s.because)}</span></li>`).join("");
       cards.push(`<section class="card swaps"><h2>Swaps</h2><ul>${rows}</ul></section>`);
     }
     if (v.candidates?.length) {

@@ -20,8 +20,8 @@ import type { Sources } from "./sources.ts";
 import { localDate } from "./store.ts";
 import type { Profile, Store } from "./store.ts";
 
-export const WIDGET_URI = "ui://allergy-crosscheck/verdict.html";
-export const WIDGET_MIME = "text/html;profile=mcp-app";
+const WIDGET_URI = "ui://allergy-crosscheck/verdict.html";
+const WIDGET_MIME = "text/html;profile=mcp-app";
 const WIDGET_HTML = readFileSync(new URL("../../public/widget.html", import.meta.url), "utf8");
 // MCP Apps link on each tool definition, plus Alexa+'s invoking/invoked status lines.
 // Alexa+ also reads resourceUri from each tool result, so reply() repeats it there.
@@ -346,7 +346,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
           return reply({ kind: "message", title: "Which product?", speech: "Scan its barcode on your phone, or tell me the product's name.", disclaimer: DISCLAIMER }, true);
         }
         const found = await sources.searchProducts(name);
-        if (found.error || !found.candidates) {
+        if (found.error !== undefined) {
           return productReply(name, checkProduct(null, people, found.error), people, store, missing, expired);
         }
         if (found.candidates.length === 0) return productReply(name, checkProduct(null, people), people, store, missing, expired);

@@ -30,7 +30,7 @@ export class Sources {
     return { product: body.product };
   }
 
-  async searchProducts(query: string): Promise<{ candidates?: Candidate[]; error?: string }> {
+  async searchProducts(query: string): Promise<{ candidates: Candidate[]; error?: undefined } | { candidates?: undefined; error: string }> {
     const q = encodeURIComponent(query.trim());
     const res = await this.json(`https://search.openfoodfacts.org/search?q=${q}&page_size=5&fields=code,product_name,brands,quantity`);
     if (res.error) return { error: res.error };

@@ -90,7 +90,7 @@
     } else if (msg.method === "tools/call") {
       // Always answer: a view that waits for a reply that never comes shows "Checking…" for ever.
       let out = null;
-      try { out = await tool(msg.params.name, msg.params.arguments, false); } catch { out = null; }
+      try { out = await tool(msg.params.name, msg.params.arguments); } catch { out = null; }
       out?.view ? reply({ content: [], structuredContent: out.view, isError: out.isError ?? false }) : reply({ content: [{ type: "text", text: "The tool call failed." }], isError: true });
     }
   });
@@ -165,7 +165,7 @@
     for (let i = 0; i < parts.length; i++) { window.simShow(i); await utter(parts[i].text); }
   }
 
-  async function tool(name, args, announce = true) {
+  async function tool(name, args) {
     const res = await fetch("/sim/tool", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, args }) });
     const body = await res.json();
     if (!res.ok) { add("sys", body.error); return null; }

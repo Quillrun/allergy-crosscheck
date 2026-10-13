@@ -14,7 +14,7 @@ import type { Sources } from "./sources.ts";
 import type { Store } from "./store.ts";
 import { createServer } from "./tools.ts";
 
-export { expandUpcE, normalizeBarcode, validBarcode } from "./barcode.ts";
+export { normalizeBarcode, validBarcode } from "./barcode.ts";
 
 export type AppOptions = { store: Store; sources: Sources; llm?: Llm; allowedHosts?: string[]; mcpToken?: string; scanToken?: string; simPublic?: boolean };
 
@@ -170,7 +170,7 @@ async function readObject(req: IncomingMessage): Promise<Record<string, unknown>
 }
 class BadJson extends Error {}
 class TooLarge extends Error {}
-export const MAX_BODY = 256 * 1024;
+const MAX_BODY = 256 * 1024;
 
 function send(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });
