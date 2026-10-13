@@ -15,6 +15,7 @@ import {
   suggestSwaps,
 } from "../../packages/allergen-guard/src/index.ts";
 import type { CheckResult, Person, Swap, Verdict } from "../../packages/allergen-guard/src/index.ts";
+import { normalizeBarcode } from "./barcode.ts";
 import type { Sources } from "./sources.ts";
 import { localDate } from "./store.ts";
 import type { Profile, Store } from "./store.ts";
@@ -323,7 +324,17 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
     async ({ barcode, name, scanned, for: names }) => {
       const { people, missing, expired } = pick(store, names);
       let code = barcode?.trim();
-      let checked: string | undefined; // the one product a name search matched, so the speech can say which
+      let named = false; // the barcode was given or came from a name search, not from the scan page: the speech says which product it found
+      let searched: string | undefined; // the name a search matched, said even when the product lookup then fails
+      if (code) {
+        // The same rule as the scan page: a misheard digit would otherwise check some other real product.
+        const valid = normalizeBarcode(code.replace(/[\s-]/g, ""));
+        if (!valid) {
+          return reply({ kind: "message", title: "Barcode not recognised", speech: "That barcode doesn't check out, so I haven't looked anything up. Read me the digits again, or scan it on your phone.", disclaimer: DISCLAIMER }, true);
+        }
+        code = valid;
+        named = true;
+      }
       if (scanned && !code) {
         const scan = store.recentScan();
         if (!scan) {
@@ -351,11 +362,13 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
           });
         }
         code = found.candidates[0].barcode;
-        checked = found.candidates[0].name;
+        named = true;
+        searched = found.candidates[0].name;
       }
       const { product, error } = await sources.product(code);
       const label = product?.product_name ?? name ?? code;
-      return productReply(label, checkProduct(product ?? null, people, error), people, store, missing, expired, product ? { label: "Open Food Facts" } : undefined, checked ? `Checked ${product?.product_name ?? checked}: ` : "");
+      const said = product?.product_name?.trim() || searched;
+      return productReply(label, checkProduct(product ?? null, people, error), people, store, missing, expired, product ? { label: "Open Food Facts" } : undefined, named && said ? `Checked ${said}: ` : "");
     },
   );
 }

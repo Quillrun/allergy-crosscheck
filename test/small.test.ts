@@ -4,7 +4,8 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { startApp } from "./helpers.ts";
+import { fakeFetch, startApp } from "./helpers.ts";
+import { Sources } from "../src/server/sources.ts";
 
 let app: Awaited<ReturnType<typeof startApp>>;
 let client: Client;
@@ -57,8 +58,45 @@ test("a single product found by name is named in the speech", async () => {
   assert.equal(r.structuredContent.kind, "product_check");
   assert.match(r.structuredContent.speech, /^Checked Nutella: /);
   assert.match(r.content[0].text, /Say to the user: Checked Nutella: /);
+});
+
+test("a barcode given by voice is named in the speech, so a wrong item can be heard; a scan keeps its wording", async () => {
   const byCode = await call("check_product", { barcode: "3017624010701" });
-  assert.doesNotMatch(byCode.structuredContent.speech, /^Checked /); // the user gave the code: no product to name
+  assert.match(byCode.structuredContent.speech, /^Checked Nutella: /);
+  assert.match(byCode.content[0].text, /Say to the user: Checked Nutella: /);
+  // The spoken code is a different real product: the name is what lets the person hear that.
+  const other = await call("check_product", { barcode: "0098008952506" });
+  assert.match(other.structuredContent.speech, /^Checked Nutella: /);
+  // A barcode with no record has no name to say.
+  const unknown = await call("check_product", { barcode: "012345678905" });
+  assert.doesNotMatch(unknown.structuredContent.speech, /^Checked /);
+});
+
+test("a misheard barcode is refused with a spoken message and is never looked up", async () => {
+  const looked: string[] = [];
+  const spy = await startApp(undefined, { sources: new Sources(((u: string | URL | Request) => { looked.push(String(u)); return fakeFetch(u); }) as never, 2000) });
+  const c = new Client({ name: "spy-client", version: "1.0.0" });
+  await c.connect(new StreamableHTTPClientTransport(new URL(`${spy.url}/mcp`)));
+  try {
+    await c.callTool({ name: "save_person", arguments: { name: "Maya", allergies: ["tree nuts"] } });
+    for (const bad of ["3017624010702", "301762401070", "12345", "3017 6240 10701x", "04252615"]) {
+      const r = (await c.callTool({ name: "check_product", arguments: { barcode: bad } })) as { structuredContent: View; isError?: boolean };
+      assert.equal(r.isError, true, bad);
+      assert.equal(r.structuredContent.kind, "message", bad);
+      assert.equal(r.structuredContent.overall, undefined, bad);
+      assert.match(r.structuredContent.speech, /barcode doesn't check out/, bad);
+    }
+    assert.equal(looked.length, 0);
+    // Spaces and dashes are what a person types or a recogniser adds; the digits are what is checked.
+    const spaced = (await c.callTool({ name: "check_product", arguments: { barcode: "3017 6240 10701" } })) as { structuredContent: View };
+    assert.match(spaced.structuredContent.speech, /^Checked Nutella: /);
+    // A UPC-E is looked up as the UPC-A it stands for, the key Open Food Facts uses.
+    await c.callTool({ name: "check_product", arguments: { barcode: "04252614" } });
+    assert.ok(looked.some((u) => u.includes("/api/v2/product/042100005264.json")), looked.join("\n"));
+  } finally {
+    await c.close();
+    await spy.close();
+  }
 });
 
 test("check_recipe declares openWorldHint (it can call TheMealDB); the local-only tools do not", async () => {
