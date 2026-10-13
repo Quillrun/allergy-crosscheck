@@ -20,13 +20,29 @@ const MUST_NOT_PASS: [string, AllergenId][] = [
   ["king prawns", "crustacean"], ["shellfish stock", "mollusc"], ["oyster sauce", "mollusc"],
   ["1 Stick Celery", "celery"], ["chicken stock", "celery"], ["dijon", "mustard"], ["lupin flour", "lupin"], ["red wine", "sulphites"],
   ["curry paste", "peanut"], ["dark chocolate", "milk"], ["granola", "tree_nut"], ["BBQ sauce", "mustard"],
+  // Glued spellings, as they come out of real label text.
+  ["brazilnuts", "tree_nut"], ["pinenuts", "tree_nut"], ["cashewnuts", "tree_nut"], ["macadamianut", "tree_nut"], ["pistachionut", "tree_nut"], ["almondmilk", "tree_nut"], ["pecannuts", "tree_nut"], ["walnutoil", "tree_nut"],
+  ["peanutbutter", "peanut"], ["peanutoil", "peanut"], ["milkpowder", "milk"], ["skimmedmilk", "milk"], ["wholemilk", "milk"], ["milkprotein", "milk"], ["creamcheese", "milk"], ["lactoferrin", "milk"],
+  ["sesameseeds", "sesame"], ["sesameoil", "sesame"], ["mustardseed", "mustard"], ["soyflour", "soy"], ["soyprotein", "soy"], ["soysauce", "soy"], ["wheatprotein", "wheat"], ["wheatflour", "wheat"], ["wheatbran", "gluten"],
+  ["ryeflour", "gluten"], ["barleymalt", "gluten"], ["eggyolk", "egg"], ["eggwhite", "egg"], ["fishsauce", "fish"], ["shrimppaste", "crustacean"],
   ["amaretto", "tree_nut"], ["amaretti biscuits", "tree_nut"], ["macarons", "tree_nut"], ["baklava", "tree_nut"], ["romesco sauce", "tree_nut"], ["rye bread", "wheat"], ["rye bread", "gluten"],
 ];
 
 test("dangerous ingredients never come back as 'no listed allergens'", () => {
   for (const [ingredient, allergen] of MUST_NOT_PASS) {
     assert.notEqual(verdict(ingredient, allergen), "no_listed_allergens", `${ingredient} passed for ${allergen}`);
+    // The product entry point reads the same list as a label would give it, and must agree.
+    assert.notEqual(checkProduct({ ingredients_text_en: `water, ${ingredient}` }, [person("X", allergen)]).overall, "no_listed_allergens", `${ingredient} passed as a product for ${allergen}`);
   }
+});
+
+test("engine: a glued spelling means the same as the spaced one, and a plain word is not split", () => {
+  const kinds = (s: string) => JSON.stringify(scanIngredient(s).map((h) => `${h.allergen}:${h.kind}`).sort());
+  for (const [glued, spaced] of [["brazilnuts", "brazil nuts"], ["pinenuts", "pine nuts"], ["milkpowder", "milk powder"], ["sesameseeds", "sesame seeds"], ["peanutbutter", "peanut butter"]]) {
+    assert.equal(kinds(glued), kinds(spaced), glued);
+    assert.notEqual(kinds(glued), "[]", glued);
+  }
+  for (const word of ["butterfly", "coconutmilk", "cornflour", "sunflower", "pineapple", "seaweed"]) assert.equal(kinds(word).includes("milk:contains") || kinds(word).includes("tree_nut:contains"), false, word);
 });
 
 test("look-alikes are not flagged", () => {

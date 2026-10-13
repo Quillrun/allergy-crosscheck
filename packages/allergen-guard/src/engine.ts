@@ -44,12 +44,27 @@ const hasSoyFreeMiso = (line: string) => {
   return bracket !== undefined && !/\b(?:soy|soya|soja|soyabeans?|soybeans?|edamame)\b/i.test(bracket);
 };
 
+// Glued spellings ("brazilnuts", "milkpowder", "sesameseeds") are split into the words the catalogue knows before matching, so the terms still apply.
+// Only a word that is neither known nor a term word is split, and only into words that are known or in a term; one part must be in a term.
+const termWord = (w: string) => TERM_WORDS.has(w) || TERM_WORDS.has(w.replace(/es$/, "")) || TERM_WORDS.has(w.replace(/s$/, "")) || TERM_WORDS.has(w.replace(/ies$/, "y"));
+const wordOf = (w: string) => w.length >= 3 && (termWord(w) || (w.length >= 4 && known(w)));
+function splitGlued(w: string, depth = 0): string[] | null {
+  for (let i = w.length - 3; i >= 3; i--) {
+    const [a, b] = [w.slice(0, i), w.slice(i)];
+    if (!wordOf(a)) continue;
+    const rest = wordOf(b) ? [b] : depth < 2 ? splitGlued(b, depth + 1) : null;
+    if (rest && [a, ...rest].some(termWord)) return [a, ...rest];
+  }
+  return null;
+}
+const deglue = (text: string) => text.split(" ").map((w) => (w.length >= 6 && /^[a-z]+$/.test(w) && !wordOf(w) ? (splitGlued(w) ?? [w]).join(" ") : w)).join(" ");
+
 /** Find allergen hits in one ingredient line ("2 tbsp tahini", "skimmed milk powder 8.7%"). */
 export function scanIngredient(line: string, kind: "contains" | "may_contain" = "contains"): Hit[] {
   // A claim ("Contains no almonds.") belongs to its own sentence: it must not downgrade a hit in the one before it.
   const sentences = line.split(/(?<=[.!?])\s+(?=\S)/);
   if (sentences.length > 1) return dedupe(sentences.flatMap((s) => scanIngredient(s, kind)));
-  const text = normalize(line);
+  const text = deglue(normalize(line));
   if (!text) return [];
   const hits: Hit[] = [];
   // An explicit "contains milk" or "(milk)" in the same item keeps the flavour's food a definite hit.
@@ -81,6 +96,7 @@ export function scanIngredient(line: string, kind: "contains" | "may_contain" = 
   return dedupe(hits.map((h) => (h.kind === "contains" && freeFrom.has(h.allergen) && !explicit.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));
 }
 
+const TERM_WORDS = new Set(TERMS.flatMap((t) => [...t.terms, ...(t.unless ?? [])]).flatMap((t) => normalize(t).split(" ")));
 const KNOWN = new Set([...PLAIN_FOODS, ...FILLER_WORDS].map((w) => normalize(w)));
 const FILLER = new Set(FILLER_WORDS.map((w) => normalize(w)));
 const PHRASES = TERMS.flatMap((t) => [...t.terms, ...(t.unless ?? [])])

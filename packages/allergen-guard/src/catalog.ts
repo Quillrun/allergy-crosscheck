@@ -243,7 +243,7 @@ export const TERMS: Term[] = [
   { terms: ["amaretti", "macaron", "orgeat", "romesco", "baklava", "dukkah"], contains: ["tree_nut"], possible: ["egg", "wheat", "gluten", "sesame"] },
   { terms: ["amaretto", "frangelico", "nocino", "biscotti", "mole", "nut oil"], contains: [], possible: ["tree_nut", "peanut"], unless: ["ground nut oil"] },
   // milk
-  { terms: ["milk", "buttermilk", "milk powder", "milkfat", "lactoglobulin"], contains: ["milk"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS, "milk thistle"] },
+  { terms: ["milk", "buttermilk", "milk powder", "milkfat", "lactoglobulin", "lactoferrin"], contains: ["milk"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS, "milk thistle"] },
   { terms: RARE_PLANT_MILKS, contains: [], possible: ["milk"] },
   { terms: ["butter", "ghee", "ghi", "butterfat", "butteroil"], contains: ["milk"], unless: [...NOT_DAIRY_BUTTER, ...VEGETABLE_GHEE] },
   { terms: VEGETABLE_GHEE, contains: [], possible: ["milk"] },
