@@ -9,7 +9,7 @@ Allergy Crosscheck
 An Alexa+ add-on that tells you who at the table can eat a dish or a scanned food, and why. Its results never say "safe": when the data is missing, they say "I can't confirm".
 
 ## Thumbnail
-`docs/video/gallery/thumbnail.png` (3:2).
+`docs/video/gallery/thumbnail.png` (3:2, for Devpost); `docs/video/gallery/thumbnail-16x9.png` for YouTube. The product name, the line "Who at the table can eat it, and why", the lasagne verdict card.
 
 ## About the project (paste as the story)
 
