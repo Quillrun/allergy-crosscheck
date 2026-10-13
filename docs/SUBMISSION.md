@@ -165,7 +165,7 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
   - The Local Inspector isn't on public npm. It installs from a private registry that needs an AWS account, an IAM user and access to an Amazon role, and searching npm for `alexa-ai` finds an unrelated package (4).
   - The Alexa+ docs put `_meta.ui` in the tool call response, while the MCP Apps spec puts `resourceUri` on the tool definition. I did both (5).
 - **Onboarding (zero to hello world):** a local MCP server came quickly, because it's the open standard. Hello world on Alexa+ itself, a deployed add-on answering in the web simulator, I did not attempt it from outside the US, because the docs say the Toolkit is available in the United States.
-- **Would I build with it again?** <AUTHOR: yes or no, and why>
+- **Would I build with it again?** Yes. Add-ons are plain MCP, so the server was built and tested with the standard SDK and clients I already use, and the design guide gave concrete figures to build the screen to.
 
 **MCP TypeScript SDK** (`@modelcontextprotocol/sdk` 1.32, with `zod` for tool inputs)
 - **Used for:** the server (stateless Streamable HTTP, spec 2025-11-25, 9 tools), plus the MCP client in the simulator and the tests.
@@ -217,13 +217,14 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
 
 **Qwen3-TTS** (1.7B Base, `mlx-community/Qwen3-TTS-12Hz-1.7B-Base-8bit`, Apache 2.0, run locally with mlx-audio)
 - **Used for:** the narrator and the user voices in the demo video, cloned from synthetic reference voices (`docs/DEMO.md`). Alexa's lines are Amazon's own voice, not Qwen.
-- **Worked well:** <AUTHOR: what worked, for example voice quality or running it locally>
-- **Needs work:** every clip was transcribed with Whisper and compared with its script, accepting a match of 0.93 or better; all 18 lines passed on the first seed. Output peaks were normalised to -1 dBFS on write (`docs/video/work/qwen_cast.py`). <AUTHOR: anything else that went wrong or was awkward>
-- **Onboarding:** a model download and one script; the licence asks for nothing in the video. <AUTHOR: how long it took to set up>
+- **Worked well:** the cloned voices were good enough to ship, and it ran locally.
+- **Needs work:** every clip was transcribed with Whisper and compared with its script, accepting a match of 0.93 or better; all 18 lines passed on the first seed. Output peaks were normalised to -1 dBFS on write (`docs/video/work/qwen_cast.py`).
+- **Onboarding:** a model download and one script; the licence asks for nothing in the video.
 
 **Claude Code**
 - **Used for:** the coding agent for this repository (every commit carries a Claude co-author line).
-- **Worked well / needs work:** <AUTHOR: one or two sentences on what Claude Code did well and badly on this project>
+- **Worked well:** when used correctly: a clear brief, tests it has to pass, and a read of what it wrote before it was kept.
+- **Needs work:** it needs those checks. Without a brief, tests and a read of the output, what it writes cannot be kept as is.
 
 ### Feature requests (optional)
 - **Critical:** let developer accounts in any country use the web simulator for development-stage add-ons. The docs describe it as the end-to-end test path, and the Toolkit is documented as available in the United States; I did not attempt it from outside the US.
