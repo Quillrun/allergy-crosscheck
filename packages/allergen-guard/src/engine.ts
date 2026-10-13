@@ -304,12 +304,13 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
   hits.push(...fromLabel.map((h) => (h.kind === "contains" && claimed.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));
   // A warning in another language that names nothing we can read ("Kann Spuren von Nüssen enthalten") is not a clean one.
   let unreadWarning = false;
+  let unplacedWarning = false;
   for (const w of warnings) {
     const found = splitIngredients(w).flatMap((l) => scanIngredient(l, "may_contain"));
     hits.push(...found);
     if (!found.length && FOREIGN_PRECAUTION.test(w)) unreadWarning = true;
     // An English warning is read word by word too: "may contain Brazilnuts" names something we can't place, which is not "nothing".
-    else if (!FOREIGN_PRECAUTION.test(w) && unrecognised(w.replace(PRECAUTION, " ").replace(NOT_SUITABLE, " ").replace(WARNING_WORDS, " ")).length) unreadWarning = true;
+    else if (!FOREIGN_PRECAUTION.test(w) && unrecognised(w.replace(PRECAUTION, " ").replace(NOT_SUITABLE, " ").replace(WARNING_WORDS, " ")).length) unplacedWarning = true;
   }
   if (!english && enTags.length === 0) {
     dataIssues.push(
@@ -321,6 +322,8 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
     dataIssues.push("Part of the ingredient list isn't in English, so I can't read it.");
   } else if (english && (unreadable(english) || unreadWarning || normalize(english).split(" ").some((w) => FOREIGN_ALLERGEN_WORDS.has(w)))) {
     dataIssues.push("Part of the ingredient list isn't in English, so I can't read it.");
+  } else if (unplacedWarning) {
+    dataIssues.push("The 'may contain' warning names something I can't place, so I can't read it.");
   }
   return evaluate(dedupe(hits), people, dataIssues);
 }

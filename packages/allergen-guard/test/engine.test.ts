@@ -969,7 +969,7 @@ test("engine: an English warning naming a word we can't place is a data issue, n
   for (const text of ["water, salt (may contain Brazilnuts)", "flour. This product may contain pinenuts", "water. May contain traces of xylitol", "water. Made in a factory that handles ashwagandha"]) {
     const r = checkProduct({ ingredients_text_en: text }, [person("X", "milk")]);
     assert.equal(r.overall, "cannot_confirm", text);
-    assert.match(r.dataIssues.join(" "), /can't read it/, text);
+    assert.match(r.dataIssues.join(" "), /names something I can't place/, text);
   }
   // The word it can place still counts in full.
   assert.equal(checkProduct({ ingredients_text_en: "water. May contain traces of pinenuts and walnuts" }, nut).overall, "unsafe");
