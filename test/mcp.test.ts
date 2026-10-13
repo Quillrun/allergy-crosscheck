@@ -182,6 +182,51 @@ test("product by barcode: milk named only in the ingredient text is still found"
   assert.equal(r.structuredContent.overall, "unsafe");
 });
 
+test("check_product with no name, no barcode and nothing scanned asks 'Which product?', and checks nobody", async () => {
+  const r = await call("check_product", {});
+  assert.equal(r.isError, true);
+  assert.equal(r.structuredContent.kind, "message");
+  assert.equal(r.structuredContent.title, "Which product?");
+  assert.equal(r.structuredContent.overall, undefined);
+  assert.equal(r.structuredContent.people, undefined);
+  assert.match(r.structuredContent.speech, /Scan its barcode on your phone, or tell me the product's name\.$/);
+  const blank = await call("check_product", { name: "   " });
+  assert.equal(blank.structuredContent.title, "Which product?");
+});
+
+test("asking about 'what I just scanned' with nothing scanned says so and checks nobody", async () => {
+  const r = await call("check_product", { scanned: true });
+  assert.equal(r.isError, true);
+  assert.equal(r.structuredContent.title, "Nothing scanned");
+  assert.equal(r.structuredContent.overall, undefined);
+  assert.match(r.structuredContent.speech, /^I don't have a recent scan\./);
+  assert.match(r.content[0].text, /Say to the user: I don't have a recent scan/);
+});
+
+test("a valid barcode that Open Food Facts doesn't know cannot be confirmed, and no product is named", async () => {
+  const r = await call("check_product", { barcode: "012345678905" });
+  assert.equal(r.structuredContent.kind, "product_check");
+  assert.equal(r.structuredContent.overall, "cannot_confirm");
+  assert.ok(r.structuredContent.people.every((p: View) => p.verdict === "cannot_confirm"));
+  assert.deepEqual(r.structuredContent.dataIssues, ["The product wasn't found in the database."]);
+  assert.equal(r.structuredContent.source, undefined);
+  assert.doesNotMatch(r.structuredContent.speech, /^Checked /);
+});
+
+test("a name that matches no product cannot be confirmed either", async () => {
+  const r = await call("check_product", { name: "zzzz nothing like it" });
+  assert.equal(r.structuredContent.overall, "cannot_confirm");
+  assert.deepEqual(r.structuredContent.dataIssues, ["The product wasn't found in the database."]);
+  assert.doesNotMatch(r.structuredContent.speech, /no_listed|Nothing listed/);
+});
+
+test("a recipe that isn't found says so and asks for the ingredients", async () => {
+  const r = await call("find_recipe", { dish: "zzzz nothing like it" });
+  assert.equal(r.isError, true);
+  assert.equal(r.structuredContent.title, "Recipe not found");
+  assert.match(r.structuredContent.speech, /couldn't find a recipe for zzzz nothing like it\. Read me the ingredients instead\./);
+});
+
 test("a product with no ingredient data cannot be confirmed", async () => {
   const r = await call("check_product", { barcode: "0098008952506" });
   assert.equal(r.structuredContent.overall, "cannot_confirm");
