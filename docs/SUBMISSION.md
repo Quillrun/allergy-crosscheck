@@ -139,7 +139,7 @@ The demo-script buttons call the MCP tools directly and need no model or API key
 - the spread with no ingredient list gives "Can't confirm";
 - the cocoa mix whose tags carry milk only as "may contain" gives "Avoid" for Leo, with the milk ingredients named.
 
-To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 148 tests.
+To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 158 tests.
 
 ### New or existing project
 New: the repository's first commit is 4 October 2026, after the submission period opened on 31 August 2026 ([rules](https://amazonappdev2026.devpost.com/rules)).
