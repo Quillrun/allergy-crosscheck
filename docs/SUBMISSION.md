@@ -246,7 +246,7 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
   - three verdicts, none of which is "safe";
   - product checks that read Open Food Facts allergen tags, traces and ingredient text together;
   - swaps filtered against everyone's allergies, and never a plant relative of what they replace.
-- **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 92 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents. The engine is open source (MIT), so any allergy feature can start fail-closed.
+- **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 93 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents. The engine is open source (MIT), so any allergy feature can start fail-closed.
 
 ## YouTube upload (not part of the Devpost form)
 - **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:41, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
