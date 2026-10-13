@@ -253,6 +253,21 @@ Per country (a record can carry both tags, so the rows overlap):
 
 Command (from `bench/`): the loop above with `off_rows_country.py` (adds the country filter and `countries_tags`) and `decisive_country.mjs`.
 
+### How often "no listed allergens" is wrong (run 13 October 2026)
+
+The counts above say how often the engine is decisive, not whether it is right. This check measures the dangerous direction: when the engine answers "no listed allergens", how often does the record's English ingredient text in fact name an ingredient containing one of the profile's allergens (a miss)? Rules fixed before the run, a seeded draw, two independent checkers and a lead re-check (Claude language-model agents: Sonnet for the checkers, Opus for the lead), as in the hand-check protocol; unclear counts as a miss. Full record: [`nonelisted-2026-10-13.md`](nonelisted-2026-10-13.md).
+
+Engine commit `c604e068` (the decisive counts on the 12 October base are unchanged: 188,717 / 151,581 / 190,629). Base: the 264,667 scanned records with English ingredient text, snapshot of 7 October 2026. Pools: the records answered "no listed allergens" for each profile (milk 93,833; peanut + tree nuts 106,270; milk + celery 90,836), minus the 1,000 codes of hand-check rounds 1 to 10. Draw: mulberry32 seed 20261017, 34 / 33 / 33 records, 100 distinct codes, 50 per checker. Lead re-check: 10 random records, seed 20261018, plus a reading of all 100.
+
+| Profile | Sample | Misses (unclear included) | of which unclear | 95% Wilson interval |
+|---|---|---|---|---|
+| milk | 34 | 0 | 0 | 0.00%-10.15% |
+| peanut + tree nuts | 33 | 0 | 0 | 0.00%-10.43% |
+| milk + celery | 33 | 0 | 0 | 0.00%-10.43% |
+| overall | 100 | 0 | 0 | 0.00%-3.70% |
+
+In 100 randomly drawn "no listed allergens" answers, the ingredient text never named an ingredient containing one of the profile's allergens (checker A 0/50, checker B 0/50; the lead agrees with every call). This does not show that the engine never misses: 0 in 100 is consistent, at 95% confidence, with a miss rate of up to 3.70% across the pool, and up to about 10% per profile on its own. It covers only app-scanned records with English ingredient text, only these three profiles and only engine `c604e068`; it says nothing about records without English text, other allergens, "may contain" warnings (not counted as misses) or whether the Open Food Facts text matches the label on sale. In 6 of the 100 the "ingredient text" was a nutrition panel, OCR fragments or marketing text: no ingredient is named, so not a miss under the rules, but the engine's "no listed allergens" there rests on no ingredient list.
+
 ## Foreign text filed as English (11 October)
 
 Open Food Facts sometimes files a label in another language as the English ingredient text. The engine reads English only, so that text must give "can't confirm", never "none listed". Two scans of the same snapshot looked for it, each with a person allergic to all 15:
