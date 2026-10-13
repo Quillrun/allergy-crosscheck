@@ -262,12 +262,12 @@ export const TERMS: Term[] = [
   { terms: ["vegan mayonnaise", "vegan mayo", "vegan aioli"], contains: [], possible: ["soy", "mustard"] },
   // Some egg substitutes are made from egg whites (US liquid "egg substitute" is mostly egg white): egg stays possible.
   { terms: ["egg replacer", "egg replacement", "egg substitute", "vegan egg"], contains: [], possible: ["egg", "soy", "wheat", "gluten"] },
-  { terms: ["milkshake", "cappuccino", "flat white", "macchiato", "frappuccino", "hot chocolate"], contains: ["milk"], possible: ["soy", "tree_nut"], unless: [...PLANT_MILKS, ...RARE_PLANT_MILKS] },
+  { terms: ["milkshake", "cappuccino", "flat white", "macchiato", "frappuccino", "hot chocolate"], contains: ["milk"], possible: ["soy", "tree_nut"] },
   { terms: ["mocha"], contains: [], possible: ["milk"] },
   { terms: ["barley grass", "wheat grass"], contains: [], possible: ["gluten", "wheat"] }, // young leaves, gluten only if seeds get in
   { terms: ["butter flavour", "butter flavor", "butter flavouring", "butter flavoring"], contains: [], possible: ["milk"] },
   { terms: ["smoothie"], contains: [], possible: ["milk", "tree_nut", "peanut", "soy"] },
-  { terms: ["yogurt", "yoghurt", "yoghourt", "kefir", "whey", "casein", "caseinate", "lactose", "lactalbumin", "custard", "bechamel", "ice cream"], contains: ["milk"], unless: ["coconut yogurt", "coconut yoghurt", ...CULTURES, "yogurt alternative", "yoghurt alternative"] },
+  { terms: ["yogurt", "yoghurt", "yoghourt", "kefir", "whey", "casein", "caseinate", "lactose", "lactalbumin", "custard", "bechamel", "ice cream"], contains: ["milk"], unless: ["coconut yogurt", "coconut yoghurt", "yogurt culture", "yoghurt culture", "kefir culture", "yogurt alternative", "yoghurt alternative"] },
   { terms: CULTURES, contains: [], possible: ["milk"] }, // a starter culture is usually grown on milk, not always
   { terms: ["yogurt alternative", "yoghurt alternative"], contains: [], possible: ["milk"] }, // usually plant-based; the label decides
   { terms: ["curd"], contains: ["milk"], unless: ["bean curd", "lemon curd"] },
@@ -287,7 +287,7 @@ export const TERMS: Term[] = [
     possible: ["egg"],
     unless: NOT_WHEAT_PASTA,
   },
-  { terms: ["bread", "breadcrumb", "panko", "pita", "pitta", "naan", "bagel", "crouton", "cracker", "pizza", "tortilla", "wonton", "dumpling", "ramen"], contains: ["wheat", "gluten"], possible: ["milk", "egg", "soy", "sesame"], unless: ["corn tortilla", "gluten free bread", "rice cracker", "rye bread", "pumpernickel"] },
+  { terms: ["bread", "breadcrumb", "panko", "pita", "pitta", "naan", "bagel", "crouton", "cracker", "pizza", "tortilla", "wonton", "dumpling", "ramen"], contains: ["wheat", "gluten"], possible: ["milk", "egg", "soy", "sesame"], unless: ["corn tortilla", "gluten free bread", "rice cracker", "rye bread"] },
   // Rye is gluten, not wheat, but most rye breads are part wheat flour.
   { terms: ["rye bread", "pumpernickel"], contains: ["gluten"], possible: ["wheat", "milk", "egg", "soy", "sesame"] },
   { terms: ["cake", "cookie", "biscuit", "pastry", "puff pastry", "filo", "phyllo", "croissant", "pie crust", "brownie", "muffin", "waffle", "pancake", "doughnut", "donut", "scone"], contains: ["wheat", "gluten"], possible: BAKED, unless: ["rice cake"] },
@@ -305,7 +305,7 @@ export const TERMS: Term[] = [
     "coriander seed", "cumin seed", "fennel seed", "caraway seed", "poppy seed", "achiote seed", "annatto seed", "nigella seed", "fenugreek seed", "anise seed", "aniseed", "dill seed", "cardamom seed",
     "pumpkin seed", "sunflower seed", "chia seed", "flax seed", "flaxseed", "linseed", "hemp seed", "melon seed", "pomegranate seed", "vanilla seed",
   ], contains: [] },
-  { terms: ["barley", "rye", "oat", "oatmeal", "malt", "malt vinegar", "malt extract", "brewer s yeast", "beer", "ale", "lager", "triticale", "bran", "stout"], contains: ["gluten"], unless: ["rice bran", "maize bran", "corn bran", "mustard bran", "soy bran", "barley grass", "wheat grass", "ginger ale", "ginger beer", "root beer", "birch beer"] },
+  { terms: ["barley", "rye", "oat", "oatmeal", "malt", "malt vinegar", "malt extract", "brewer s yeast", "beer", "ale", "lager", "triticale", "bran", "stout"], contains: ["gluten"], unless: ["rice bran", "maize bran", "corn bran", "mustard bran", "soy bran", "barley grass", "ginger ale", "ginger beer", "root beer", "birch beer"] },
   { terms: ["gluten free"], contains: [], possible: GLUTEN_FREE_MAY_CONTAIN },
   // soy
   { terms: ["soy", "soya", "soybean", "soyabean", "soja", "tofu", "bean curd", "tempeh", "edamame", "miso", "shoyu", "tamari", "natto", "textured vegetable protein", "tvp", "glycine max", "soymilk", "yuba", "kinako"], contains: ["soy"] },
@@ -462,7 +462,7 @@ export const PLAIN_FOODS: string[] = (
   "mushroom broccoli cauliflower brussels sprout asparagus artichoke fennel okra pea peas bean beans lentil chickpea corn sweetcorn maize " +
   "pumpkin squash butternut marrow avocado olive caper gherkin spring scallion chive chives parsley coriander cilantro basil mint " +
   "rosemary thyme oregano marjoram sage dill tarragon bay leaf leaves lemongrass ginger galangal turmeric cumin paprika cinnamon " +
-  "nutmeg clove cloves cardamom star anise allspice saffron vanilla peppercorn chillies pak choi bok choy beansprout sprouts edamame " +
+  "nutmeg clove cloves cardamom star anise allspice saffron vanilla peppercorn chillies pak choi bok choy beansprout sprouts " +
   "garden greens herb herbs root " +
   // fruit
   "apple pear banana orange lemon lime grapefruit clementine mandarin tangerine grape strawberry raspberry blueberry blackberry " +
@@ -509,5 +509,5 @@ export const FILLER_WORDS: string[] = (
   "food pulp crumbs wholemeal skimmed semi greasing grating baked hard mature mild very split thickness neutral dissolved thumb bashed " +
   "coarsely strained stewing waxy jumbo square cured flat sun pounded brine " +
   "spice spices sea grams gram meat natural de chips " +
-  "puree pink purple strips strip chunks chunk florets floret wedges wedge rings ring sauce-free unsalted salted sweetened unsweetened"
+  "puree pink purple strips strip chunks chunk florets floret wedges wedge rings ring unsalted salted sweetened unsweetened"
 ).split(" ").filter(Boolean);
