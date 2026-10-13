@@ -93,7 +93,9 @@ export function suggestSwaps(lines: { text: string; hits: Hit[] }[], people: Per
     if (bad.length === 0) continue;
     const terms = [...new Set(bad.map((h) => h.term))];
     const known = terms.flatMap((t) => BY_TERM[t] ?? []);
-    const options = known
+    // A swap that fixes only some of the flagged terms leaves the rest in the dish: an option must be offered for every term, and with a term that has no swap there is none.
+    const offered = terms.map((t) => (BY_TERM[t] ?? []).map((o) => o.use));
+    const options = (terms.some((t) => !BY_TERM[t]) ? [] : known.filter((o) => offered.every((uses) => uses.includes(o.use))))
       .filter((o) => o.contains.every((a) => !avoid.has(a)) && !(noLegumes && (o.legume || o.contains.some((a) => LEGUME_ALLERGENS.includes(a)))))
       .map((o) => o.use);
     const who = people.filter((p) => bad.some((h) => p.allergies.includes(h.allergen))).map((p) => p.name);

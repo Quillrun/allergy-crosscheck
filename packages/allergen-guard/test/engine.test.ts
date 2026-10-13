@@ -991,3 +991,17 @@ test("engine: a 'wheat free' claim covers wheat only, so barley and malt stay gl
   assert.equal(kinds("gluten free bread").gluten, "possible"); // and a gluten-free claim still weakens gluten
   assert.equal(verdict("wheat free barley malt extract", "gluten"), "unsafe");
 });
+
+test("swaps: an option must fix every flagged term of the line, or the answer is to leave it out", () => {
+  const optionsFor = (line: string, ...allergies: AllergenId[]) => {
+    const people = [person("X", ...allergies)];
+    return suggestSwaps(checkIngredients([line], people).lines, people)[0].options;
+  };
+  // 'cookie' (wheat) has no swap, so a peanut swap would leave the wheat in the line.
+  assert.deepEqual(optionsFor("2 tbsp peanut butter cookies", "peanut", "wheat"), ["Leave it out (no swap fits everyone)"]);
+  // Two terms with swaps: only an option offered for both is kept.
+  assert.deepEqual(optionsFor("peanut and tahini sauce", "peanut", "sesame"), ["sunflower seed butter"]);
+  // One term keeps all its swaps.
+  assert.deepEqual(optionsFor("peanut butter", "peanut"), ["sunflower seed butter", "toasted pumpkin seeds"]);
+  assert.deepEqual(optionsFor("a pinch of unobtainium and peanut", "peanut", "wheat"), ["sunflower seed butter", "toasted pumpkin seeds"]);
+});
