@@ -173,6 +173,15 @@ test("product by barcode: reads the ingredient text, not just the tags", async (
   assert.ok(items.some((i) => i.text === "Allergen warning on the label"));
 });
 
+test("product by barcode: milk named only in the ingredient text is still found", async () => {
+  // allergens_tags and traces_tags are empty, so only the cross-check of the text can catch it.
+  const r = await call("check_product", { barcode: "4001112223338" });
+  const leo = r.structuredContent.people.find((p: View) => p.name === "Leo");
+  assert.equal(leo.verdict, "unsafe");
+  assert.ok(leo.reasons.length > 0 && leo.reasons.every((x: string) => /^Contains milk/.test(x)), JSON.stringify(leo.reasons));
+  assert.equal(r.structuredContent.overall, "unsafe");
+});
+
 test("a product with no ingredient data cannot be confirmed", async () => {
   const r = await call("check_product", { barcode: "0098008952506" });
   assert.equal(r.structuredContent.overall, "cannot_confirm");

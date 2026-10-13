@@ -18,11 +18,22 @@ export const NUTELLA = {
   ingredients_text_en: "sugar, palm oil, hazelnuts (13%), skimmed milk powder (8.7%), fat reduced cocoa (7.4%), emulsifier: lecithins (soya), vanillin",
 };
 
+/** Milk is named only in the ingredient text: allergens_tags and traces_tags are empty, as Open Food Facts often has them. */
+export const MILK_IN_TEXT = {
+  code: "4001112223338",
+  product_name: "Creamy Oat Bar",
+  brands: "Acme",
+  allergens_tags: [],
+  traces_tags: [],
+  ingredients_text_en: "oats, sugar, skimmed milk powder, salt",
+};
+
 /** Offline stand-ins for Open Food Facts and TheMealDB. */
 export const fakeFetch: Fetcher = (async (input: string | URL | Request) => {
   const url = String(input);
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
   if (url.includes("/api/v2/product/3017624010701")) return json({ status: 1, product: NUTELLA });
+  if (url.includes("/api/v2/product/4001112223338")) return json({ status: 1, product: MILK_IN_TEXT });
   if (url.includes("/api/v2/product/0098008952506")) return json({ status: 1, product: { code: "0098008952506", product_name: "Nutella" } });
   if (url.includes("/api/v2/product/")) return json({ status: 0 });
   if (url.includes("search.openfoodfacts.org") && url.includes("q=Nutella")) {
