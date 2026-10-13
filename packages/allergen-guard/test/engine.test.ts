@@ -1005,3 +1005,14 @@ test("swaps: an option must fix every flagged term of the line, or the answer is
   assert.deepEqual(optionsFor("peanut butter", "peanut"), ["sunflower seed butter", "toasted pumpkin seeds"]);
   assert.deepEqual(optionsFor("a pinch of unobtainium and peanut", "peanut", "wheat"), ["sunflower seed butter", "toasted pumpkin seeds"]);
 });
+
+test("engine: two people with the same name each get their own spoken answer", () => {
+  const sams = [person("Sam", "milk"), person("Sam", "peanut")];
+  for (const people of [sams, [...sams].reverse()]) {
+    const r = checkIngredients(["1 cup milk"], people);
+    assert.equal(r.overall, "unsafe");
+    assert.match(r.speech, /should avoid this: it contains milk/);
+    assert.match(r.speech, /Nothing listed for Sam's allergies/);
+    assert.equal(r.people.filter((p) => p.verdict === "unsafe").length, 1);
+  }
+});

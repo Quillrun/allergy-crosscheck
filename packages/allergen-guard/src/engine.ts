@@ -327,7 +327,7 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
 
 /** Turn hits into a verdict per person. Any data issue blocks a "no listed allergens" answer. */
 export function evaluate(hits: Hit[], people: Person[], dataIssues: string[] = []): CheckResult {
-  const templates = new Map<string, string>(); // name -> speech with NAME in place of the name
+  const templates = new Map<PersonResult, string>(); // result -> speech with NAME in place of the name (two people can share a name)
   const results = people.map((p): PersonResult => {
     const mine = hits.filter((h) => p.allergies.includes(h.allergen));
     const contains = mine.filter((h) => h.kind === "contains");
@@ -343,8 +343,9 @@ export function evaluate(hits: Hit[], people: Person[], dataIssues: string[] = [
     if (contains.length || mayContain.length) verdict = "unsafe";
     else if (possible.length || dataIssues.length) verdict = "cannot_confirm";
     const template = speak({ ...p, name: NAME }, verdict, contains, mayContain, possible, dataIssues);
-    templates.set(p.name, template);
-    return { name: p.name, verdict, reasons: unique(reasons), speech: template.replace(NAME, p.name) };
+    const result: PersonResult = { name: p.name, verdict, reasons: unique(reasons), speech: template.replace(NAME, p.name) };
+    templates.set(result, template);
+    return result;
   });
   const overall = results.reduce<Verdict>((v, r) => worst(v, r.verdict), "no_listed_allergens");
   const ordered = [...results].sort((a, b) => RANK[b.verdict] - RANK[a.verdict]);
@@ -383,10 +384,10 @@ function speak(p: Person, verdict: Verdict, contains: Hit[], may: Hit[], possibl
 
 // People who would hear the same sentence share it: "…OK for Maya and Leo: …", said once.
 const NAME = "\u0000";
-function merged(ordered: PersonResult[], templates: Map<string, string>): string {
+function merged(ordered: PersonResult[], templates: Map<PersonResult, string>): string {
   const groups = new Map<string, string[]>();
   for (const r of ordered) {
-    const t = templates.get(r.name) ?? r.speech;
+    const t = templates.get(r)!;
     groups.set(t, [...(groups.get(t) ?? []), r.name]);
   }
   return [...groups].map(([t, names]) => t.replace(NAME, join(names))).join(" ");
