@@ -231,6 +231,7 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
       const { people, missing, expired } = pick(store, names);
       let source: View["source"];
       let note = "";
+      let askForIngredients = false; // the dish gave no ingredients, so the person is asked to read them
       let nameLine: string | undefined;
       const unknown: string[] = [];
       if (!ingredients?.length && dish) {
@@ -246,7 +247,7 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
           ingredients = [];
           recipe_name = recipe_name ?? dish;
           unknown.push(error ? `I couldn't look up ${dish} (${error}), so its ingredients are unknown.` : `I couldn't find a recipe for ${dish}, so its ingredients are unknown.`);
-          note = READ_ME;
+          askForIngredients = true;
         }
       }
       let result = checkIngredients(splitIngredients(ingredients ?? []), people);
@@ -255,13 +256,13 @@ function registerCheckRecipe(server: McpServer, { store, sources }: Deps): void 
         const lines = [...result.lines, { text: nameLine, hits: scanIngredient(dish) }];
         result = { ...evaluate(lines.flatMap((l) => l.hits), people, unknown.length ? unknown : result.dataIssues), lines };
       }
-      if (note === READ_ME && result.people.every((p) => p.verdict === "unsafe")) note = ""; // nothing more to learn
+      if (askForIngredients && result.people.every((p) => p.verdict === "unsafe")) askForIngredients = false; // nothing more to learn
       const swaps = suggestSwaps(result.lines.filter((l) => l.text !== nameLine), people, store.activePeople());
       return reply({
         kind: "recipe_check",
         title: recipe_name ? `${recipe_name}` : "Recipe check",
         overall: result.overall,
-        speech: withMissing(result, missing, expired) + note + (swaps.length ? " Swaps are on the screen." : ""),
+        speech: withMissing(result, missing, expired) + note + (askForIngredients ? READ_ME : "") + (swaps.length ? " Swaps are on the screen." : ""),
         people: verdictRows(result, store, expired),
         items: result.lines
           .map((l) => ({
@@ -297,6 +298,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
     },
     async ({ barcode, name, scanned, for: names }) => {
       const { people, missing, expired } = pick(store, names);
+      const who: Asked = { people, store, missing, expired };
       let code = barcode?.trim();
       let named = false; // the barcode was given or came from a name search, not from the scan page: the speech says which product it found
       let searched: string | undefined; // the name a search matched, said even when the product lookup then fails
@@ -322,9 +324,9 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
         }
         const found = await sources.searchProducts(name);
         if (found.error !== undefined) {
-          return productReply(name, checkProduct(null, people, found.error), people, store, missing, expired);
+          return productReply(name, checkProduct(null, people, found.error), who);
         }
-        if (found.candidates.length === 0) return productReply(name, checkProduct(null, people), people, store, missing, expired);
+        if (found.candidates.length === 0) return productReply(name, checkProduct(null, people), who);
         if (found.candidates.length > 1) {
           return reply({
             kind: "needs_choice",
@@ -342,7 +344,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
       const { product, error } = await sources.product(code);
       const label = product?.product_name || name || code;
       const said = product?.product_name?.trim() || searched;
-      return productReply(label, checkProduct(product ?? null, people, error), people, store, missing, expired, product ? { label: "Open Food Facts" } : undefined, named && said ? `Checked ${said}: ` : "");
+      return productReply(label, checkProduct(product ?? null, people, error), who, { source: product ? { label: "Open Food Facts" } : undefined, lead: named && said ? `Checked ${said}: ` : "" });
     },
   );
 }
@@ -402,7 +404,8 @@ function registerRemoveFromShoppingList(server: McpServer, { store }: Deps): voi
   );
 }
 
-function productReply(label: string, result: CheckResult, people: Person[], store: Store, missing: string[], expired: Profile[], source?: View["source"], lead = "") {
+type Asked = { people: Person[]; store: Store; missing: string[]; expired: Profile[] };
+function productReply(label: string, result: CheckResult, { people, store, missing, expired }: Asked, { source, lead = "" }: { source?: View["source"]; lead?: string } = {}) {
   return reply({
     kind: "product_check",
     title: label,
