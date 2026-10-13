@@ -18,7 +18,17 @@
   },
   "private": true,
   "license": "MIT",
-  "keywords": ["alexa", "mcp", "allergens", "food-allergy", "open-food-facts"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Quillrun/allergy-crosscheck"
+  },
+  "keywords": [
+    "alexa",
+    "mcp",
+    "allergens",
+    "food-allergy",
+    "open-food-facts"
+  ],
   "type": "module",
   "engines": {
     "node": ">=22.6"
