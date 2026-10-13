@@ -12,6 +12,9 @@ export class El {
   value = "";
   dataset: Record<string, string> = {};
   clientWidth = 1280;
+  readyState = 2;
+  srcObject: unknown;
+  play = async () => {};
   parentElement?: El;
   contentWindow: { sent: unknown[]; postMessage: (m: unknown) => void } = { sent: [], postMessage(m) { this.sent.push(m); } };
   style: Record<string, unknown> & { setProperty: (k: string, v: string) => void } = { setProperty() {} };

@@ -62,7 +62,8 @@
   const FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e"];
   // SCAN_TOKEN: the phone opens /scan#token=..., and the fragment never reaches a server log.
   const TOKEN = new URLSearchParams(location.hash.slice(1)).get("token");
-  let detector, scanning = false, last = "", streak = 0;
+  let detector, scanning = false, last = "", streak = 0, failures = 0;
+  const MAX_FAILURES = 10; // detect() errors in a row, 150 ms apart, before the scanner gives up
 
   async function getDetector() {
     if ("BarcodeDetector" in window) {
@@ -86,6 +87,7 @@
       await video.play();
       msg.textContent = "Looking for a barcode…";
       scanning = true;
+      failures = 0;
       loop();
     } catch (err) {
       msg.textContent = "I couldn't open the camera. Type the digits below instead.";
@@ -96,12 +98,21 @@
     if (!scanning) return;
     try {
       const codes = video.readyState >= 2 ? await detector.detect(video) : [];
+      failures = 0;
       const code = codes.find((c) => /^\d{8,14}$/.test(c.rawValue))?.rawValue;
       // Two matching reads in a row before sending: one blurry frame can misread a digit.
       streak = code && code === last ? streak + 1 : code ? 1 : 0;
       last = code || "";
       if (streak >= 2) { scanning = false; cam.classList.add("hit"); navigator.vibrate?.(60); return send(code); }
-    } catch {}
+    } catch (err) {
+      // A decoder that fails to load (Safari's WebAssembly loads on the first detect) fails every time: say so instead of looking for ever.
+      if (++failures >= MAX_FAILURES) {
+        scanning = false;
+        console.error("Barcode decoder failed", err);
+        msg.textContent = "I can't read barcodes on this device. Type the digits below instead.";
+        return;
+      }
+    }
     setTimeout(loop, 150);
   }
 

@@ -130,3 +130,31 @@ test("the scan page sends the token from the URL fragment, and no header when th
     assert.equal(sent[0].Authorization, want, hash);
   }
 });
+
+/** The scan page with a camera that works and a decoder that does what the test says. */
+async function cameraPage(detect: () => Promise<{ rawValue: string }[]>, fetch: (...a: any[]) => Promise<unknown> = async () => ({ ok: true, json: async () => ({ name: "Nutella", barcode: "3017624010701" }) })) {
+  class BarcodeDetector {
+    static getSupportedFormats = async () => ["ean_13", "ean_8", "upc_a", "upc_e"];
+    detect = detect;
+  }
+  return loadPage("scan.html", { globals: { fetch, BarcodeDetector, navigator: { vibrate() {}, mediaDevices: { getUserMedia: async () => ({}) } } } });
+}
+
+test("the scan page stops after 10 failed reads in a row and says to type the digits", async () => {
+  let calls = 0;
+  const page = await cameraPage(async () => { calls++; throw new Error("wasm failed to load"); });
+  assert.equal(page.el("msg").textContent, "Looking for a barcode…");
+  for (let i = 0; i < 20 && page.timers.length; i++) await page.tick();
+  assert.equal(calls, 10);
+  assert.equal(page.timers.length, 0, "no more reads are scheduled");
+  assert.match(page.el("msg").textContent, /Type the digits below/);
+});
+
+test("a read that works resets the count of failed reads", async () => {
+  let calls = 0;
+  const page = await cameraPage(async () => { calls++; if (calls % 5 !== 0) throw new Error("blip"); return []; });
+  for (let i = 0; i < 40; i++) await page.tick();
+  assert.ok(calls >= 40, "four failures then a good read, over and over: it keeps looking");
+  assert.equal(page.timers.length, 1);
+  assert.equal(page.el("msg").textContent, "Looking for a barcode…");
+});
