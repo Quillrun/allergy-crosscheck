@@ -19,15 +19,16 @@ Each entry is something that happened while building Allergy Crosscheck. Every e
   1. Read the MCP Toolkit overview: https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-overview.html
   2. Read the QuickStart: https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-quickstart.html (the `addon.json` schema reference).
   3. Read "Test Your MCP Add-ons": https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-test-add-ons.html
-  4. Stop there. I did not try a deployment (see Actual).
+  4. Read the hackathon FAQ on the Devpost site.
+  5. Stop there: no deployment is possible (see Actual).
 - **Expected:** any developer account can deploy a development add-on and talk to it in the web simulator, without publishing.
-- **Actual:** not run, so this entry is unverified by design. The docs say:
+- **Actual:** not run. The hackathon FAQ says the tools "are in preview and available to select partners only - there is currently no way for hackathon participants to apply for or gain access", and that "there's no way for any participant to connect a self-hosted MCP server to a real Alexa+ device or developer console". The product docs give a different gate:
   - overview: "The MCP Toolkit is available in the United States";
   - QuickStart sample: `"distributionCountries": ["US"]`;
   - testing page: "You must deploy your add-on before you can test it".
 
-  I'm outside the US, so I didn't attempt a deployment and can't say what Amazon would have done.
-- **Severity:** High, if the docs mean what they say. It blocks the only end-to-end test path.
+  A developer reading the docs alone would try to deploy and fail for a reason the docs don't give. The simulated path the hackathon Resources page points to is what this entry fell back on.
+- **Severity:** High. It closes the only end-to-end test path, and the product docs don't say so.
 - **Workaround:** I built a simulator. A local LLM drives the server through the MCP TypeScript SDK client over Streamable HTTP, and a host shim renders the MCP Apps view in an Echo Show-sized frame.
 - **Suggestion:** to the MCP Toolkit team and the "Test Your MCP Add-ons" page: let developer accounts in any country use the web simulator for development-stage add-ons, with distribution still limited to supported countries. Or ship the simulator as a local tool next to the Local Inspector.
 
