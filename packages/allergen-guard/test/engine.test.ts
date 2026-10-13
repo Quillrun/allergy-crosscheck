@@ -949,3 +949,20 @@ test("'Processed in a factory handling peanuts' is a may-contain warning even af
   const r = checkProduct({ product_name: "X", ingredients_text_en: "sugar. Contains peanuts: Processed in a factory handling nuts" }, [person("Leo", "tree_nut")]);
   assert.deepEqual(r.people[0].reasons, ["May contain tree nuts"]);
 });
+
+test("engine: an English warning naming a word we can't place is a data issue, never 'none listed'", () => {
+  const nut = [person("X", "tree_nut")];
+  for (const text of ["water, salt (may contain Brazilnuts)", "flour. This product may contain pinenuts", "water. May contain traces of xylitol", "water. Made in a factory that handles ashwagandha"]) {
+    const r = checkProduct({ ingredients_text_en: text }, [person("X", "milk")]);
+    assert.equal(r.overall, "cannot_confirm", text);
+    assert.match(r.dataIssues.join(" "), /can't read it/, text);
+  }
+  // The word it can place still counts in full.
+  assert.equal(checkProduct({ ingredients_text_en: "water. May contain traces of pinenuts and walnuts" }, nut).overall, "unsafe");
+  // Ordinary wording around known allergens is not an unread warning.
+  for (const text of [
+    "water. May contain traces of nuts, peanuts and sesame seeds", "water. May contain trace amounts of milk", "water. Made on equipment that also processes wheat",
+    "water. Not suitable for nut and peanut allergy sufferers", "water. May also contain other cereals containing gluten", "water. Produced in a factory which also handles peanuts, tree nuts and milk",
+    "water. May contain one or more of the following: celery, mustard", "water (may contain egg, milk, soy)",
+  ]) assert.equal(checkProduct({ ingredients_text_en: text }, [person("X", "lupin")]).overall, "no_listed_allergens", text);
+});

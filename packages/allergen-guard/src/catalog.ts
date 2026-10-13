@@ -318,7 +318,7 @@ export const TERMS: Term[] = [
   { terms: ["margarine", "vegetable spread"], contains: [], possible: ["milk", "soy"] },
   { terms: ["vegetable oil"], contains: [], possible: ["soy", "peanut"] },
   // sesame ("til" or "teel" on its own is read in engine.ts: it is also English for "until")
-  { terms: ["sesame", "sesamum indicum", "tahini", "tahina", "halva", "halvah", "halwa", "gomasio", "benne", "gingelly", "til seed", "til oil", "teel seed", "teel oil", "hummus", "houmous", "za atar", "zaatar"], contains: ["sesame"] },
+  { terms: ["sesame", "sesame seed", "sesamum indicum", "tahini", "tahina", "halva", "halvah", "halwa", "gomasio", "benne", "gingelly", "til seed", "til oil", "teel seed", "teel oil", "hummus", "houmous", "za atar", "zaatar"], contains: ["sesame"] },
   // fish
   {
     terms: ["fish", "salmon", "tuna", "cod", "anchovy", "anchovies", "sardine", "haddock", "trout", "mackerel", "tilapia", "halibut",

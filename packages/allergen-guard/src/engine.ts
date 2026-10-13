@@ -164,6 +164,8 @@ const FOREIGN_PRECAUTION = new RegExp(`^(?:${PRECAUTION_FOREIGN.join("|")})`, "i
 
 // "Not suitable for Nut, Peanut and Sesame allergy sufferers.", "It may not be suitable for those with peanut allergy.", "Allergy advice: Not suitable for customers with an allergy to soya.": a sentence of its own (or the text after an allergy-advice label), only a precaution when it speaks of allergy.
 const NOT_SUITABLE = /(?<=^|[.\n]\s*|\ballerg(?:y|en|ens|ic) (?:advice|information|warning|note)\s*:\s*)(?:(?:(?:it|this|this product|the product) )?(?:may|might) not be suitable|not suitable|unsuitable) for\b(?=(?:[^.\n]|\.(?!\s|$))*\ballerg(?:y|ic|ies)\b)/gi;
+// Words that only dress up a warning ("may contain traces of other nuts", "not suitable for nut allergy sufferers"): not an item to place.
+const WARNING_WORDS = /\b(?:trace amounts?|traces?|amounts?|other|following|all|any|products?|ingredients?|allerg(?:y|ies|ic|ens?)|sufferers?|customers?|people|persons?|anyone|those|who|are|is|handled|present|that|which|where|also|processe[sd]|handles|uses|manufactures|packs|produces|makes|cross contamination|contaminat(?:ed|ion))\b/gi;
 const SENTENCE_END = /\.(?=\s|$)|\n/;
 
 /** True for a sentence made only of allergen terms joined by spaces, commas, "and", "or", "&" ("egg peanuts and nuts"). */
@@ -289,6 +291,8 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
     const found = splitIngredients(w).flatMap((l) => scanIngredient(l, "may_contain"));
     hits.push(...found);
     if (!found.length && FOREIGN_PRECAUTION.test(w)) unreadWarning = true;
+    // An English warning is read word by word too: "may contain Brazilnuts" names something we can't place, which is not "nothing".
+    else if (!FOREIGN_PRECAUTION.test(w) && unrecognised(w.replace(PRECAUTION, " ").replace(NOT_SUITABLE, " ").replace(WARNING_WORDS, " ")).length) unreadWarning = true;
   }
   if (!english && enTags.length === 0) {
     dataIssues.push(
