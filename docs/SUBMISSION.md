@@ -39,7 +39,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 ### How I built it
 - **More than an API wrapper.** Amazon names a "basic MCP wrapper around an existing API" as the obvious Alexa+ idea ([rules](https://amazonappdev2026.devpost.com/rules)). Of the creative examples in the judging criteria, this builds three (an agentic workflow in one turn, state across sessions, MCP Apps) and part of one more (cards):
   - **State across sessions:** the household and dated guests are saved between conversations, and after their last day a guest stays listed, marked as ended, and is no longer checked (`src/server/store.ts`, `until`; `save_person` in `src/server/tools.ts`). The "what I just scanned" scan is kept for 30 minutes.
-  - **Agentic workflow, in one turn:** one ask, "Check the lasagne for everyone, then add the swaps to my shopping list." (video 1:00), makes the model run `check_recipe`, read the swaps from its result and call `add_to_shopping_list` with exactly those three items, with no second prompt. Inside `check_recipe` the server, not the model, looks the dish up on TheMealDB, checks every ingredient for every person and proposes swaps checked against everyone; that part is deterministic code (`src/server/tools.ts`, `src/server/sources.ts`). `check_product` fetches packaged food from Open Food Facts the same way.
+  - **Agentic workflow, in one turn:** one ask, "Check the lasagne for everyone, then add the swaps to my shopping list." (video 0:53), makes the model run `check_recipe`, read the swaps from its result and call `add_to_shopping_list` with exactly those three items, with no second prompt. Inside `check_recipe` the server, not the model, looks the dish up on TheMealDB, checks every ingredient for every person and proposes swaps checked against everyone; that part is deterministic code (`src/server/tools.ts`, `src/server/sources.ts`). `check_product` fetches packaged food from Open Food Facts the same way.
   - **MCP Apps:** the Echo Show screen, with tap-to-choose that calls back into the server (`public/widget.html`).
   - **Cards, partly:** the screen is made of card panels: "Who's eating", "Watch out for", "Swaps", "Which one?" and "Shopping list". These are HTML sections I drew inside the MCP Apps view, not Alexa+'s own card or carousel components, and there are no images or media.
   - **Not built:** purchasing, and Agent Skills.
@@ -110,7 +110,7 @@ alexa+, model-context-protocol, mcp-apps, streamable-http, typescript, node.js, 
 - Code repository: <GitHub URL, once the author decides private or public>
 
 ## Video demo link
-<YouTube URL, after the upload>. The file is `docs/video/allergy-crosscheck-demo.mp4` (2:48, 4K at 60 fps, recorded 12 October 2026), with captions in `docs/video/allergy-crosscheck-demo.srt`.
+<YouTube URL, after the upload>. The file is `docs/video/allergy-crosscheck-demo.mp4` (2:41, 4K at 60 fps, recorded 12 October 2026), with captions in `docs/video/allergy-crosscheck-demo.srt`.
 
 ## Image gallery (upload in this order)
 Files are in `docs/video/gallery/`, padded to 3:2.
@@ -241,7 +241,7 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
 - **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 92 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents. The engine is open source (MIT), so any allergy feature can start fail-closed.
 
 ## YouTube upload (not part of the Devpost form)
-- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:48, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
+- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:41, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
 - **Title:** Allergy Crosscheck: who at the table can eat it, and why (Alexa+ hackathon demo)
 - **Visibility:** Public. The rules say "publicly visible", and Unlisted may not count. This is the author's call.
 - **Altered or synthetic content:** yes. The voices are synthetic: Alexa's lines are Amazon's Alexa voice from the developer console; the narrator and the user are AI-generated.
@@ -255,16 +255,16 @@ Built for Amazon's Build, Ship, Shape hackathon (Alexa+ track): a self-hosted MC
 
 Code: <repository URL>
 
-0:00 A record with no ingredient list: no list, no guess
-0:12 Alexa's answer for it: "can't confirm"
-0:18 Eight scans in ten have no list; with one, a decisive answer 7 times in 10
-0:35 The simulator
-0:42 Saving the household and a guest
-1:00 One ask: the lasagne checked for everyone, the swaps on the list
-1:30 Scan on a phone: missing data means "can't confirm"
-1:46 A cocoa mix: the tags say "may contain" milk, the ingredients show it is in
-2:19 Sunday: the guest's visit is over
-2:30 How it's built, and what the server ships
+0:00 One in fifteen US adults has a food allergy
+0:06 A record with no ingredient list: no list, no guess
+0:18 Allergy Crosscheck's answer for it: "can't confirm"
+0:27 The simulator
+0:35 Saving the household and a guest
+0:53 One ask: the lasagne checked for everyone, the swaps on the list
+1:23 Scan on a phone: missing data means "can't confirm"
+1:38 A cocoa mix: the tags say "may contain" milk, the ingredients show it is in
+2:12 Sunday: the guest's visit is over
+2:23 How it's built, and what the server ships
 ```
 
 ## Repository access (not part of the Devpost form)
