@@ -95,11 +95,15 @@
   let nextId = 1;
   const pending = new Map();
   const post = (msg) => window.parent.postMessage(msg, "*");
+  // A host that never answers must not leave "Checking…" on screen for ever: a request gives up after this long.
+  const REQUEST_TIMEOUT_MS = 20000;
   const request = (method, params) => new Promise((resolve, reject) => {
     const id = nextId++;
-    pending.set(id, { resolve, reject });
+    const timer = setTimeout(() => { pending.delete(id); reject(new Error("The host did not answer")); }, REQUEST_TIMEOUT_MS);
+    pending.set(id, { resolve: (r) => { clearTimeout(timer); resolve(r); }, reject: (e) => { clearTimeout(timer); reject(e); } });
     post({ jsonrpc: "2.0", id, method, params });
   });
+  const FAILED = `<div class="empty">That didn't work. Ask me again by voice.</div>`;
   const notify = (method, params) => post({ jsonrpc: "2.0", method, params });
 
   window.addEventListener("message", (event) => {
@@ -111,7 +115,7 @@
       return;
     }
     if (msg.method === "ui/notifications/tool-input") app.innerHTML = `<div class="empty">Checking…</div>`;
-    if (msg.method === "ui/notifications/tool-result") render(msg.params?.structuredContent);
+    if (msg.method === "ui/notifications/tool-result") msg.params?.structuredContent ? render(msg.params.structuredContent) : (app.innerHTML = FAILED);
     if (msg.method === "ui/notifications/host-context-changed") applyContext(msg.params);
     if (msg.method === "ui/resource-teardown" && msg.id !== undefined) post({ jsonrpc: "2.0", id: msg.id, result: {} });
   });
@@ -149,9 +153,11 @@
     app.innerHTML = `<div class="empty">Checking…</div>`;
     try {
       const result = await request("tools/call", { name: "check_product", arguments: forNames?.length ? { barcode, for: forNames } : { barcode } });
-      render(result?.structuredContent);
+      // An isError reply that still carries a view (a message such as "that barcode doesn't check out") is shown; one with none is a failure.
+      if (!result?.structuredContent) throw new Error("The tool returned no screen");
+      render(result.structuredContent);
     } catch (e) {
-      app.innerHTML = `<div class="empty">That didn't work. Ask me again by voice.</div>`;
+      app.innerHTML = FAILED;
     }
   }
 

@@ -11,6 +11,9 @@ export class El {
   hidden = false;
   value = "";
   dataset: Record<string, string> = {};
+  clientWidth = 1280;
+  parentElement?: El;
+  contentWindow: { sent: unknown[]; postMessage: (m: unknown) => void } = { sent: [], postMessage(m) { this.sent.push(m); } };
   style: Record<string, unknown> & { setProperty: (k: string, v: string) => void } = { setProperty() {} };
   classes = new Set<string>();
   classList = { add: (c: string) => void this.classes.add(c), remove: (c: string) => void this.classes.delete(c) };
@@ -21,8 +24,9 @@ export class El {
   addEventListener(type: string, fn: (e: unknown) => unknown) {
     this.listeners.set(type, [...(this.listeners.get(type) ?? []), fn]);
   }
-  async fire(type: string, event: Record<string, unknown> = {}) {
-    for (const fn of this.listeners.get(type) ?? []) await fn({ preventDefault() {}, ...event });
+  /** Calls the listeners without waiting for what they return: a handler may wait on a host reply the test sends next. */
+  fire(type: string, event: Record<string, unknown> = {}) {
+    for (const fn of this.listeners.get(type) ?? []) void Promise.resolve(fn({ preventDefault() {}, ...event }));
   }
   querySelectorAll() {
     return [] as El[];
@@ -44,7 +48,7 @@ export type Page = {
   settle: () => Promise<void>;
   /** Run every timer that is queued right now, once, then settle. */
   tick: () => Promise<void>;
-  timers: { fn: () => void; ms: number }[];
+  timers: { id: number; fn: () => void; ms: number }[];
 };
 
 type Options = {
@@ -59,8 +63,16 @@ export async function loadPage(file: string, opts: Options = {}): Promise<Page> 
   const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
   const source = scripts[opts.script ?? scripts.length - 1];
   const els = new Map<string, El>();
-  const el = (id: string) => els.get(id) ?? (els.set(id, new El(id)), els.get(id)!);
-  const timers: { fn: () => void; ms: number }[] = [];
+  const el = (id: string) => {
+    if (!els.has(id)) {
+      const e = new El(id);
+      e.parentElement = new El(`${id}-parent`);
+      els.set(id, e);
+    }
+    return els.get(id)!;
+  };
+  const timers: { id: number; fn: () => void; ms: number }[] = [];
+  let timerId = 0;
   const listeners = new Map<string, ((e: unknown) => unknown)[]>();
   const root = new El("html");
   const win: Record<string, any> = {
@@ -74,8 +86,8 @@ export async function loadPage(file: string, opts: Options = {}): Promise<Page> 
     location: { hash: "", search: "" },
     isSecureContext: true,
     console: { ...console, error() {}, warn() {} }, // a page's console.error is part of its failure path, not the test's output
-    setTimeout: (fn: () => void, ms = 0) => void timers.push({ fn, ms }),
-    clearTimeout() {},
+    setTimeout: (fn: () => void, ms = 0) => (timers.push({ id: ++timerId, fn, ms }), timerId),
+    clearTimeout: (id: number) => { const i = timers.findIndex((t) => t.id === id); if (i >= 0) timers.splice(i, 1); },
     ResizeObserver: class { observe() {} },
     URLSearchParams,
     JSON, Promise, Map, Set, Math, Number, String, Date, Error, Array, Object, RegExp,
