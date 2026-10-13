@@ -6,6 +6,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { normalizeBarcode, validBarcode } from "../src/server/app.ts";
 import { SCAN_TTL_MS } from "../src/server/store.ts";
+import { loadPage } from "./dom.ts";
 import { startApp } from "./helpers.ts";
 
 let app: Awaited<ReturnType<typeof startApp>>;
@@ -112,4 +113,20 @@ test("a valid UPC-E is accepted and looked up as its UPC-A", async () => {
   const res = await scan("04252614");
   assert.equal(res.status, 200);
   assert.equal((await res.json()).barcode, "042100005264");
+});
+
+test("the scan page sends the token from the URL fragment, and no header when there is none", async () => {
+  for (const [hash, want] of [["#token=scan-secret", "Bearer scan-secret"], ["", undefined]] as const) {
+    const sent: Record<string, string>[] = [];
+    const fetch = async (_url: string, init: { headers: Record<string, string> }) => {
+      sent.push(init.headers);
+      return { ok: true, json: async () => ({ name: "Nutella", barcode: "3017624010701" }) };
+    };
+    const page = await loadPage("scan.html", { globals: { fetch, location: { hash } } });
+    page.el("digits").value = "3017624010701";
+    await page.el("manual").fire("submit");
+    await page.settle();
+    assert.equal(sent.length, 1, hash);
+    assert.equal(sent[0].Authorization, want, hash);
+  }
 });

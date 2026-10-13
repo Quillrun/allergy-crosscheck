@@ -60,6 +60,8 @@
   const $ = (id) => document.getElementById(id);
   const video = $("video"), msg = $("msg"), cam = $("cam");
   const FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e"];
+  // SCAN_TOKEN: the phone opens /scan#token=..., and the fragment never reaches a server log.
+  const TOKEN = new URLSearchParams(location.hash.slice(1)).get("token");
   let detector, scanning = false, last = "", streak = 0;
 
   async function getDetector() {
@@ -107,7 +109,7 @@
     $("error").hidden = true;
     msg.textContent = "Got it. Looking it up…";
     try {
-      const res = await fetch("/scan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ barcode }) });
+      const res = await fetch("/scan", { method: "POST", headers: { "Content-Type": "application/json", ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}) }, body: JSON.stringify({ barcode }) });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error);
       $("name").textContent = body.name || "A product without a name in the data";

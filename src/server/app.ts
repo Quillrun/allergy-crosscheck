@@ -16,7 +16,7 @@ import { createServer } from "./tools.ts";
 
 export { expandUpcE, normalizeBarcode, validBarcode } from "./barcode.ts";
 
-export type AppOptions = { store: Store; sources: Sources; llm?: Llm; allowedHosts?: string[]; mcpToken?: string; simPublic?: boolean };
+export type AppOptions = { store: Store; sources: Sources; llm?: Llm; allowedHosts?: string[]; mcpToken?: string; scanToken?: string; simPublic?: boolean };
 
 const page = (file: string) => readFileSync(new URL(`../../public/${file}`, import.meta.url), "utf8");
 // Barcode decoding for browsers without a native BarcodeDetector (Safari): served from here, never a CDN.
@@ -46,6 +46,9 @@ export function createApp(opts: AppOptions): Server {
 
       // Optional bearer token on /mcp (MCP_TOKEN); unset = open, since the Alexa+ connection may send no header.
       if (url.pathname === "/mcp" && opts.mcpToken && !tokenOk(req.headers.authorization, opts.mcpToken)) return send(res, 401, { error: "unauthorized" });
+      // Optional bearer token on POST /scan (SCAN_TOKEN), separate from MCP_TOKEN: the phone page is a browser, not the Alexa+ client.
+      // Unset = open, and then anyone with the URL can replace "what I just scanned".
+      if (url.pathname === "/scan" && req.method === "POST" && opts.scanToken && !tokenOk(req.headers.authorization, opts.scanToken)) return send(res, 401, { error: "unauthorized" });
       // /sim/* spends the operator's LLM key and drives the household tools: loopback only (socket and Host, since a tunnel connects from loopback), unless SIM_PUBLIC=1.
       if (url.pathname.startsWith("/sim/") && !opts.simPublic && !(isLoopback(req.socket.remoteAddress) && LOOPBACK_HOSTS.has(host))) return send(res, 403, { error: "the simulator is local only (set SIM_PUBLIC=1 to expose it)" });
 

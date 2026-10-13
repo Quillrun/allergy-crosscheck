@@ -1,4 +1,4 @@
-// Optional bearer token on /mcp, loopback-only /sim/*, and the request-size cap.
+// Optional bearer tokens on /mcp and POST /scan, loopback-only /sim/*, and the request-size cap.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -25,6 +25,33 @@ test("with MCP_TOKEN set, /mcp needs the bearer token", async () => {
   try {
     assert.equal((await post(`${app.url}/mcp`, rpc)).status, 401);
     assert.equal((await post(`${app.url}/mcp`, rpc, { Authorization: "Bearer wrong" })).status, 401);
+    assert.equal((await post(`${app.url}/mcp`, rpc, { Authorization: "Bearer s3cret" })).status, 200);
+  } finally {
+    await app.close();
+  }
+});
+
+test("MCP_TOKEN does not cover POST /scan; SCAN_TOKEN does", async () => {
+  const barcode = JSON.stringify({ barcode: "3017624010701" });
+  const mcpOnly = await startApp(undefined, { mcpToken: "s3cret" });
+  try {
+    // The gap the README states: with only MCP_TOKEN set, anyone with the URL can set "what I just scanned".
+    assert.equal((await post(`${mcpOnly.url}/scan`, barcode)).status, 200);
+    assert.ok(mcpOnly.store.recentScan());
+  } finally {
+    await mcpOnly.close();
+  }
+  const app = await startApp(undefined, { mcpToken: "s3cret", scanToken: "scan-secret" });
+  try {
+    assert.equal((await post(`${app.url}/scan`, barcode)).status, 401);
+    assert.equal((await post(`${app.url}/scan`, barcode, { Authorization: "Bearer wrong" })).status, 401);
+    assert.equal((await post(`${app.url}/scan`, barcode, { Authorization: "Bearer s3cret" })).status, 401, "the MCP token is not the scan token");
+    assert.equal(app.store.recentScan(), undefined, "a refused scan is not saved");
+    assert.equal((await post(`${app.url}/scan`, barcode, { Authorization: "Bearer scan-secret" })).status, 200);
+    assert.equal(app.store.recentScan()?.barcode, "3017624010701");
+    // The page itself carries no data, so it opens without the token; only saving a scan needs it.
+    assert.equal((await fetch(`${app.url}/scan`)).status, 200);
+    assert.equal((await post(`${app.url}/mcp`, rpc)).status, 401);
     assert.equal((await post(`${app.url}/mcp`, rpc, { Authorization: "Bearer s3cret" })).status, 200);
   } finally {
     await app.close();

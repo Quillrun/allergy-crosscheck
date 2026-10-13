@@ -72,6 +72,7 @@ LLM_BASE_URL=https://api.openai.com/v1 LLM_MODEL=gpt-4.1-mini LLM_API_KEY=... np
 | `DATA_FILE` | `data/household.json` | The household's profiles and shopping list |
 | `ALLOWED_HOSTS` | — | Extra Host headers to accept, e.g. a tunnel hostname (DNS-rebinding guard) |
 | `MCP_TOKEN` | — | When set, `/mcp` requires `Authorization: Bearer <token>` (401 otherwise); unset leaves it open |
+| `SCAN_TOKEN` | — | When set, `POST /scan` requires `Authorization: Bearer <token>` (401 otherwise); unset leaves it open. The scan page sends the token it finds in the URL fragment: open `https://<host>/scan#token=<token>` on the phone. `MCP_TOKEN` does not cover `/scan` |
 | `SIM_PUBLIC` | — | `1` lets non-loopback callers use `/sim/*`; by default they get 403 |
 | `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` | — | Simulator voice mode |
 
@@ -88,7 +89,7 @@ npx @modelcontextprotocol/inspector   # transport: Streamable HTTP, URL: http://
 Untested, from Amazon's docs: the Alexa+ add-on tools (MCP Toolkit, CLI, web simulator) are a preview for select partners, and the [overview](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-overview.html) limits the Toolkit to the United States. Once you have access, to connect this server to Alexa+:
 
 1. Run Amazon's Local Inspector against it (installed from the Developer Console): `addon-local-inspector http://127.0.0.1:8787/mcp`. It writes a certification verdict to `/tmp/alexaplus-addon-local-inspector-live/`.
-2. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://127.0.0.1:8787`, and add the tunnel host to `ALLOWED_HOSTS`. Set `MCP_TOKEN` if the connection can send a bearer header, since otherwise anyone with the URL can read and change the household's allergies; `/sim/*` answers loopback callers only (a tunnel counts as remote) unless `SIM_PUBLIC=1`.
+2. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://127.0.0.1:8787`, and add the tunnel host to `ALLOWED_HOSTS`. Set `MCP_TOKEN` if the connection can send a bearer header, since otherwise anyone with the URL can read and change the household's allergies; `/sim/*` answers loopback callers only (a tunnel counts as remote) unless `SIM_PUBLIC=1`. `MCP_TOKEN` covers `/mcp` only: `POST /scan` (the phone scan page) is outside it, so anyone with the URL can replace "what I just scanned" for 30 minutes, and the next "what I just scanned" check then speaks that product's verdict. Set `SCAN_TOKEN` to close that.
 3. Scaffold an add-on with `alexa-ai new mcp` pointing at `https://<host>/mcp`, then `alexa-ai deploy`.
 4. Test in the Alexa+ web simulator.
 
