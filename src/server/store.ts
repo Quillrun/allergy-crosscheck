@@ -25,12 +25,12 @@ export class Store {
 
   /** Household members, plus guests whose visit hasn't ended. */
   activePeople(today = localDate()): Profile[] {
-    return this.state.people.filter((p) => !p.until || p.until >= today);
+    return this.state.people.filter((p) => !isExpired(p, today));
   }
 
   /** Guests whose last day has passed: still saved, no longer checked unless asked for by name. */
   expiredPeople(today = localDate()): Profile[] {
-    return this.state.people.filter((p) => p.until && p.until < today);
+    return this.state.people.filter((p) => isExpired(p, today));
   }
 
   allPeople(): Profile[] {
@@ -121,4 +121,7 @@ function load(path: string): State {
 const same = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
 /** YYYY-MM-DD in the server's time zone: a guest "until Saturday" means the household's Saturday, not UTC's. */
+/** A guest whose last day has passed. One rule for who is checked, who is listed as ended, and which dates may be saved. */
+export const isExpired = (p: { until?: string }, today = localDate()): boolean => Boolean(p.until && p.until < today);
+
 export const localDate = (d = new Date()): string => d.toLocaleDateString("en-CA");

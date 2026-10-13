@@ -17,7 +17,7 @@ import {
 import type { CheckResult, Person, Swap, Verdict } from "../../packages/allergen-guard/src/index.ts";
 import { normalizeBarcode } from "./barcode.ts";
 import type { Sources } from "./sources.ts";
-import { localDate } from "./store.ts";
+import { isExpired } from "./store.ts";
 import type { Profile, Store } from "./store.ts";
 
 const WIDGET_URI = "ui://allergy-crosscheck/verdict.html";
@@ -101,40 +101,20 @@ function registerSavePerson(server: McpServer, { store }: Deps): void {
     },
     async ({ name, allergies, guest, until, replace }) => {
       if (!name.trim()) {
-        return reply({ kind: "message", title: "Who is it for?", speech: "I didn't catch a name, so I haven't saved anything. Tell me who it is and what they're allergic to.", disclaimer: DISCLAIMER }, true);
+        return refuse("Who is it for?", "I didn't catch a name, so I haven't saved anything. Tell me who it is and what they're allergic to.");
       }
       const { ids, unknown } = resolveAllergies(allergies);
       if (unknown.length) {
-        return reply({
-          kind: "message",
-          title: "Allergy not recognised",
-          speech: `I can't check for ${unknown.join(" or ")} yet, so I haven't ${store.find(name) ? `changed ${store.find(name)!.name}'s list` : `saved ${name}`}. I can track peanuts, tree nuts, milk, egg, wheat, gluten, soy, sesame, fish, shellfish, celery, mustard, lupin and sulphites.`,
-          disclaimer: DISCLAIMER,
-        }, true);
+        return refuse("Allergy not recognised", `I can't check for ${unknown.join(" or ")} yet, so I haven't ${store.find(name) ? `changed ${store.find(name)!.name}'s list` : `saved ${name}`}. I can track peanuts, tree nuts, milk, egg, wheat, gluten, soy, sesame, fish, shellfish, celery, mustard, lupin and sulphites.`);
       }
       if (ids.length === 0) {
-        return reply({
-          kind: "message",
-          title: "No allergy heard",
-          speech: `I didn't catch an allergy for ${name.trim()}, so I haven't ${store.find(name) ? `changed ${store.find(name)!.name}'s list` : "saved them"}. Which foods can't they have?`,
-          disclaimer: DISCLAIMER,
-        }, true);
+        return refuse("No allergy heard", `I didn't catch an allergy for ${name.trim()}, so I haven't ${store.find(name) ? `changed ${store.find(name)!.name}'s list` : "saved them"}. Which foods can't they have?`);
       }
       if (until && !isCalendarDate(until)) {
-        return reply({
-          kind: "message",
-          title: "That isn't a date",
-          speech: `I couldn't make a date out of ${until}, so I haven't saved ${name.trim()}. Tell me the last day they'll be eating with you.`,
-          disclaimer: DISCLAIMER,
-        }, true);
+        return refuse("That isn't a date", `I couldn't make a date out of ${until}, so I haven't saved ${name.trim()}. Tell me the last day they'll be eating with you.`);
       }
-      if (until && until < localDate()) {
-        return reply({
-          kind: "message",
-          title: "That date has passed",
-          speech: `${spokenDate(until)} has already passed, so I haven't saved ${name}. Tell me the last day they'll be eating with you.`,
-          disclaimer: DISCLAIMER,
-        }, true);
+      if (until && isExpired({ until })) {
+        return refuse("That date has passed", `${spokenDate(until)} has already passed, so I haven't saved ${name}. Tell me the last day they'll be eating with you.`);
       }
       // An end date only makes sense for a visitor. With neither given, an existing person's status is kept.
       const { saved: p, before } = store.savePerson({ name: name.trim(), allergies: ids, guest: until ? true : guest, until }, replace);
@@ -218,12 +198,7 @@ function registerFindRecipe(server: McpServer, { sources }: Deps): void {
     async ({ dish }) => {
       const { recipe, error } = await sources.recipe(dish);
       if (!recipe) {
-        return reply({
-          kind: "message",
-          title: "Recipe not found",
-          speech: error ? `I couldn't look that up: ${error}. Read me the ingredients instead.` : `I couldn't find a recipe for ${dish}. Read me the ingredients instead.`,
-          disclaimer: DISCLAIMER,
-        }, true);
+        return refuse("Recipe not found", error ? `I couldn't look that up: ${error}. Read me the ingredients instead.` : `I couldn't find a recipe for ${dish}. Read me the ingredients instead.`);
       }
       return reply({
         kind: "recipe",
@@ -329,7 +304,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
         // The same rule as the scan page: a misheard digit would otherwise check some other real product.
         const valid = normalizeBarcode(code.replace(/[\s-]/g, ""));
         if (!valid) {
-          return reply({ kind: "message", title: "Barcode not recognised", speech: "That barcode doesn't check out, so I haven't looked anything up. Read me the digits again, or scan it on your phone.", disclaimer: DISCLAIMER }, true);
+          return refuse("Barcode not recognised", "That barcode doesn't check out, so I haven't looked anything up. Read me the digits again, or scan it on your phone.");
         }
         code = valid;
         named = true;
@@ -337,13 +312,13 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
       if (scanned && !code) {
         const scan = store.recentScan();
         if (!scan) {
-          return reply({ kind: "message", title: "Nothing scanned", speech: "I don't have a recent scan. Scan the barcode on your phone, or tell me the product's name.", disclaimer: DISCLAIMER }, true);
+          return refuse("Nothing scanned", "I don't have a recent scan. Scan the barcode on your phone, or tell me the product's name.");
         }
         code = scan.barcode;
       }
       if (!code) {
         if (!name?.trim()) {
-          return reply({ kind: "message", title: "Which product?", speech: "Scan its barcode on your phone, or tell me the product's name.", disclaimer: DISCLAIMER }, true);
+          return refuse("Which product?", "Scan its barcode on your phone, or tell me the product's name.");
         }
         const found = await sources.searchProducts(name);
         if (found.error !== undefined) {
@@ -525,12 +500,14 @@ const distinct = (xs: string[]) => {
   const seen = new Set<string>();
   return xs.map((x) => x.trim()).filter((x) => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase()));
 };
-const isExpired = (p: Profile) => Boolean(p.until && p.until < localDate());
 const guestTag = (p: Profile) => (!p.guest ? "" : isExpired(p) ? ` (guest, visit ended ${spokenDate(p.until!)})` : " (guest)");
 
 function peopleRows(all: Profile[]): View["people"] {
   return all.map((p) => ({ name: p.name, guest: p.guest, ...(isExpired(p) ? { expired: true } : {}), until: p.until, allergies: p.allergies.map((a) => ALLERGENS[a].label) }));
 }
+
+/** A refusal the person hears: nothing was saved or looked up, and the sentence says what to do next. */
+const refuse = (title: string, speech: string) => reply({ kind: "message", title, speech, disclaimer: DISCLAIMER }, true);
 
 function reply(view: View, isError = false) {
   const lines = [view.overall ? `VERDICT: ${view.overall.toUpperCase().replace(/_/g, " ")}` : "", `Say to the user: ${view.speech}`];
