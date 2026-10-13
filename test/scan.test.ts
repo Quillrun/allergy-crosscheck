@@ -158,3 +158,66 @@ test("a read that works resets the count of failed reads", async () => {
   assert.equal(page.timers.length, 1);
   assert.equal(page.el("msg").textContent, "Looking for a barcode…");
 });
+
+const NOT_SAVED = "Not saved. Tap Scan another, or type the digits.";
+const okBody = { name: "Nutella", barcode: "3017624010701", ask: "Can Maya have what I just scanned?" };
+/** Types a code into the scan page, as the manual form does, and lets the request finish. */
+const typeCode = async (page: Awaited<ReturnType<typeof cameraPage>>, digits = "3017624010701") => {
+  page.el("digits").value = digits;
+  page.el("manual").fire("submit");
+  await page.settle();
+};
+
+test("a failed save shows a fixed message, never the exception's text, and the scanner does not claim to be looking", async () => {
+  const failures: [string, () => Promise<unknown>][] = [
+    ["the network fails", async () => { throw new TypeError("Load failed"); }],
+    ["the tunnel answers an HTML page", async () => ({ ok: false, json: async () => { throw new SyntaxError("Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON"); } })],
+    ["the server answers 500 with no message", async () => ({ ok: false, json: async () => ({}) })],
+    ["an OK answer that is not a scan", async () => ({ ok: true, json: async () => ({}) })],
+  ];
+  for (const [name, fetch] of failures) {
+    const page = await cameraPage(async () => [], fetch);
+    await typeCode(page);
+    assert.equal(page.el("error").textContent, NOT_SAVED, name);
+    assert.equal(page.el("error").hidden, false, name);
+    assert.doesNotMatch(page.el("msg").textContent, /Looking for a barcode/, name);
+    assert.equal(page.el("found").hidden, true, name);
+    assert.equal(page.el("again").hidden, false, name);
+  }
+});
+
+test("a refusal the server wrote is shown as written; a 401 says the link needs its token", async () => {
+  const refused = await cameraPage(async () => [], async () => ({ ok: false, status: 400, json: async () => ({ error: "That isn't a valid barcode. Try again, or type the digits." }) }));
+  await typeCode(refused, "3017624010702");
+  assert.equal(refused.el("error").textContent, "That isn't a valid barcode. Try again, or type the digits.");
+  const locked = await cameraPage(async () => [], async () => ({ ok: false, status: 401, json: async () => ({ error: "unauthorized" }) }));
+  await typeCode(locked);
+  assert.match(locked.el("error").textContent, /scan link/);
+  assert.doesNotMatch(locked.el("error").textContent, /unauthorized/);
+});
+
+test("a failed save hides the card of the last good scan, and Scan another clears the error", async () => {
+  let n = 0;
+  const page = await cameraPage(async () => [], async () => { if (n++ === 0) return { ok: true, json: async () => okBody }; throw new TypeError("Load failed"); });
+  await typeCode(page);
+  assert.equal(page.el("found").hidden, false);
+  assert.equal(page.el("name").textContent, "Nutella");
+  await typeCode(page, "0050700000220");
+  assert.equal(page.el("found").hidden, true, "the card of the earlier product is not left under the error");
+  assert.equal(page.el("error").hidden, false);
+  page.el("again").fire("click");
+  await page.settle();
+  assert.equal(page.el("error").hidden, true);
+  assert.equal(page.el("found").hidden, true);
+  assert.equal(page.el("again").hidden, true);
+  assert.equal(page.el("msg").textContent, "Looking for a barcode…");
+});
+
+test("a good save shows the product and the prompt for the household", async () => {
+  const page = await cameraPage(async () => [], async () => ({ ok: true, json: async () => okBody }));
+  await typeCode(page);
+  assert.equal(page.el("found").hidden, false);
+  assert.equal(page.el("error").hidden, true);
+  assert.equal(page.el("ask").textContent, "Now ask Alexa: “Can Maya have what I just scanned?”");
+  assert.equal(page.el("msg").textContent, "Saved. Now ask Alexa.");
+});

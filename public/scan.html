@@ -116,28 +116,43 @@
     setTimeout(loop, 150);
   }
 
+  const NOT_SAVED = "Not saved. Tap Scan another, or type the digits.";
+
+  function fail(text) {
+    $("found").hidden = true; // never leave the last product's card under an error
+    $("error").textContent = text;
+    $("error").hidden = false;
+    msg.textContent = "Not saved.";
+  }
+
   async function send(barcode) {
     $("error").hidden = true;
+    $("found").hidden = true;
     msg.textContent = "Got it. Looking it up…";
     try {
       const res = await fetch("/scan", { method: "POST", headers: { "Content-Type": "application/json", ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}) }, body: JSON.stringify({ barcode }) });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error);
+      let body;
+      try { body = await res.json(); } catch {}
+      if (!res.ok || !body?.barcode) {
+        // Only text the server wrote is shown; a parser's or the network's message is not for the person holding the phone.
+        if (res.status === 401) return fail("This page isn't allowed to save scans. Open the scan link again.");
+        return fail(!res.ok && typeof body?.error === "string" ? body.error : NOT_SAVED);
+      }
       $("name").textContent = body.name || "A product without a name in the data";
       $("code").textContent = body.barcode;
       if (body.ask) $("ask").textContent = `Now ask Alexa: “${body.ask}”`;
       $("found").hidden = false;
       msg.textContent = "Saved. Now ask Alexa.";
     } catch (err) {
-      $("error").textContent = err.message || "That didn't work. Try again.";
-      $("error").hidden = false;
-      msg.textContent = "Looking for a barcode…";
+      console.error("Scan not saved", err);
+      fail(NOT_SAVED);
+    } finally {
+      $("again").hidden = false;
     }
-    $("again").hidden = false;
   }
 
   $("manual").addEventListener("submit", (e) => { e.preventDefault(); const d = $("digits").value.replace(/\D/g, ""); if (d) { scanning = false; send(d); } });
-  $("again").addEventListener("click", () => { $("found").hidden = true; $("again").hidden = true; cam.classList.remove("hit"); last = ""; streak = 0; start(); });
+  $("again").addEventListener("click", () => { $("found").hidden = true; $("error").hidden = true; $("again").hidden = true; cam.classList.remove("hit"); last = ""; streak = 0; start(); });
   start();
 </script>
 </body>
