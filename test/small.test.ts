@@ -99,12 +99,22 @@ test("a misheard barcode is refused with a spoken message and is never looked up
   }
 });
 
-test("check_recipe declares openWorldHint (it can call TheMealDB); the local-only tools do not", async () => {
+test("tool annotations say what each tool does: the three data tools are open-world, the six household tools are not", async () => {
+  // The MCP defaults are openWorldHint=true and destructiveHint=true, so every value is spelled out, never left to them.
   const { tools } = await client.listTools();
   const hint = (n: string) => tools.find((t) => t.name === n)?.annotations;
-  assert.equal(hint("check_recipe")?.openWorldHint, true);
-  assert.equal(hint("check_recipe")?.readOnlyHint, true);
-  assert.equal(hint("list_people")?.openWorldHint, undefined);
+  const open = ["find_recipe", "check_recipe", "check_product"]; // Open Food Facts and TheMealDB
+  const local = ["save_person", "remove_person", "list_people", "add_to_shopping_list", "get_shopping_list", "remove_from_shopping_list"];
+  assert.equal(tools.length, open.length + local.length);
+  for (const n of open) {
+    assert.equal(hint(n)?.openWorldHint, true, n);
+    assert.equal(hint(n)?.readOnlyHint, true, n);
+  }
+  for (const n of local) assert.equal(hint(n)?.openWorldHint, false, n);
+  for (const n of ["list_people", "get_shopping_list"]) assert.equal(hint(n)?.readOnlyHint, true, n);
+  // Adding to the list removes nothing; saving can (replace drops allergies), removing does.
+  assert.equal(hint("add_to_shopping_list")?.destructiveHint, false);
+  for (const n of ["save_person", "remove_person", "remove_from_shopping_list"]) assert.equal(hint(n)?.destructiveHint, true, n);
 });
 
 test("a blank dish name never reaches TheMealDB", async () => {

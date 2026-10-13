@@ -96,7 +96,7 @@ function registerSavePerson(server: McpServer, { store }: Deps): void {
         until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Last day a guest's allergies apply (YYYY-MM-DD)"),
         replace: z.boolean().optional().describe("True only when the user says an allergy no longer applies; the list then replaces what's saved. Otherwise new allergies are added"),
       },
-      annotations: { idempotentHint: true },
+      annotations: { destructiveHint: true, idempotentHint: true, openWorldHint: false }, // destructive: replace drops allergies
       _meta: ui("Saving…", "Saved"),
     },
     async ({ name, allergies, guest, until, replace }) => {
@@ -165,7 +165,7 @@ function registerRemovePerson(server: McpServer, { store }: Deps): void {
       title: "Remove someone",
       description: "Stop checking for a household member or guest.",
       inputSchema: { name: z.string().min(1).max(60) },
-      annotations: { destructiveHint: true, idempotentHint: true },
+      annotations: { destructiveHint: true, idempotentHint: true, openWorldHint: false },
       _meta: ui("Removing…", "Removed"),
     },
     async ({ name }) => {
@@ -187,7 +187,7 @@ function registerListPeople(server: McpServer, { store }: Deps): void {
     {
       title: "Who's being checked",
       description: "List household members and guests with their allergies.",
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: true, openWorldHint: false },
       _meta: ui("Checking who is saved…", "Household"),
     },
     async () => {
@@ -380,6 +380,7 @@ function registerAddToShoppingList(server: McpServer, { store }: Deps): void {
       title: "Add to shopping list",
       description: "Add items (for example the swaps from a recipe check) to the household shopping list.",
       inputSchema: { items: z.array(z.string().max(200)).min(1).max(100), note: z.string().max(500).optional() },
+      annotations: { destructiveHint: false, openWorldHint: false }, // adds to the list, removes nothing
       _meta: ui("Adding to the list…", "List updated"),
     },
     async ({ items, note }) => {
@@ -400,7 +401,7 @@ function registerAddToShoppingList(server: McpServer, { store }: Deps): void {
 function registerGetShoppingList(server: McpServer, { store }: Deps): void {
   server.registerTool(
     "get_shopping_list",
-    { title: "Shopping list", description: "Read the household shopping list.", annotations: { readOnlyHint: true }, _meta: ui("Reading the list…", "Shopping list") },
+    { title: "Shopping list", description: "Read the household shopping list.", annotations: { readOnlyHint: true, openWorldHint: false }, _meta: ui("Reading the list…", "Shopping list") },
     async () => {
       const list = store.shopping();
       const names = list.map((i) => i.item);
@@ -417,7 +418,7 @@ function registerRemoveFromShoppingList(server: McpServer, { store }: Deps): voi
       title: "Remove from shopping list",
       description: "Remove one item from the shopping list.",
       inputSchema: { item: z.string().min(1).max(200) },
-      annotations: { destructiveHint: true, idempotentHint: true },
+      annotations: { destructiveHint: true, idempotentHint: true, openWorldHint: false },
       _meta: ui("Removing from the list…", "List updated"),
     },
     async ({ item }) => {
