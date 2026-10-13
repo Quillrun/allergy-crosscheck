@@ -272,7 +272,7 @@ Code: <repository URL>
 ## Repository access (not part of the Devpost form)
 Pick one:
 - **Public:** the root `LICENSE` (MIT) is in place, so GitHub shows the licence in the About section, which the rules ask for. No other step.
-- **Private:** on submission day, add these collaborators: `chris-trag`, `knmeiss`, `giolaq`, `anishamalde`, `mosesroth`, `emersonsklar`, and `testing@devpost.com`. GitHub invitations expire after 7 days, so don't add them earlier.
+- **Private:** on submission day, add these collaborators: `chris-trag`, `knmeiss`, `giolaq`, `anishamalde`, `mosesroth`, `emersonsklar`, and `testing@devpost.com`, plus `AmazonAppDev` (the submission form names it next to testing@devpost.com; the rules name the six). GitHub invitations expire after 7 days, so don't add them earlier.
 
 **GitHub About text:** An Alexa+ MCP server and Echo Show screen that tell you who at the table can eat it, and why. They check recipes and scanned food for everyone, and their results never call a food "safe".
 **Topics:** alexa, alexa-plus, mcp, mcp-server, mcp-apps, food-allergy, allergens, open-food-facts, echo-show, typescript
