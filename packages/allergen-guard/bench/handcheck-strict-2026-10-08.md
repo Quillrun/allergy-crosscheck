@@ -1,6 +1,6 @@
 # Hand-check of the strict count
 
-The strict count (README, "The count we claim") was hand-checked in ten rounds against rules fixed before each run. The rule: draw 100 records from the 200-record `strict_sample`, judge each on the snapshot record, and claim the count only if 100 of 100 are real. The original protocol allowed 2 rounds; round 3 ran under the Round-3 rules the README fixed on 2026-10-08, after round 2, with the same 100-of-100 decision rule. Round 4 ran under the Round-4 rules (R1–R6, README, fixed 2026-10-09), again with the same decision rule. Round 5 ran under the Round-5 rules (R1–R7, README, fixed 2026-10-09), with the same decision rule. Round 6 ran under the same R1–R7 rules (README, fixed 2026-10-09) with the same decision rule. Round 7 ran under the Round-7 rules (R8–R10b and the glyceride correction, README, fixed 2026-10-09) with the same decision rule. Round 8 ran under the Round-8 rules (R11 and R12, README, fixed 2026-10-09) with the same decision rule. Round 9 ran under the Round-9 rules (R13, README, fixed 2026-10-09) with the same decision rule and was declared the final round; the operator asked for a further round on 2026-10-10. Round 10 ran under the Round-10 rules (R14 and the engine changes, README, fixed 2026-10-10) with the same decision rule and is the latest round. A record is real only if the English ingredient text names, as an ingredient, something that contains the allergen, and neither the allergen list nor the "may contain" list names it. Unclear counts as not real.
+The strict count (README, "The count we claim") was hand-checked in ten rounds against rules fixed before each run. The rule: draw 100 records from the 200-record `strict_sample`, judge each on the snapshot record, and claim the count only if 100 of 100 are real. The original protocol allowed 2 rounds; round 3 ran under the Round-3 rules the README fixed on 2026-10-08, after round 2, with the same 100-of-100 decision rule. Round 4 ran under the Round-4 rules (R1–R6, README, fixed 2026-10-09), again with the same decision rule. Round 5 ran under the Round-5 rules (R1–R7, README, fixed 2026-10-09), with the same decision rule. Round 6 ran under the same R1–R7 rules (README, fixed 2026-10-09) with the same decision rule. Round 7 ran under the Round-7 rules (R8–R10b and the glyceride correction, README, fixed 2026-10-09) with the same decision rule. Round 8 ran under the Round-8 rules (R11 and R12, README, fixed 2026-10-09) with the same decision rule. Round 9 ran under the Round-9 rules (R13, README, fixed 2026-10-09) with the same decision rule and was declared the final round; the author asked for a further round on 2026-10-10. Round 10 ran under the Round-10 rules (R14 and the engine changes, README, fixed 2026-10-10) with the same decision rule and is the latest round. A record is real only if the English ingredient text names, as an ingredient, something that contains the allergen, and neither the allergen list nor the "may contain" list names it. Unclear counts as not real.
 
 In the tables below, `$C` stands for the local cache directory `~/Library/Caches/allergy-crosscheck`. The records are public Open Food Facts data. Each checker's table is copied verbatim from its result file.
 
@@ -321,7 +321,7 @@ The lead re-checked every NOT REAL record, both borderline records (B#12, sherry
 
 Under the pre-registered rule (100/100 to claim; at most 2 rounds) the count is **not claimed**. The measured precision is reported instead: 90/100, 95% Wilson interval 82.6%-94.5%.
 
-The figures are for engine `d9cffca`. The fixes for (d) and (e) change the engine, not this measurement. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `d9cffca`. The fixes for (d) and (e) change the engine, not this measurement. Whether the number is used anywhere public is the author's decision.
 
 ## Round 3 (engine 0d2357f, rules 37f89ae, Round-3 rules from the README): 47/50 + 48/50 = 95/100
 
@@ -482,7 +482,7 @@ None of the five is the engine telling a user something false. For the user, the
 
 Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 95/100, 95% Wilson interval 88.8%-97.8%. Progress across rounds: 73/100, then 90/100, then 95/100.
 
-The figures are for engine `0d2357f` with the round-3 rules (`37f89ae`). Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `0d2357f` with the round-3 rules (`37f89ae`). Whether the number is used anywhere public is the author's decision.
 
 ## Round 4 (rules f88bc4a, engine 0d2357f): 46/50 + 47/50 = 93/100
 
@@ -646,7 +646,7 @@ Under the pre-registered rule (100/100 to claim) the count is **not claimed**. T
 
 A 100/100 sample is only likely if true precision is about 99%. At 95% true precision, 100/100 happens about 0.6% of the time (0.95^100). Rounds 3 and 4 put the count's precision at about 93-95%. Each round found new long-tail cases, so further rule rounds were stopped.
 
-The figures are for engine `0d2357f` and the R1–R6 count rules. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `0d2357f` and the R1–R6 count rules. Whether the number is used anywhere public is the author's decision.
 
 ## Round 5 (rules 04e5241, engine 858d317): 47/50 + 49/50 = 96/100 by the checkers, 97/100 after lead re-check
 
@@ -809,7 +809,7 @@ Result: **97 of 100 real after the lead re-check** (96 by the checkers alone). T
 
 Separately, and not part of the count: the round-5 vanished-hit audit of the run found two fail-opens introduced in engine `858d317`. The allergy-advice strip removed a real "For allergens see cereals containing gluten, nuts, soya and sulphites" (5013803340155, gluten lost), and "peanut milk" as a plant milk hid "milk" in garbled text (0034952369342). It also found asafoetida (0664648120492) losing its only gluten signal. These were fixed in engine commit `9313dbb`.
 
-The figures are for engine `858d317` and the R1–R7 count rules. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `858d317` and the R1–R7 count rules. Whether the number is used anywhere public is the author's decision.
 
 ## Round 6 (rules 4f594cd, engine fa229b8): 47/50 + 48/50 = 95/100
 
@@ -977,7 +977,7 @@ Borderline calls kept REAL, lead agrees:
 
 Result: **95 of 100 real** (checker A 47/50, checker B 48/50; the lead agrees with every call). The 95% Wilson interval is 88.8%-97.8%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 95/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100.
 
-The figures are for engine `fa229b8` and the R1–R7 count rules. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `fa229b8` and the R1–R7 count rules. Whether the number is used anywhere public is the author's decision.
 
 ## Round 7 (rules 4cd40fb, engine fa229b8): 46/50 + 49/50 = 95/100
 
@@ -1142,7 +1142,7 @@ Borderline calls kept REAL, lead agrees:
 
 Result: **95 of 100 real** (checker A 46/50, checker B 49/50; the lead agrees with every call). The 95% Wilson interval is 88.8%-97.8%. Under the pre-registered rule (100/100 to claim) the count is **not claimed**. The measured precision is reported: 95/100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100, then 95/100.
 
-The figures are for engine `fa229b8` and the Round-7 count rules. Whether the number is used anywhere public is the operator's decision.
+The figures are for engine `fa229b8` and the Round-7 count rules. Whether the number is used anywhere public is the author's decision.
 
 ## Round 8 (rules 1caacd9, engine 55f497c): 50/50 + 48/50 = 98/100
 
@@ -1487,7 +1487,7 @@ Borderline calls kept REAL, lead agrees:
 
 ### Round 9 outcome
 
-Result: **93 of 100 real** (checker A 48/50, checker B 45/50; the lead agrees with every call). The 95% Wilson interval is 86.3%-96.6%. Round 9 was declared the last round (decision 2026-10-09); the operator asked for a further round on 2026-10-10, see round 10. The count is **not claimed**. The reported figure is the measured precision of the final engine and rules: 93 of 100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100, then 95/100, then 98/100, then 93/100. Rounds 5 to 9 ranged 93-98.
+Result: **93 of 100 real** (checker A 48/50, checker B 45/50; the lead agrees with every call). The 95% Wilson interval is 86.3%-96.6%. Round 9 was declared the last round (decision 2026-10-09); the author asked for a further round on 2026-10-10, see round 10. The count is **not claimed**. The reported figure is the measured precision of the final engine and rules: 93 of 100. Progress across rounds: 73/100, then 90/100, then 95/100, then 93/100, then 97/100, then 95/100, then 95/100, then 98/100, then 93/100. Rounds 5 to 9 ranged 93-98.
 
 The figures are for engine `402b308` and the Round-9 count rules.
 
@@ -1495,7 +1495,7 @@ The figures are for engine `402b308` and the Round-9 count rules.
 
 Run: `$C/run13` (`summary.json`; copy in [`results-strict-round10-2026-10-10.json`](results-strict-round10-2026-10-10.json)). Result files: `$C/run13/hc_a_result.md` and `hc_b_result.md`. The slowest shard took 2,725.325 s (wall clock 2,725 s). Determinism: shard 2 re-run gave identical counts apart from `seconds` (2,725.3 s in the 8-way run, 2,190.7 s solo).
 
-The operator asked for a further round (2026-10-10), after round 9 had been declared the final round (2026-10-09); round 10 is now the latest. Round 9's 93/100 stands above and is not replaced.
+The author asked for a further round (2026-10-10), after round 9 had been declared the final round (2026-10-09); round 10 is now the latest. Round 9's 93/100 stands above and is not replaced.
 
 The round-9 fixes: engine `bbbc069` (vegetable/vanaspati ghee: milk possible; "may/might not be suitable for ... allergy" sentences are precautions; "shell fish" reads as shellfish; macadamia milk: milk possible; superscript digits normalised to spaces, which fixed "Butter Beans³") and bench `7ad05e5` (R9 extended to "made in a", facility, factory and "manufactured in/on" items; R1 extended to a term followed by "o" or "oi" at the end of the text). Full-data gate: 62 records lost "contains", all intended; one record went to none (5036829756588, allergen-free text).
 
