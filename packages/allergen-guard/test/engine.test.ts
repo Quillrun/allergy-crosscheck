@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ALL_ALLERGENS, SWAP_OPTIONS, checkIngredients, checkProduct, resolveAllergies, scanIngredient, suggestSwaps } from "../src/index.ts";
+import { ALLERGENS, ALL_ALLERGENS, SWAP_OPTIONS, checkIngredients, checkProduct, resolveAllergies, scanIngredient, suggestSwaps } from "../src/index.ts";
 import { unrecognised } from "../src/engine.ts";
 import type { AllergenId, Person } from "../src/index.ts";
 
@@ -1015,4 +1015,26 @@ test("engine: two people with the same name each get their own spoken answer", (
     assert.match(r.speech, /Nothing listed for Sam's allergies/);
     assert.equal(r.people.filter((p) => p.verdict === "unsafe").length, 1);
   }
+});
+
+test("never says 'safe': no speech, reason, data issue, swap or label of the engine contains the word, in any verdict", () => {
+  const everyone = ALL_ALLERGENS.map((a) => person(a, a));
+  const group = [person("Maya", "peanut", "milk"), person("Leo", "gluten"), person("Sam", "sesame"), person("Ana", "fish")];
+  const results = [
+    ...[["tomato", "basil"], ["peanuts", "milk"], ["korma paste"], ["mayonnaise"], ["—"], ["牛奶"], [], ["egg-free mayonnaise"], ["dairy free chocolate (contains milk)"], ["brazilnuts, wheat free barley malt"]]
+      .flatMap((lines) => [everyone, group, [person("X", "milk")], []].map((people) => checkIngredients(lines, people))),
+    ...[
+      null, {}, { code: "1" }, { ingredients_text_en: "water, salt" }, { ingredients_text_en: "water. May contain milk" }, { ingredients_text_en: "water. May contain traces of xylitol" },
+      { ingredients_text_en: "sugar, 牛奶" }, { ingredients_text: "lait, sucre" }, { ingredients_text_en: "-" }, { ingredients_tags: ["en:milk"] }, { ingredients_original_tags: ["fr:lait"] },
+      { allergens_tags: ["en:milk", "en:made-up"] }, { traces_tags: ["en:made-up"] }, { ingredients_text_en: "wheat flour", labels_tags: ["en:no-gluten"] }, { ingredients_text_en: "water", traces_tags: ["en:nuts"] },
+    ].flatMap((p) => [everyone, group, []].map((people) => checkProduct(p, people))),
+    checkProduct(null, group, "timeout"),
+  ];
+  assert.deepEqual([...new Set(results.map((r) => r.overall))].sort(), ["cannot_confirm", "no_listed_allergens", "unsafe"], "the sweep must cover every verdict");
+  const said = (r: ReturnType<typeof checkProduct>) => [r.speech, ...r.dataIssues, ...r.people.flatMap((p) => [p.speech, ...p.reasons])];
+  for (const r of results) for (const s of said(r)) assert.doesNotMatch(s, /\bsafe\b/i, s);
+  // Swaps and the catalogue's own labels are spoken too.
+  const swapUses = Object.values(SWAP_OPTIONS).flatMap((os) => os.map((o) => o.use));
+  const swapLines = results.flatMap((r) => ("lines" in r ? suggestSwaps((r as ReturnType<typeof checkIngredients>).lines, everyone) : []));
+  for (const s of [...swapUses, ...swapLines.flatMap((w) => [w.because, ...w.options]), ...Object.values(ALLERGENS).flatMap((a) => [a.label, a.spoken])]) assert.doesNotMatch(s, /\bsafe\b/i, s);
 });
