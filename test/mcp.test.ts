@@ -207,6 +207,7 @@ test("a valid barcode that Open Food Facts doesn't know cannot be confirmed, and
   const r = await call("check_product", { barcode: "012345678905" });
   assert.equal(r.structuredContent.kind, "product_check");
   assert.equal(r.structuredContent.overall, "cannot_confirm");
+  assert.ok(r.structuredContent.people.length > 0); // every() alone is true for nobody
   assert.ok(r.structuredContent.people.every((p: View) => p.verdict === "cannot_confirm"));
   assert.deepEqual(r.structuredContent.dataIssues, ["The product wasn't found in the database."]);
   assert.equal(r.structuredContent.source, undefined);
@@ -230,6 +231,7 @@ test("a recipe that isn't found says so and asks for the ingredients", async () 
 test("a product with no ingredient data cannot be confirmed", async () => {
   const r = await call("check_product", { barcode: "0098008952506" });
   assert.equal(r.structuredContent.overall, "cannot_confirm");
+  assert.ok(r.structuredContent.people.length > 0); // every() alone is true for nobody
   assert.ok(r.structuredContent.people.every((p: View) => p.verdict === "cannot_confirm"));
 });
 
@@ -287,12 +289,10 @@ test("an allergy list that resolves to nothing, or a blank name, is refused and 
   await call("remove_person", { name: "Keep Me" });
 });
 
-test("save_person without guest or until leaves a guest a guest", async () => {
+// The state rule is in store.test.ts; this is the sentence the person hears.
+test("save_person without guest or until still speaks of a guest", async () => {
   await call("save_person", { name: "Visiting Vic", allergies: ["milk"], until: "2999-01-01" });
   const more = await call("save_person", { name: "visiting vic", allergies: ["egg"] });
-  const vic = more.structuredContent.people.find((p: View) => p.name === "Visiting Vic");
-  assert.equal(vic.guest, true);
-  assert.equal(vic.until, "2999-01-01");
   assert.match(more.structuredContent.speech, /guest Visiting Vic until/);
   await call("remove_person", { name: "Visiting Vic" });
 });

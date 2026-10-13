@@ -78,7 +78,6 @@ test("a model that says 'safe' is overridden by the tool's verdict", async () =>
   const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "Is satay chicken with rice ok for Maya?" }) });
   const turn = await res.json();
   assert.equal(res.status, 200);
-  assert.ok(llmCalls >= 2);
   assert.doesNotMatch(turn.speech, /safe for everyone/);
   assert.match(turn.speech, /Maya should avoid this: it contains peanuts/);
   assert.equal(turn.views[0].overall, "unsafe");

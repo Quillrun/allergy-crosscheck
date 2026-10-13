@@ -108,8 +108,12 @@ test("an over-long ingredient list is refused by the tool schema", async () => {
   const app = await startApp();
   try {
     const call = (args: unknown) => post(`${app.url}/mcp`, JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "check_recipe", arguments: args } })).then((r) => r.json());
-    assert.equal((await call({ ingredients: "zorb, ".repeat(1000) })).result.isError, true);
-    assert.equal((await call({ ingredients: Array(201).fill("salt") })).result.isError, true);
+    // The size cap is what refuses them, not some unrelated error.
+    for (const ingredients of ["zorb, ".repeat(1000), Array(201).fill("salt")]) {
+      const { result } = await call({ ingredients });
+      assert.equal(result.isError, true);
+      assert.match(result.content[0].text, /too_big|too big|at most|Too big/i);
+    }
     assert.notEqual((await call({ ingredients: "salt, flour" })).result.isError, true);
   } finally {
     await app.close();

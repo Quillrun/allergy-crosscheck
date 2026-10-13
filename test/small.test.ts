@@ -3,19 +3,17 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { fakeFetch, startApp } from "./helpers.ts";
+import { callTool, connect, fakeFetch, startApp } from "./helpers.ts";
+import type { View } from "./helpers.ts";
 import { Sources } from "../src/server/sources.ts";
 
 let app: Awaited<ReturnType<typeof startApp>>;
 let client: Client;
-type View = Record<string, any>;
-const call = async (name: string, args: Record<string, unknown> = {}) => (await client.callTool({ name, arguments: args })) as { structuredContent: View; content: { text: string }[]; isError?: boolean };
+const call = (name: string, args: Record<string, unknown> = {}) => callTool(client, name, args);
 
 before(async () => {
   app = await startApp();
-  client = new Client({ name: "test-client", version: "1.0.0" });
-  await client.connect(new StreamableHTTPClientTransport(new URL(`${app.url}/mcp`)));
+  client = await connect(app);
   await call("save_person", { name: "Maya", allergies: ["tree nuts"] });
 });
 after(async () => {
@@ -75,8 +73,7 @@ test("a barcode given by voice is named in the speech, so a wrong item can be he
 test("a misheard barcode is refused with a spoken message and is never looked up", async () => {
   const looked: string[] = [];
   const spy = await startApp(undefined, { sources: new Sources(((u: string | URL | Request) => { looked.push(String(u)); return fakeFetch(u); }) as never, 2000) });
-  const c = new Client({ name: "spy-client", version: "1.0.0" });
-  await c.connect(new StreamableHTTPClientTransport(new URL(`${spy.url}/mcp`)));
+  const c = await connect(spy);
   try {
     await c.callTool({ name: "save_person", arguments: { name: "Maya", allergies: ["tree nuts"] } });
     for (const bad of ["3017624010702", "301762401070", "12345", "3017 6240 10701x", "04252615"]) {

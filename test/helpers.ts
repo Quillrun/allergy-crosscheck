@@ -2,6 +2,8 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { AddressInfo } from "node:net";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { createApp } from "../src/server/app.ts";
 import type { AppOptions } from "../src/server/app.ts";
 import type { Llm } from "../src/sim/agent.ts";
@@ -82,3 +84,14 @@ export async function startApp(llm?: Llm, extra: Partial<AppOptions> = {}) {
     close: () => new Promise<void>((r) => { http.closeAllConnections(); http.close(() => { rmSync(dir, { recursive: true, force: true }); r(); }); }),
   };
 }
+
+/** An MCP client over real Streamable HTTP, playing Alexa+. */
+export async function connect(app: { url: string }): Promise<Client> {
+  const client = new Client({ name: "test-client", version: "1.0.0" });
+  await client.connect(new StreamableHTTPClientTransport(new URL(`${app.url}/mcp`)));
+  return client;
+}
+
+export type View = Record<string, any>;
+export type ToolResult = { structuredContent: View; content: { text: string }[]; isError?: boolean };
+export const callTool = async (client: Client, name: string, args: Record<string, unknown> = {}) => (await client.callTool({ name, arguments: args })) as ToolResult;

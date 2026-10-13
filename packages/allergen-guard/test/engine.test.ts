@@ -86,7 +86,6 @@ test("lasagne: per-person verdicts and a household-aware swap list", () => {
   assert.deepEqual(swaps.map((s) => s.replace), ["1 Stick Celery", "400ml Creme Fraiche", "125g Mozzarella Balls", "50g Parmesan Cheese"]);
   const mozzarella = swaps.find((s) => s.replace.includes("Mozzarella"));
   // Dairy-free cheese is often cashew-based; Maya can't have tree nuts, so it must not be offered.
-  assert.ok(mozzarella?.options.every((o) => !/dairy-free cheese/.test(o)));
   assert.deepEqual(mozzarella?.options, ["Leave it out (no swap fits everyone)"]);
 });
 
@@ -612,8 +611,7 @@ test("precaution: 'not suitable for … allergy sufferers' is one precaution sen
   for (const a of ["tree_nut", "peanut", "sesame"] as AllergenId[]) { assert.ok(labelKinds(t, a).includes("may_contain"), a); assert.ok(!labelKinds(t, a).includes("contains"), a); }
   assert.ok(labelKinds("Rice. Unsuitable for those with a sesame allergy.", "sesame").includes("may_contain"));
   assert.ok(!labelKinds("Rice. Unsuitable for those with a sesame allergy.", "sesame").includes("contains"));
-  assert.ok(labelKinds("Flour, sesame. Not suitable for vegetarians.", "sesame").includes("contains"));
-  assert.ok(labelKinds("Flour, sesame. Not suitable for vegetarians.", "sesame").length === 1);
+  assert.deepEqual(labelKinds("Flour, sesame. Not suitable for vegetarians.", "sesame"), ["contains"]);
   // the sentence ends at its full stop: what follows stays an ingredient
   assert.ok(labelKinds("Not suitable for nut allergy sufferers. Sesame, salt.", "sesame").includes("contains"));
 });

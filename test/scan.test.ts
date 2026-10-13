@@ -3,22 +3,20 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { normalizeBarcode, validBarcode } from "../src/server/app.ts";
 import { SCAN_TTL_MS } from "../src/server/store.ts";
 import { loadPage } from "./dom.ts";
-import { startApp } from "./helpers.ts";
+import { callTool, connect, startApp } from "./helpers.ts";
+import type { View } from "./helpers.ts";
 
 let app: Awaited<ReturnType<typeof startApp>>;
 let client: Client;
-type View = Record<string, any>;
-const call = async (name: string, args: Record<string, unknown> = {}) => (await client.callTool({ name, arguments: args })) as { structuredContent: View; isError?: boolean };
+const call = (name: string, args: Record<string, unknown> = {}) => callTool(client, name, args);
 const scan = (barcode: unknown) => fetch(`${app.url}/scan`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ barcode }) });
 
 before(async () => {
   app = await startApp();
-  client = new Client({ name: "test-client", version: "1.0.0" });
-  await client.connect(new StreamableHTTPClientTransport(new URL(`${app.url}/mcp`)));
+  client = await connect(app);
   await call("save_person", { name: "Maya", allergies: ["peanuts", "tree nuts"] });
 });
 after(async () => {

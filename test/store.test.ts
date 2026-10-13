@@ -1,11 +1,16 @@
-import { test } from "node:test";
+import { after, test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Store } from "../src/server/store.ts";
+import { Store, isExpired } from "../src/server/store.ts";
 
-const tmp = () => join(mkdtempSync(join(tmpdir(), "ag-store-")), "household.json");
+const dirs: string[] = [];
+const tmp = () => {
+  dirs.push(mkdtempSync(join(tmpdir(), "ag-store-")));
+  return join(dirs.at(-1)!, "household.json");
+};
+after(() => dirs.forEach((d) => rmSync(d, { recursive: true, force: true })));
 
 test("profiles persist across restarts", () => {
   const path = tmp();
@@ -51,4 +56,14 @@ test("re-saving without guest or until keeps a guest's status and end date; sayi
   assert.deepEqual([s.find("Leo")!.guest, s.find("Leo")!.until], [false, undefined]); // explicitly a member now
   s.savePerson({ name: "Ana", allergies: ["fish"] });
   assert.deepEqual([s.find("Ana")!.guest, s.find("Ana")!.until], [false, undefined]); // new people default to household members
+});
+
+test("a guest's last day is still a visit; the day after is not; no end date never expires", () => {
+  assert.equal(isExpired({ until: "2026-10-10" }, "2026-10-10"), false);
+  assert.equal(isExpired({ until: "2026-10-10" }, "2026-10-11"), true);
+  assert.equal(isExpired({}, "2999-12-31"), false);
+  const s = new Store(tmp());
+  s.savePerson({ name: "Leo", allergies: ["milk"], guest: true, until: "2026-10-10" });
+  assert.deepEqual(s.expiredPeople("2026-10-10"), []);
+  assert.deepEqual(s.expiredPeople("2026-10-11").map((p) => p.name), ["Leo"]);
 });

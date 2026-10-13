@@ -5,9 +5,8 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { startApp } from "./helpers.ts";
+import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { connect, startApp } from "./helpers.ts";
 import { Store } from "../src/server/store.ts";
 
 let app: Awaited<ReturnType<typeof startApp>>;
@@ -17,8 +16,7 @@ const postJson = (path: string, body: string) => fetch(`${app.url}${path}`, { me
 
 before(async () => {
   app = await startApp({ baseUrl: "http://127.0.0.1:1/v1", model: "unused" }); // the body is refused before any LLM call
-  client = new Client({ name: "test-client", version: "1.0.0" });
-  await client.connect(new StreamableHTTPClientTransport(new URL(`${app.url}/mcp`)));
+  client = await connect(app);
   await call("save_person", { name: "Maya", allergies: ["peanuts"] });
 });
 after(async () => {

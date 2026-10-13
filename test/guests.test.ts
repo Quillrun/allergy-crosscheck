@@ -4,20 +4,18 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { startApp } from "./helpers.ts";
+import { callTool, connect, startApp } from "./helpers.ts";
+import type { View } from "./helpers.ts";
 
 let app: Awaited<ReturnType<typeof startApp>>;
 let client: Client;
-type View = Record<string, any>;
-const call = async (name: string, args: Record<string, unknown> = {}) => (await client.callTool({ name, arguments: args })) as { structuredContent: View; content: { text: string }[]; isError?: boolean };
+const call = (name: string, args: Record<string, unknown> = {}) => callTool(client, name, args);
 
 before(async () => {
   app = await startApp();
   app.store.savePerson({ name: "Maya", allergies: ["peanut"], guest: false });
   app.store.savePerson({ name: "Leo", allergies: ["milk"], guest: true, until: "2020-01-05" });
-  client = new Client({ name: "test-client", version: "1.0.0" });
-  await client.connect(new StreamableHTTPClientTransport(new URL(`${app.url}/mcp`)));
+  client = await connect(app);
 });
 after(async () => {
   await client.close();
