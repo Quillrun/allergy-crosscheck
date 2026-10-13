@@ -217,14 +217,12 @@ For each tool: what it was used for, what worked, what needs work, onboarding, a
 
 **Qwen3-TTS** (1.7B Base, `mlx-community/Qwen3-TTS-12Hz-1.7B-Base-8bit`, Apache 2.0, run locally with mlx-audio)
 - **Used for:** the narrator and the user voices in the demo video, cloned from synthetic reference voices (`docs/DEMO.md`). Alexa's lines are Amazon's own voice, not Qwen.
-- **Worked well:** the cloned voices were good enough to ship, and it ran locally.
+- **Worked well:** it ran locally, and all 18 lines passed the Whisper check on the first seed.
 - **Needs work:** every clip was transcribed with Whisper and compared with its script, accepting a match of 0.93 or better; all 18 lines passed on the first seed. Output peaks were normalised to -1 dBFS on write (`docs/video/work/qwen_cast.py`).
 - **Onboarding:** a model download and one script; the licence asks for nothing in the video.
 
 **Claude Code**
 - **Used for:** the coding agent for this repository (every commit carries a Claude co-author line).
-- **Worked well:** when used correctly: a clear brief, tests it has to pass, and a read of what it wrote before it was kept.
-- **Needs work:** it needs those checks. Without a brief, tests and a read of the output, what it writes cannot be kept as is.
 
 ### Feature requests (optional)
 - **Critical:** let developer accounts in any country use the web simulator for development-stage add-ons. The docs describe it as the end-to-end test path, and the Toolkit is documented as available in the United States; I did not attempt it from outside the US.
