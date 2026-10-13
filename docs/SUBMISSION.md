@@ -138,7 +138,7 @@ Alexa+
 Open Source
 
 ### Code repository URL
-<GitHub URL>
+https://github.com/Quillrun/allergy-crosscheck
 
 ### Testing instructions
 Node 22.6 or newer. Run `npm install && npm start`, then open http://127.0.0.1:8787/.
@@ -237,7 +237,7 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
 ### Open Source mini-challenge
 **NOTE TO AUTHOR, not form text:** Held: publishing waits for the owner's go.
 - **Contribution URL:** https://github.com/Quillrun/allergen-guard (private until he opens it; the mini challenge needs it public by submission)
-- **Project repository URL:** <repository URL>
+- **Project repository URL:** https://github.com/Quillrun/allergy-crosscheck
 - **GitHub username:** Quillrun
 - **What:** a zero-dependency TypeScript library for fail-closed allergen checks on recipes and packaged foods, covering the EU 14 and US Big 9 allergens.
 - **How:**
