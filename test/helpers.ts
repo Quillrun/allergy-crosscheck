@@ -28,12 +28,16 @@ export const MILK_IN_TEXT = {
   ingredients_text_en: "oats, sugar, skimmed milk powder, salt",
 };
 
+/** Open Food Facts often returns product_name: "" for a record that has a barcode and nothing else. */
+export const NAMELESS = { code: "4001112224441", product_name: "", allergens_tags: [], traces_tags: [], ingredients_text_en: "water, salt" };
+
 /** Offline stand-ins for Open Food Facts and TheMealDB. */
 export const fakeFetch: Fetcher = (async (input: string | URL | Request) => {
   const url = String(input);
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
   if (url.includes("/api/v2/product/3017624010701")) return json({ status: 1, product: NUTELLA });
   if (url.includes("/api/v2/product/4001112223338")) return json({ status: 1, product: MILK_IN_TEXT });
+  if (url.includes("/api/v2/product/4001112224441")) return json({ status: 1, product: NAMELESS });
   if (url.includes("/api/v2/product/0098008952506")) return json({ status: 1, product: { code: "0098008952506", product_name: "Nutella" } });
   if (url.includes("/api/v2/product/")) return json({ status: 0 });
   if (url.includes("search.openfoodfacts.org") && url.includes("q=Nutella")) {

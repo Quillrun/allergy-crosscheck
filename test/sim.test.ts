@@ -30,6 +30,10 @@ const fakeLlm = createServer(async (req, res) => {
       : { role: "assistant", content: "Done, and it's totally safe now!" }
     : /never stops/.test(asked)
     ? { role: "assistant", content: null, tool_calls: [call(`n${toolMsgs}`, "check_recipe", { ingredients: [toolMsgs === 0 ? "peanut butter" : "rice"], for: ["Maya"] })] }
+    : /bad arguments/.test(asked)
+    ? toolMsgs === 0
+      ? { role: "assistant", content: null, tool_calls: [{ id: "b1", type: "function", function: { name: "save_person", arguments: '{"name": "Zed", "allergies": ["egg"' } }] }
+      : { role: "assistant", content: "Sorry, which allergy was that?" }
     : /save Sam/.test(asked)
     ? toolMsgs === 0
       ? { role: "assistant", content: null, tool_calls: [call("c1", "save_person", { name: "Sam", allergies: ["egg"] })] }
@@ -183,4 +187,14 @@ test("simulator pages are served", async () => {
   assert.match(await (await fetch(`${app.url}/`)).text(), /Alexa\+ simulator/);
   assert.match(await (await fetch(`${app.url}/widget.html`)).text(), /ui\/initialize/);
   assert.deepEqual(await (await fetch(`${app.url}/health`)).json(), { ok: true, llm: true });
+});
+
+test("a tool call whose arguments are not JSON is not run, and the model is told", async () => {
+  const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: "bad arguments please" }) });
+  const turn = await res.json();
+  assert.equal(res.status, 200);
+  assert.deepEqual(turn.views, []);
+  assert.equal(turn.speech, "Sorry, which allergy was that?");
+  const told = turn.history.find((m: { role: string }) => m.role === "tool");
+  assert.match(told.content, /^Invalid JSON arguments/);
 });

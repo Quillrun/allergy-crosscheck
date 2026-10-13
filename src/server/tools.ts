@@ -211,12 +211,11 @@ function registerFindRecipe(server: McpServer, { sources }: Deps): void {
     {
       title: "Find a recipe",
       description: "Look up a recipe's ingredient list by dish name (for example 'lasagne'), so it can be checked with check_recipe.",
-      inputSchema: { dish: z.string().min(1).max(100) },
+      inputSchema: { dish: z.string().trim().min(1).max(100) },
       annotations: { readOnlyHint: true, openWorldHint: true },
       _meta: ui("Finding the recipe…", "Recipe found"),
     },
-    async ({ dish: rawDish }) => {
-      const dish = rawDish.trim() || "that dish";
+    async ({ dish }) => {
       const { recipe, error } = await sources.recipe(dish);
       if (!recipe) {
         return reply({
@@ -366,7 +365,7 @@ function registerCheckProduct(server: McpServer, { store, sources }: Deps): void
         searched = found.candidates[0].name;
       }
       const { product, error } = await sources.product(code);
-      const label = product?.product_name ?? name ?? code;
+      const label = product?.product_name || name || code;
       const said = product?.product_name?.trim() || searched;
       return productReply(label, checkProduct(product ?? null, people, error), people, store, missing, expired, product ? { label: "Open Food Facts" } : undefined, named && said ? `Checked ${said}: ` : "");
     },

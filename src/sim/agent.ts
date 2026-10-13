@@ -59,11 +59,13 @@ export async function runTurn(client: Client, llm: Llm, history: ChatMessage[], 
     if (msg.tool_calls?.length) {
       messages.push({ role: "assistant", content: msg.content ?? "", tool_calls: msg.tool_calls });
       for (const call of msg.tool_calls) {
-        let args: Record<string, unknown> = {};
+        let args: Record<string, unknown>;
         try {
           args = JSON.parse(call.function.arguments || "{}");
         } catch {
-          args = {};
+          // Not run with {} instead: the call would be attributed to the model with arguments it never gave. It is told, and can try again.
+          messages.push({ role: "tool", tool_call_id: call.id, content: "Invalid JSON arguments: the tool was not run. Call it again with valid JSON." });
+          continue;
         }
         const result = await client.callTool({ name: call.function.name, arguments: args });
         const view = result.structuredContent as View | undefined;

@@ -74,7 +74,7 @@ export function createApp(opts: AppOptions): Server {
         return res.end(readFileSync(new URL(file, import.meta.url)));
       }
       if (req.method === "POST" && url.pathname === "/scan") {
-        const { barcode } = (await readJson(req)) as { barcode?: string };
+        const { barcode } = (await readObject(req)) as { barcode?: string };
         const code = String(barcode ?? "").slice(0, 64).replace(/\D/g, "");
         const lookup = normalizeBarcode(code);
         if (!lookup) return send(res, 400, { error: "That isn't a valid barcode. Try again, or type the digits." });
@@ -87,14 +87,14 @@ export function createApp(opts: AppOptions): Server {
       if (req.method === "GET" && url.pathname === "/health") return send(res, 200, { ok: true, llm: Boolean(opts.llm) });
 
       if (req.method === "POST" && url.pathname === "/sim/tool") {
-        const { name, args } = (await readJson(req)) as { name: string; args?: Record<string, unknown> };
+        const { name, args } = (await readObject(req)) as { name: string; args?: Record<string, unknown> };
         client ??= await connect(http, opts.mcpToken);
         const result = await client.callTool({ name, arguments: args ?? {} });
         return send(res, 200, { view: result.structuredContent, isError: result.isError ?? false });
       }
       if (req.method === "POST" && url.pathname === "/sim/turn") {
         if (!opts.llm) return send(res, 503, { error: "No LLM configured. Set LLM_BASE_URL and LLM_MODEL, or use the demo buttons." });
-        const { history, text } = (await readJson(req)) as { history?: ChatMessage[]; text: string };
+        const { history, text } = (await readObject(req)) as { history?: ChatMessage[]; text: string };
         if (typeof text !== "string" || text.length > 2000 || (history !== undefined && (!Array.isArray(history) || history.length > 200))) return send(res, 400, { error: "text must be a string of at most 2000 characters, history at most 200 messages." });
         client ??= await connect(http, opts.mcpToken);
         const turn = await runTurn(client, opts.llm, history ?? [], text);
@@ -161,6 +161,12 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
   } catch {
     throw new BadJson();
   }
+}
+/** The /scan and /sim bodies are objects: JSON null, an array or a number is the caller's mistake, not a server fault. (/mcp takes any JSON-RPC body, batches included.) */
+async function readObject(req: IncomingMessage): Promise<Record<string, unknown>> {
+  const body = await readJson(req);
+  if (typeof body !== "object" || body === null || Array.isArray(body)) throw new BadJson();
+  return body as Record<string, unknown>;
 }
 class BadJson extends Error {}
 class TooLarge extends Error {}

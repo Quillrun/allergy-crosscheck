@@ -3,6 +3,7 @@
 
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
+import { ALLERGENS } from "../../packages/allergen-guard/src/index.ts";
 import type { AllergenId } from "../../packages/allergen-guard/src/index.ts";
 
 export type Profile = { name: string; allergies: AllergenId[]; guest: boolean; until?: string };
@@ -107,7 +108,10 @@ export class Store {
 function load(path: string): State {
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8")) as Partial<State>;
-    return { people: parsed.people ?? [], shopping: parsed.shopping ?? [], lastScan: parsed.lastScan };
+    // A file that parses but is not a household (a renamed key, an unknown allergen id) must not become an empty one, or fail later at ALLERGENS[id].label.
+    if (!Array.isArray(parsed?.people)) throw new Error("no people list");
+    for (const p of parsed.people) for (const a of p?.allergies ?? []) if (!Object.hasOwn(ALLERGENS, a)) throw new Error(`unknown allergen id ${JSON.stringify(a)} for ${p.name}`);
+    return { people: parsed.people, shopping: parsed.shopping ?? [], lastScan: parsed.lastScan };
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") return { people: [], shopping: [] };
     throw new Error(`Household file ${path} is unreadable; refusing to start with an empty household. ${String(err)}`);
