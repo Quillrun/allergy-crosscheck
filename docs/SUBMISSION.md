@@ -115,10 +115,10 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 alexa+, model-context-protocol, mcp-apps, streamable-http, typescript, node.js, open-food-facts, themealdb, web-speech-api, barcode-detector, mlx, qwen, claude-code
 
 ## Try it out (links)
-- Code repository: <GitHub URL, once the author decides private or public>
+- Code repository: https://github.com/Quillrun/allergy-crosscheck (private at the time of writing)
 
 ## Video demo link
-<YouTube URL, after the upload>. The file is `docs/video/allergy-crosscheck-demo.mp4` (2:41, 4K at 60 fps, recorded 12 October 2026), with captions in `docs/video/allergy-crosscheck-demo.srt`.
+https://youtu.be/h2UmjFyHJ-M (Unlisted until submission day, then Public). The file is `docs/video/allergy-crosscheck-demo.mp4` (2:41, 4K at 60 fps, recorded 12 October 2026), captions burned in.
 
 ## Image gallery (upload in this order)
 Files are in `docs/video/gallery/`, padded to 3:2.
@@ -248,30 +248,19 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
 - **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 93 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents. The engine is open source (MIT), so any allergy feature can start fail-closed.
 
 ## YouTube upload (not part of the Devpost form)
-- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:41, 4K at 60 fps), with captions in `docs/video/allergy-crosscheck-demo.srt` (English).
+Uploaded 13 October 2026: https://youtu.be/h2UmjFyHJ-M (v14 file, 2:41).
+- **File:** `docs/video/allergy-crosscheck-demo.mp4` (2:41, 4K at 60 fps). Captions are burned in; no caption file uploaded.
 - **Title:** Allergy Crosscheck: who at the table can eat it, and why (Alexa+ hackathon demo)
-- **Visibility:** Public. The rules say "publicly visible", and Unlisted may not count. This is the author's call.
+- **Visibility:** Unlisted until submission day, then Public (the rules say "publicly visible", and Unlisted may not count).
 - **Altered or synthetic content:** yes. The voices are synthetic: Alexa's lines are Amazon's Alexa voice from the developer console; the narrator and the user are AI-generated.
-- **Made for kids:** no. **Category:** Science & Technology.
-- **Description:**
+- **Made for kids:** no. **Category:** Science & Technology. **Language:** English.
+- **Thumbnail:** `docs/video/gallery/thumbnail-16x9.png` (the lasagne card).
+- **Description** (no repository link while the repo is private, no chapters):
 
 ```
 Allergy Crosscheck is an Alexa+ add-on, shown in a simulator, that tells you who at the table can eat it, and why: it checks recipes and scanned food for everyone, guests included. Its results never call a food "safe": when the data can't back an answer, it says "I can't confirm".
 
 Built for Amazon's Build, Ship, Shape hackathon (Alexa+ track): a self-hosted MCP server (spec 2025-11-25, Streamable HTTP), an MCP Apps screen for the Echo Show, and an open-source allergen engine. The voices are synthetic. Product data: Open Food Facts (ODbL). Recipes: TheMealDB.
-
-Code: <repository URL>
-
-0:00 One in fifteen US adults has a food allergy
-0:06 A record with no ingredient list: no list, no guess
-0:18 Allergy Crosscheck's answer for it: "can't confirm"
-0:27 The simulator
-0:35 Saving the household and a guest
-0:53 One ask: the lasagne checked for everyone, the swaps on the list
-1:23 Scan on a phone: missing data means "can't confirm"
-1:38 A cocoa mix: the tags say "may contain" milk, the ingredients show it is in
-2:12 Sunday: the guest's visit is over
-2:23 How it's built, and what the server ships
 ```
 
 ## Repository access (not part of the Devpost form)
