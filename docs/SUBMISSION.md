@@ -17,6 +17,12 @@ Who at the table can eat tonight's dinner, and why? Allergy Crosscheck answers t
 
 What is real and what is simulated: the MCP server, the allergen engine, the Echo Show screen and the phone scan are the shipped code; the Alexa+ host in the video is a simulator driven by a local model, because the MCP Toolkit is available in the United States and I am outside it (details under "Simulated Alexa+" below).
 
+**For the judges, in their four criteria**
+- **Tech implementation:** self-hosted MCP server, spec 2025-11-25 over Streamable HTTP, 9 tools, MCP Apps screen with tap-to-choose; 158 automated tests, 93 in the engine.
+- **Design:** one ask gives a verdict per person on the Echo Show screen and in speech, with the risky ingredients and swaps; guests expire; the screen is authored at the guide's 768×480 base canvas.
+- **Potential impact:** 1 in 15 US adults has a food allergy; on the 1.55 million products scanned in the Open Food Facts app, the engine gives a decisive answer for 22.9 to 30.5% of records, "can't confirm" for the rest instead of a false "allergen-free".
+- **Quality of the idea:** three of Amazon's own "creative" examples built (agentic workflow in one turn, state across sessions, MCP Apps), and a cross-check that catches a real cocoa mix whose tags say milk is only "may contain".
+
 ### Inspiration
 I have seen people close to me go through allergic reactions, and I have had one myself without ever finding out what caused it. That is where this started.
 
@@ -60,7 +66,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   - a **verdict lock**: after a check or a change, the spoken answer is the tools' own sentences, verdicts first;
   - a **no-tool guard**: a keyword filter that blocks common verdict and action phrases when no tool has returned a result.
 
-  On a real Alexa+, add-ons can't script speech. What ships is the server's side: every check result starts with a `VERDICT:` line, and every result carries the exact sentence to say. A verbatim hint for safety answers is the top feature request below.
+  On a real Alexa+, add-ons can't script speech. What ships is the server's side: every check result starts with a `VERDICT:` line, and every result carries the exact sentence to say. A verbatim hint for safety answers is the top item in the product feedback's feature requests.
 - **158 automated tests** (93 of them in the engine package), including:
   - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
