@@ -104,7 +104,7 @@ The screen follows parts of the Alexa+ MCP design guide: it is authored at the g
 - it applies the host's theme and safe-area insets (divided by the scale, so the host's pixels are not scaled twice);
 - no links out of the view.
 
-Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result repeats `resourceUri`. Some failures set `isError`: `save_person` (blank name, allergy not recognised, no allergy given, a date that isn't a real day or has already passed), `remove_person` (nobody by that name), `find_recipe` (recipe not found), `check_product` (nothing scanned, or no product named), `add_to_shopping_list` (only blank items) and `remove_from_shopping_list` (item not on the list). A product name that finds nothing is a normal "check the label" answer, not an error.
+Each tool declares `_meta.ui.resourceUri` with `invoking`/`invoked` status lines, and every result the server builds repeats `resourceUri` (a refusal by the input schema, such as a blank dish or an over-long list, is the SDK's own error and carries none). Some failures set `isError`: `save_person` (blank name, allergy not recognised, no allergy given, a date that isn't a real day or has already passed), `remove_person` (nobody by that name), `find_recipe` (recipe not found), `check_product` (nothing scanned, no product named, or a barcode whose check digit fails), `add_to_shopping_list` (only blank items) and `remove_from_shopping_list` (item not on the list). A product name that finds nothing is a normal "check the label" answer, not an error.
 
 ### What Alexa+ receives
 
