@@ -23,7 +23,7 @@ npm start    # then open http://127.0.0.1:8787/ and press the demo script button
 | **Allergen tags say soy, milk only "may contain"; the ingredient text shows it is in** | **A guest saved until Saturday: not checked after the visit** |
 | ![Product check](docs/screenshots/product-check.png) | ![Household](docs/screenshots/household.png) |
 
-Screens from the recorded demo run: a local model driving the server, with live data. They show the screen's earlier layout, from before it was moved to the 768×480 base canvas.
+Screens from the recorded demo run: a local model driving the server, with live data. The video, its script and how it was made: [docs/DEMO.md](docs/DEMO.md); the submission text: [docs/SUBMISSION.md](docs/SUBMISSION.md).
 
 ## Why fail-closed matters here
 
@@ -85,7 +85,7 @@ npx @modelcontextprotocol/inspector   # transport: Streamable HTTP, URL: http://
 
 ### Alexa+
 
-The Alexa+ MCP Toolkit currently serves US accounts. To connect this server to Alexa+:
+The Alexa+ docs say the MCP Toolkit is available in the United States ([overview](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-overview.html)). To connect this server to Alexa+:
 
 1. Run Amazon's Local Inspector against it (installed from the Developer Console): `addon-local-inspector http://127.0.0.1:8787/mcp`. It writes a certification verdict to `/tmp/alexaplus-addon-local-inspector-live/`.
 2. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://127.0.0.1:8787`, and add the tunnel host to `ALLOWED_HOSTS`. Set `MCP_TOKEN` if the connection can send a bearer header, since otherwise anyone with the URL can read and change the household's allergies; `/sim/*` answers loopback callers only (a tunnel counts as remote) unless `SIM_PUBLIC=1`.
@@ -170,7 +170,7 @@ test/                      integration tests
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The screen and the tap-to-choose flow | Headless Chrome, with every demo button's screen measured at the guide's 768×480 base canvas (dark and light), at 1280×800 with the 1.667 root scale (dark theme only), and in the simulator's Echo Show 8 frame: all fit with no scrolling. The tap-to-choose click was checked in that scaled frame. Not tested on a real Echo Show |
-| Real Alexa+ | **Not tested.** The Alexa+ MCP Toolkit serves US accounts, and this was built outside the US |
+| Real Alexa+ | **Not tested.** The docs say the MCP Toolkit is available in the United States; this was built outside the US and no deployment was attempted |
 | Amazon's Local Inspector | **Not run.** It installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4) |
 
 The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`). On real Alexa+, add-ons can't script what Alexa says. There, the defence is in the server: every check result leads with a `VERDICT:` line and every result carries the exact sentence to say, and the tool descriptions tell the model to repeat it. Asking Amazon for a verbatim-speech hook is entry 2 in the [friction log](docs/FRICTION_LOG.md).
