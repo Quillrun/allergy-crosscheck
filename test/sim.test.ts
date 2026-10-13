@@ -15,9 +15,12 @@ const fakeLlm = createServer(async (req, res) => {
   for await (const c of req) chunks.push(c as Buffer);
   const body = JSON.parse(Buffer.concat(chunks).toString());
   llmCalls++;
-  const sawTool = body.messages.some((m: { role: string }) => m.role === "tool");
-  const toolMsgs = body.messages.filter((m: { role: string }) => m.role === "tool").length;
-  const asked = body.messages.find((m: { role: string }) => m.role === "user").content as string;
+  // Only the current turn counts (the latest user message that is not the loop's nudge): a long history carries the tool results of earlier turns.
+  const lastUser = body.messages.map((m: { role: string; content?: string }) => m.role === "user" && !/^You answered without calling a tool/.test(m.content ?? "")).lastIndexOf(true);
+  const thisTurn: { role: string }[] = body.messages.slice(lastUser);
+  const sawTool = thisTurn.some((m) => m.role === "tool");
+  const toolMsgs = thisTurn.filter((m) => m.role === "tool").length;
+  const asked = body.messages[lastUser].content as string;
   const call = (id: string, name: string, args: unknown) => ({ id, type: "function", function: { name, arguments: JSON.stringify(args) } });
   const message = /chain/.test(asked)
     ? toolMsgs === 0
@@ -130,14 +133,28 @@ test("without a tool call the model may still ask a question", async () => {
 });
 
 test("long history is trimmed at a user turn, never between a tool call and its result", async () => {
-  let history: { role: string }[] = [];
-  for (let i = 0; i < 10; i++) {
-    const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ history, text: "Is satay chicken with rice ok for Maya?" }) });
+  // Each turn is four messages (user, tool call, tool result, spoken answer); 15 turns is 60, over the limit of 40.
+  type Msg = { role: string; content?: string | null; tool_calls?: { id: string }[]; tool_call_id?: string };
+  let history: Msg[] = [];
+  for (let i = 1; i <= 15; i++) {
+    const res = await fetch(`${app.url}/sim/turn`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ history, text: `Is satay chicken with rice ok for Maya? (round ${i})` }) });
     history = (await res.json()).history;
   }
-  assert.ok(history.length <= 40);
+  assert.equal(history.length, 40); // 60 messages were produced: the oldest five turns are gone, whole
   assert.equal(history[0].role, "user");
-  assert.ok(history.some((m) => m.role === "tool"));
+  assert.match(String(history[0].content), /round 6\)$/);
+  assert.equal(history.filter((m) => m.role === "user").length, 10);
+  assert.ok(!history.some((m) => /round [1-5]\)/.test(String(m.content))));
+  // Every tool result follows the assistant message that made the call, and every call has all its results.
+  history.forEach((m, i) => {
+    if (m.role === "tool") {
+      const call = history.slice(0, i).reverse().find((x) => x.role === "assistant" && x.tool_calls);
+      assert.ok(call?.tool_calls?.some((c) => c.id === m.tool_call_id), `tool result ${i} has no call`);
+    }
+    for (const c of m.tool_calls ?? []) {
+      assert.ok(history.slice(i + 1).some((x) => x.role === "tool" && x.tool_call_id === c.id), `call ${c.id} at ${i} has no result`);
+    }
+  });
 });
 
 test("the verdict lock holds when the tool loop runs out: an earlier unsafe check is still spoken", async () => {
