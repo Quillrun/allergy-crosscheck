@@ -137,6 +137,42 @@ function readable(text: string): boolean {
   return content.some((w) => !odd.has(w)) || !/[^\x00-\x7f]/.test(text.replace(/[^\p{L}]/gu, ""));
 }
 
+// A nutrition panel, OCR fragments or marketing copy filed as the ingredient text (6 of 100 "no listed allergens" records in the
+// 13 October 2026 hand-check, bench/nonelisted-2026-10-13.md): there is no ingredient list to read, so "no listed allergens" would rest on nothing.
+const NUTRITION_MARKER = /(?:^| )(?:per 100 ?(?:g|ml)|per serving|serving size|servings? per (?:container|pack|package)|amount per serving|nutrition(?:al)? (?:facts|values?|information|declaration)|typical values|daily values?|reference intakes?|average adult|of which (?:sugars|saturates)|saturated fat|trans fat|total (?:fat|carbohydrates?)|dietary fib(?:er|re)|cholesterol|kcal|kj|(?:energy|calories) \d)(?= |$)/;
+// A nutrient name is a panel row, not a food, when a number follows it ("sugars 10 g") or when it comes after the panel's first marker.
+const NUTRIENTS = new Set("energy calories fat fats saturates sugar sugars salt sodium protein proteins fibre fiber carbohydrate carbohydrates starch".split(" "));
+const PLAIN = new Set(PLAIN_FOODS.map((w) => normalize(w)));
+const plainFood = (w: string) => PLAIN.has(w) || PLAIN.has(w.replace(/es$/, "")) || PLAIN.has(w.replace(/s$/, "")) || PLAIN.has(w.replace(/ies$/, "y"));
+/** How many words of normalised text name a food: a plain food or an allergen term ("skimmed milk powder" -> 2: milk, powder), anywhere in the text. */
+function foodWords(norm: string, markerAt = Infinity): number {
+  let n = 0;
+  let rest = ` ${norm} `;
+  for (const re of TERM_PHRASES) rest = rest.replace(new RegExp(re.source, "g"), (m) => { n += m.trim().split(" ").length; return " ".repeat(m.length); });
+  const words = [...rest.matchAll(/\S+/g)].map((m) => ({ w: m[0], at: m.index - 1 }));
+  words.forEach((t, i) => {
+    if (!plainFood(t.w)) return;
+    if (NUTRIENTS.has(t.w) && (t.at >= markerAt || /^\d/.test(words[i + 1]?.w ?? ""))) return;
+    n++;
+  });
+  return n;
+}
+/**
+ * True for readable text with no ingredient list in it: a nutrition panel that names no food ("Serving size 1oz, Total fat 14%…"; a list
+ * before or after the panel keeps it a list), or one run of words with no list separator and no food in it, long or strewn with numbers
+ * ("Mutrition Facts 1 Lat www home 10% 87 ww f 22 CO"). A short run naming one unknown food ("hydrolysed bovine collagen peptides") stays a list.
+ */
+function notAList(text: string): boolean {
+  const norm = normalize(text);
+  const marker = NUTRITION_MARKER.exec(norm);
+  if (marker) return foodWords(norm, marker.index) === 0;
+  if (splitIngredients(text).length !== 1 || foodWords(norm) > 0) return false;
+  const words = norm.split(" ").filter(Boolean);
+  const content = words.filter((w) => w.length > 1 && !/^\d/.test(w) && !FILLER.has(w)).length;
+  const numbers = words.filter((w) => /^\d/.test(w)).length;
+  return content >= 8 || (content >= 4 && numbers >= 2);
+}
+
 /** The food a line names, without quantities and preparation words ("2 tbsp garam masala" -> "garam masala"). */
 const foodName = (line: string) => normalize(line).split(" ").filter((w) => w && !/^\d/.test(w) && !FILLER.has(w)).join(" ");
 
@@ -297,6 +333,7 @@ export function checkProduct(product: OffProduct | null, people: Person[], looku
   const { ingredients, warnings } = splitPrecautions(english);
   // "-", "n/a", "see pack", "100%", or a whole list in another language: text with no word the catalogue knows is not a clean list.
   if (english && !readable(ingredients)) dataIssues.push("I couldn't read the ingredient list.");
+  else if (english && notAList(ingredients)) dataIssues.push("The text on file is not an ingredient list, so I can't read it.");
   const claimed = new Set((product.labels_tags ?? []).flatMap((t) => FREE_FROM_LABELS[t] ?? []));
   const fromLabel: Hit[] = [];
   splitIngredients(ingredients).forEach((l) => fromLabel.push(...scanIngredient(l)));

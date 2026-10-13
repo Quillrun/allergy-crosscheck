@@ -1036,3 +1036,39 @@ test("never says 'safe': no speech, reason, data issue, swap or label of the eng
   const swapLines = results.flatMap((r) => ("lines" in r ? suggestSwaps((r as ReturnType<typeof checkIngredients>).lines, everyone) : []));
   for (const s of [...swapUses, ...swapLines.flatMap((w) => [w.because, ...w.options]), ...Object.values(ALLERGENS).flatMap((a) => [a.label, a.spoken])]) assert.doesNotMatch(s, /\bsafe\b/i, s);
 });
+
+test("product: a nutrition panel, OCR fragments or marketing copy filed as the ingredient text cannot be confirmed", () => {
+  // The six "no listed allergens" records of the 13 October 2026 hand-check whose text names no ingredient (bench/nonelisted-2026-10-13.md).
+  const notLists = [
+    "170215395 - lidl nutritional values s/100 g 271 kj/",
+    "iry typical ergy which satuaes fare you arenotente please return when and vales confed po box 255 ack (alon was y ltd. c",
+    "r,recommended ynosi for average adult (8400 k stevilo portion: 8, ri,assunzioni di riferimento di un adulto medio (8400 k proteine-beliakovine flore-nutritional fibre enengia - enerciiska vrednost ai cui zuccheri - of which sugars aldri nutrisonali medi per %ri 62,5 100 g wreona nutritional value",
+    "NANAR IGNITE HOT SAU 14 PK GOURMET HOT YOUR JOURNEY AS YOU FLIMS LEVELS OF HEAT WITH EN RE WITH A FRIEND AND SEE WHO CAN COMPLETE THE HOF SA MND MEDIUM HOT NOSE PEEN OF A $48 OF E",
+    "Serving Size 1oz\n\nAmount Per Serving\n\nTotal Fat 14%\nSaturated fat 0%\nTrans fat 0g\nOmega-6 1.6g\nOmega-3 4.8g\nCholesterol 0gm\nSodium 0mg\nTotal Carbohydrate 11.8g\nDietary Fiber 12g\nSugar 0g\nProtein 7g\n\nCalcium 18%\nZinc 8%",
+    "Mutrition Facts 1 Lat www home 10% 87 ww f 22 CO",
+    "Per 100 g: energy 2000 kJ, fat 3 g, of which saturates 1 g, salt 0.1 g",
+  ];
+  for (const text of notLists) {
+    const r = checkProduct(off([], undefined, { ingredients_text_en: text }), [person("Maya", "milk")]);
+    assert.equal(r.overall, "cannot_confirm", text);
+    assert.deepEqual(r.dataIssues, ["The text on file is not an ingredient list, so I can't read it."], text);
+    assert.equal(r.speech, "I can't confirm this is OK for Maya: the text on file is not an ingredient list, so I can't read it. Treat it as unsafe and check the label.");
+  }
+  // A list stays a list: a panel after it, a nutrient as the one ingredient, two unknown ingredients, one short unknown ingredient.
+  const lists = [
+    "Wheat flour, sugar, palm oil. Nutritional values per 100 g: energy 2000 kJ, fat 20 g, of which saturates 10 g, salt 0.5 g",
+    "Sugar. Nutrition facts per 100 g: energy 1700 kJ",
+    "Maltodextrin, xylitol",
+    "Xylitol",
+    "Water 60%, sugar 30%, salt 10%. Per 100 g: energy 500 kJ",
+    // Found refused by the first cut of this rule (13 October, 50 refused records read): a short run naming one food the catalogue doesn't know, and a panel before the list.
+    "Hydrolysed bovine collagen peptides",
+    "100% whole grain non-gmo white popcorn.",
+    "energy 126kcal 503kcal 7.2g 28.7g fat of which saturates 0.6g 2.5g carbohydrate of which 13.3g 53.3g sugars 0.8g 3.1g 1.5g 5.8g 1.4g protein salt 0.4g prawn cocktail flavour potato crisps ingredients: potatoes, sunflower oil (30%), sugar, acidity regulator: sodium diacetate",
+  ];
+  for (const text of lists) {
+    const r = checkProduct(off([], undefined, { ingredients_text_en: text }), [person("Maya", "peanut")]);
+    assert.deepEqual(r.dataIssues, [], text);
+    assert.equal(r.overall, "no_listed_allergens", text);
+  }
+});
