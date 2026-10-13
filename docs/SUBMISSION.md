@@ -237,7 +237,7 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
 
 ### Open Source mini-challenge
 **NOTE TO AUTHOR, not form text:** Held: publishing waits for the owner's go.
-- **Contribution URL:** <github.com/Quillrun/allergen-guard, after publishing>
+- **Contribution URL:** https://github.com/Quillrun/allergen-guard (private until he opens it; the mini challenge needs it public by submission)
 - **Project repository URL:** <repository URL>
 - **GitHub username:** Quillrun
 - **What:** a zero-dependency TypeScript library for fail-closed allergen checks on recipes and packaged foods, covering the EU 14 and US Big 9 allergens.
