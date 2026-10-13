@@ -529,7 +529,7 @@ const isExpired = (p: Profile) => Boolean(p.until && p.until < localDate());
 const guestTag = (p: Profile) => (!p.guest ? "" : isExpired(p) ? ` (guest, visit ended ${spokenDate(p.until!)})` : " (guest)");
 
 function peopleRows(all: Profile[]): View["people"] {
-  return all.map((p) => ({ name: p.name, verdict: "no_listed_allergens" as Verdict, reasons: [], guest: p.guest, ...(isExpired(p) ? { expired: true } : {}), until: p.until, allergies: p.allergies.map((a) => ALLERGENS[a].label) }));
+  return all.map((p) => ({ name: p.name, guest: p.guest, ...(isExpired(p) ? { expired: true } : {}), until: p.until, allergies: p.allergies.map((a) => ALLERGENS[a].label) }));
 }
 
 function reply(view: View, isError = false) {

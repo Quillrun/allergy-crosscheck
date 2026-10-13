@@ -69,3 +69,12 @@ test("a household file that parses but is not a household refuses to load", () =
   assert.throws(() => new Store(write({ people: [{ name: "Ann", allergies: ["kiwi"], guest: false }] })), /unknown allergen id "kiwi" for Ann/);
   assert.deepEqual(new Store(write({ people: [{ name: "Ann", allergies: ["milk"], guest: false }] })).find("ann")?.allergies, ["milk"]);
 });
+
+test("a household list names people, never a verdict: nobody was checked", async () => {
+  for (const r of [await call("list_people"), await call("save_person", { name: "Ben", allergies: ["egg"] }), await call("remove_person", { name: "Ben" })]) {
+    const people = r.structuredContent?.people as Record<string, unknown>[];
+    assert.ok(people.length > 0);
+    for (const p of people) assert.ok(!("verdict" in p) && !("reasons" in p), JSON.stringify(p));
+    assert.equal(r.structuredContent?.overall, undefined);
+  }
+});
