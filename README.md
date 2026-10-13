@@ -85,7 +85,7 @@ npx @modelcontextprotocol/inspector   # transport: Streamable HTTP, URL: http://
 
 ### Alexa+
 
-The Alexa+ docs say the MCP Toolkit is available in the United States ([overview](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-overview.html)). To connect this server to Alexa+:
+Untested, from Amazon's docs: the Alexa+ add-on tools (MCP Toolkit, CLI, web simulator) are a preview for select partners, and the [overview](https://developer.amazon.com/docs/alexaplus/add-ons/mcp-toolkit-overview.html) limits the Toolkit to the United States. Once you have access, to connect this server to Alexa+:
 
 1. Run Amazon's Local Inspector against it (installed from the Developer Console): `addon-local-inspector http://127.0.0.1:8787/mcp`. It writes a certification verdict to `/tmp/alexaplus-addon-local-inspector-live/`.
 2. Expose it over HTTPS, e.g. `cloudflared tunnel --url http://127.0.0.1:8787`, and add the tunnel host to `ALLOWED_HOSTS`. Set `MCP_TOKEN` if the connection can send a bearer header, since otherwise anyone with the URL can read and change the household's allergies; `/sim/*` answers loopback callers only (a tunnel counts as remote) unless `SIM_PUBLIC=1`.
@@ -135,7 +135,7 @@ The tool result, trimmed (`structuredContent` also carries each person's reasons
 | `save_person` | Save a household member or guest (with an optional last day) and their allergies; unknown allergies are rejected, not dropped |
 | `remove_person`, `list_people` | Manage who is checked |
 | `check_recipe` | Ingredients, or a dish name looked up on TheMealDB; verdict per person, flagged lines, household-aware swaps |
-| `check_product` | The product just scanned on the phone, or by barcode or name (Open Food Facts); several matches → choices; no recent scan → asks for one |
+| `check_product` | The product just scanned on the phone (the model passes `scanned: true`), or by barcode or name (Open Food Facts); several matches → choices; no recent scan → asks for one |
 | `find_recipe` | Look up a dish's ingredient list |
 | `add_to_shopping_list`, `get_shopping_list`, `remove_from_shopping_list` | Shopping list for the swaps |
 
@@ -170,7 +170,7 @@ test/                      integration tests
 | The scan page | Headless Chrome with a fake camera showing a barcode image: decoded, looked up and checked through the real model ("what I just scanned") |
 | The full demo conversation | End to end in the simulator on a local model (Qwen3.5 9B, 4-bit, MLX), against live Open Food Facts and TheMealDB data |
 | The screen and the tap-to-choose flow | Headless Chrome, with every demo button's screen measured at the guide's 768×480 base canvas (dark and light), at 1280×800 with the 1.667 root scale (dark theme only), and in the simulator's Echo Show 8 frame: all fit with no scrolling. The tap-to-choose click was checked in that scaled frame. Not tested on a real Echo Show |
-| Real Alexa+ | **Not tested.** The docs say the MCP Toolkit is available in the United States; this was built outside the US and no deployment was attempted |
+| Real Alexa+ | **Not tested.** The add-on tools are a partner-only preview (hackathon FAQ), and the docs limit the Toolkit to the United States; there was no deployment to test |
 | Amazon's Local Inspector | **Not run.** It installs from a private registry that needs an AWS account with access to an Amazon role (friction log 4) |
 
 The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`). On real Alexa+, add-ons can't script what Alexa says. There, the defence is in the server: every check result leads with a `VERDICT:` line and every result carries the exact sentence to say, and the tool descriptions tell the model to repeat it. Asking Amazon for a verbatim-speech hook is entry 2 in the [friction log](docs/FRICTION_LOG.md).
@@ -178,8 +178,12 @@ The verdict lock and the no-tool guard live in the simulator (`src/sim/agent.ts`
 ## Limits, stated plainly
 
 - English ingredient text only. Products without it get "can't confirm".
-- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". Across all 790 TheMealDB recipes, 2.6% of ingredient lines hit that rule (a one-off check before the 2026-10-11 engine fixes, which changed the filler words and so this rate; its script and result are not in this repo, so it can't be re-run from here); the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every "can't confirm" and "nothing listed" answer ends with "check the label" in its spoken sentence; the "avoid" answers don't say it, but every tool result carries the on-screen disclaimer "Data can be wrong: always check the label".
+- In a recipe, a word the dictionary doesn't know gives "can't confirm", never "none listed". A few percent of TheMealDB's ingredient lines hit that rule (a one-off check over all its recipes; the script is not in this repo, so the figure is not claimed here); the rest are recognised. The remaining risk is a known word that hides an allergen under a name the dictionary treats as plain. That's why every "can't confirm" and "nothing listed" answer ends with "check the label" in its spoken sentence; the "avoid" answers don't say it, but every tool result carries the on-screen disclaimer "Data can be wrong: always check the label".
 - Product checks read the label's declared allergens, traces and English ingredient text; unrecognised words there don't block an answer, because the declaration is the legal record. The exceptions give "can't confirm": a foreign allergen word, letters from a non-Latin script, a foreign "may contain" warning that names nothing the engine knows, or text that isn't an ingredient list ("-", "n/a", "see pack", or only unknown words with accented letters).
 - Saying someone is "also allergic to" something adds it; only "no longer allergic" replaces the list.
 - It isn't medical advice and isn't an emergency service.
 - Data: Open Food Facts (ODbL). Product data: [Open Food Facts](https://world.openfoodfacts.org), ODbL. Recipes: [TheMealDB](https://www.themealdb.com), using its free development key.
+
+## Data and licences
+
+The engine's bench files (`packages/allergen-guard/bench/`) are built on a snapshot of Open Food Facts data under the Open Database License (ODbL) 1.0. The files `fixtures.jsonl`, `foreign-*.json` and `results-*.json` there contain or derive from that data and are ODbL, not MIT. Attribution: Open Food Facts, https://world.openfoodfacts.org.
