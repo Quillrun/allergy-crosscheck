@@ -90,7 +90,8 @@ export function scanIngredient(line: string, kind: "contains" | "may_contain" = 
   // "lactose free milk" is still milk.
   // Also "not from milk", "not derived from milk", "contains no nuts", and the same word in other languages ("sans gluten", "ohne ei").
   const claimed = [...text.matchAll(/\b(?:([a-z]+) free(?! range| (?:from|of)\b)|free (?:from|of) ([a-z]+)|not (?:derived |made )?from ([a-z]+)|(?:sans|sin|senza|ohne|uten|zonder) ([a-z]+)|contains? no ([a-z]+)|(?:does not|do not|doesn t|don t) contain ([a-z]+))\b/g)].map((m) => m[1] ?? m[2] ?? m[3] ?? m[4] ?? m[5] ?? m[6]).filter((w) => w !== "lactose");
-  const freeFrom = new Set(resolveAllergies(claimed).ids);
+  // "wheat free" names wheat, not every gluten grain: barley and rye stay gluten ("wheat" resolves to wheat and gluten for a person's list, not here).
+  const freeFrom = new Set(claimed.flatMap((w) => (w === "wheat" ? ["wheat" as AllergenId] : resolveAllergies([w]).ids)));
   // "dairy free chocolate (contains milk)": an explicit "contains X" in the same item beats the free-from wording.
   const explicit = new Set([...text.matchAll(/(?<!\b(?:not|may|might|t) )\bcontains? (?!no\b)((?:[a-z]+ ?){1,4})/g)].flatMap((m) => resolveAllergies(m[1].trim().split(" ")).ids));
   return dedupe(hits.map((h) => (h.kind === "contains" && freeFrom.has(h.allergen) && !explicit.has(h.allergen) ? { ...h, kind: "possible" as const } : h)));

@@ -982,3 +982,12 @@ test("engine: an English warning naming a word we can't place is a data issue, n
     "water. May contain one or more of the following: celery, mustard", "water (may contain egg, milk, soy)",
   ]) assert.equal(checkProduct({ ingredients_text_en: text }, [person("X", "lupin")]).overall, "no_listed_allergens", text);
 });
+
+test("engine: a 'wheat free' claim covers wheat only, so barley and malt stay gluten", () => {
+  const kinds = (s: string) => Object.fromEntries(scanIngredient(s).map((h) => [h.allergen, h.kind]));
+  assert.equal(kinds("wheat free barley malt extract").gluten, "contains");
+  assert.equal(kinds("wheat free rye bread").gluten, "contains");
+  assert.equal(kinds("wheat free bread").wheat, "possible"); // the claim still weakens wheat
+  assert.equal(kinds("gluten free bread").gluten, "possible"); // and a gluten-free claim still weakens gluten
+  assert.equal(verdict("wheat free barley malt extract", "gluten"), "unsafe");
+});
