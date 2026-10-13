@@ -87,7 +87,7 @@ The engine changes of the same round (more precaution wordings, "not from X" and
 - *R3, nitrite and naturally-occurring statements.* An occurrence does not count when it comes after "naturally occurring in" or "except for those" within the same item. Example caught: "uncured pepperoni no nitrates or nitrites added except for those naturally occurring in sea salt and celery juice (pork, ...)". "SHERRY VINEGAR (CONTAINS NATURALLY OCCURRING SULFITES)" has no "in" after "occurring", is a real explicit statement, and still counts.
 - If a hit's term cannot be found in its source text by this matching, the hit does not count (the rules cannot vouch for it), and it is counted in `strict_hits_unlocated` so the number is visible.
 - *Sample.* The `strict_sample` reservoir seed changes from 7 to 3, so the round-3 pool differs from round 2's. The `change_sample` seed is unchanged.
-- *Engine.* The engine changed since round 2: commit `bab00b8` plus the foreign-text fix (English ingredient text that contains a word from `FOREIGN_ALLERGEN_WORDS` now carries "Part of the ingredient list isn't in English, so I can't read it."). The round-3 numbers will therefore differ from round 2's for engine reasons as well as rule reasons.
+- *Engine.* The engine changed since round 2: commit `bab00b8` plus the foreign-text fix (English ingredient text that contains a word from `FOREIGN_ALLERGEN_WORDS` now carries "Part of the ingredient list isn't in English, so I can't read it."). The round-3 numbers will therefore differ from round 2's for engine reasons as well as rule reasons. Commit hashes in this document refer to the application repository (Allergy Crosscheck), whose history this package was split from; they are not resolvable in this repository.
 - *Round-3 hand check and decision rule.* 100 records are drawn with mulberry32 seed 20261009 from the round-3 `strict_sample`, excluding every code checked in rounds 1 and 2. Two independent checkers judge them by the hand-check protocol below (unclear = not real). The count is claimed only at 100 of 100 real; otherwise the measured precision is reported.
 
 **Round-4 rules (fixed before the run, 2026-10-09).** The round-3 hand check found 95 of 100 real; all 5 misses are gaps in the count's own rules. Three rules are added, working per occurrence like R1-R3, and every earlier rule stays (including dropping unlocated hits). A strict hit counts only if at least one occurrence of its term survives R1-R6.
@@ -96,7 +96,7 @@ The engine changes of the same round (more precaution wordings, "not from X" and
 - *R6, caramel colour.* A sulphites occurrence does not count when its item contains "sulphite ammonia", "sulfite ammonia", "caustic sulphite" or "caustic sulfite". Caught: "colour (sulphite ammonia" (truncated) and "colour (sulphite ammonia caramel)". A separate item "sodium sulphite" in the same record still counts.
 - *Sample.* The `strict_sample` reservoir seed changes from 3 to 5, so the round-4 pool differs from round 3's. The `change_sample` seed is unchanged.
 - *Engine.* Unchanged since round 3 (commit `0d2357f` is the last engine change), so only the count's rules changed.
-- *Round-4 hand check and decision rule.* 100 records are drawn with mulberry32 seed 20261010 from the round-4 `strict_sample`, excluding every code checked in rounds 1 to 3 (`$C/run3`, `run4`, `run5` `hc_a`/`hc_b`). Two independent checkers judge them by the hand-check protocol below (unclear = not real). The count is claimed only at 100 of 100 real; otherwise the measured precision is reported.
+- *Round-4 hand check and decision rule.* 100 records are drawn with mulberry32 seed 20261010 from the round-4 `strict_sample`, excluding every code checked in rounds 1 to 3 (`$C/run3`, `run4`, `run5` `hc_a`/`hc_b`). Two independent checkers judge them by the hand-check protocol below (unclear = not real). The count is claimed only at 100 of 100 real; otherwise the measured precision is reported. `$C` is a local cache directory (`~/Library/Caches/allergy-crosscheck`) holding the Open Food Facts snapshot and run outputs; it is not published, and the "Run it" section rebuilds it.
 
 **Round-5 rules (fixed before the run, 2026-10-09).** The round-4 hand check found 93 of 100 real; 3 of the 7 misses were named flavours. One rule is added, working per occurrence like R1-R6, and every earlier rule stays (including dropping unlocated hits and the oil/flavour line exclusion). A strict hit counts only if at least one occurrence of its term survives R1-R7.
 - *R7, flavour context.* An occurrence does not count when its item (same definition as R1-R6) contains any of the words flavour, flavours, flavor, flavors, flavouring, flavourings, flavoring, flavorings, aroma, aromas. Because the engine reports a hit's source as a fragment of the text (for "natural flavor {contains wheat, soybeans, and celery seed}" the celery hit's source is "and celery seed}"), the item is read in the record's whole English text: the fragment is located in it (first match) and the occurrence's item is taken there. If the fragment cannot be located, the fragment's own item is used. Caught: "Wheat milk flavour" (gluten), "artificial cheddar cheese flavor" (milk), "Prawn Cocktail Flavour [Salt, Wheat Flour]" (crustacean), "natural flavor {contains wheat, soybeans, and celery seed}" (celery). Kept: "cheddar cheese, natural flavour" (milk: the cheese is a separate item). Side effect, accepted: "Flavourings (Contain Milk, Egg)" and "flavourings (with soya and wheat)", which the round-3 and round-4 hand checks judged real, no longer count.
@@ -142,7 +142,7 @@ The engine changes of the same round (more precaution wordings, "not from X" and
 - *Residual, no change (one-off garbles that do not generalise).* 93716956 "Lemon eel 2.5%" (a typo for "peel", read as the fish eel) and 4902745003536 "egg shell calcium" (the engine rightly stays cautious about eggshell; 1 in 359 in the sweep, 0 in the two slices). No rule is added for either.
 - *Sample.* The `strict_sample` reservoir seed changes from 23 to 29 (the only seed changed), so the round-10 pool differs from round 9's.
 - *Fixtures.* `fixtures.jsonl` now holds 65 records (58 before): four for R14 that would count without the rule (`fx-r14-sentence`, `-label`, `-item`, `-dried`) and three controls that still count (`fx-r14-keep-header` "CONTAINS LESS THAN 2% OF: WHEAT FLOUR", `fx-r14-keep-bracket` "spice mix (contains: mustard, salt)", `fx-r14-keep-listed` "Rice, sesame, salt. Contains: sesame.").
-- *Round-10 hand check and decision rule.* 100 records are drawn with mulberry32 seed 20261016 from the round-10 `strict_sample`, excluding every code checked in rounds 1 to 9 (`$C/run3`, `run4`, `run5`, `run6`, `run7`, `run9`, `run10`, `run11`, `run12` `hc_a`/`hc_b`) and every code in `$C/explore10/ex_*.json`. Two independent checkers judge them by the hand-check protocol below (unclear = not real). The count is claimed only at 100 of 100 real; otherwise the measured precision is reported. The operator wants a measured precision of at least 98 of 100; that is a target, and the decision rule is unchanged.
+- *Round-10 hand check and decision rule.* 100 records are drawn with mulberry32 seed 20261016 from the round-10 `strict_sample`, excluding every code checked in rounds 1 to 9 (`$C/run3`, `run4`, `run5`, `run6`, `run7`, `run9`, `run10`, `run11`, `run12` `hc_a`/`hc_b`) and every code in `$C/explore10/ex_*.json`. Two independent checkers judge them by the hand-check protocol below (unclear = not real). The count is claimed only at 100 of 100 real; otherwise the measured precision is reported. A measured precision of at least 98 of 100 was set as a target; it is a target only, and the decision rule is unchanged.
 
 **What is reported.** `strict_named` (records with a kept hit) and `strict_missed` (of those, a kept family is in neither list), with per-family counts, and `strict_missed` split into `_list_empty` and `_list_partial`. Each is given for all records and for scanned ones. A 200-record sample of `strict_missed` goes to `strict_sample.json`.
 
@@ -150,7 +150,7 @@ The engine changes of the same round (more precaution wordings, "not from X" and
 
 ### Outcome
 
-Ten rounds were run. Round 9 had been declared the final round (decision 2026-10-09); the operator then asked for a further round (2026-10-10), so round 10 is now the latest and round 9's 93 of 100 stands as measured.
+Ten rounds were run. Round 9 had been declared the final round (decision 2026-10-09); a further round was then requested (2026-10-10), so round 10 is now the latest and round 9's 93 of 100 stands as measured.
 
 Compare run, 11 October (engine `0a1ceec` against the round-10 engine `17287f8`, `OLD_ENGINE`; not a counted round, no hand check). It checks that the 11 October engine changes (lookalike fixes, Open Food Facts allergen ids mapped, foreign text; see below) open no new gap. `A` and the total are unchanged. `strict_missed` is 8,295 for all records (list empty 2,049, list partial 6,246) and 2,071 for popular ones (717 and 1,354); `B` is 136,763 (popular 64,232); `foreign_exposed` fell from 96 to 68 (popular 57 to 40). 583 records changed (269 popular) and **117 went to none** (40 popular). Every one of the 117 was listed and checked: 116 are lookalikes the engine now leaves alone on purpose (butter lettuce 70, ginger or root beer 26, tiger nuts 7, rice cakes 5, tart apples 4, ginger ale 3, a rum label's "with ginger beer or ginger ale" serving suggestion 1). One was a real gap: a cashew-apple juice (7896288960173). The 117 codes and groups: [`tonone-2026-10-11.tsv`](tonone-2026-10-11.tsv). Cashew apple is now "possible tree nut" (engine `2ec07bc`, after the run; it changes only records that name cashew apple or cashew fruit). Counts: [`results-compare-2026-10-11.json`](results-compare-2026-10-11.json); the slowest shard took 3,465.2 s. The precision figure above stays the round-10 one, measured at `17287f8`.
 
@@ -210,13 +210,13 @@ Round 4 (engine `0d2357f`, count rules R1-R6, commit `f88bc4a`) had found 93 of 
 - 1: a shared-equipment sentence ("shares equipment with peanuts").
 - 1: UK allergy-advice boilerplate ("For allergens see cereals containing gluten").
 
-The plant-milk, shared-equipment and advice-boilerplate causes, plus the flavour downgrade, were engine faults; the round-5 engine commit `858d317` fixed them. A 100/100 sample is only likely if true precision is about 99%: at 95% true precision it happens about 0.6% of the time (0.95^100). Rounds 3 to 9 put the count's precision at about 93-98%, and each round found new long-tail cases, so further rule rounds were stopped; the operator then asked for a round 10, which found 99%.
+The plant-milk, shared-equipment and advice-boilerplate causes, plus the flavour downgrade, were engine faults; the round-5 engine commit `858d317` fixed them. A 100/100 sample is only likely if true precision is about 99%: at 95% true precision it happens about 0.6% of the time (0.95^100). Rounds 3 to 9 put the count's precision at about 93-98%, and each round found new long-tail cases, so further rule rounds were stopped; a round 10 was then requested, which found 99%.
 
 History: round 1 (engine `4e4ef42`) 73/100; round 2 (engine `d9cffca`) 90/100, interval 82.6% to 94.5%, `strict_missed` 10,730 (2,698 scanned); round 3 (engine `0d2357f`, rules `37f89ae`, `strict_missed` 9,547 and 2,449 scanned, 38.9 minutes) 95/100, interval 88.8% to 97.8%; round 4 (engine `0d2357f`, rules `f88bc4a`) 93/100; round 5 (engine `858d317`, rules `04e5241`) 97/100, interval 91.5% to 99.0%, `strict_missed` 8,551 and 2,161 scanned; round 6 (engine `fa229b8`, rules `4f594cd`) 95/100, interval 88.8% to 97.8%; round 7 (engine `fa229b8`, rules `4cd40fb`) 95/100, interval 88.8% to 97.8%; round 8 (engine `55f497c`, rules `1caacd9`) 98/100, interval 93.0% to 99.4%; round 9 (engine `402b308`, rules `4f0a9a4`) 93/100, interval 86.3% to 96.6%; round 10 (engine `17287f8`, rules `cd8ffb8`) 99/100, interval 94.6% to 99.8%.
 
 The foreign-text change in the engine: English ingredient text that contains a word from `FOREIGN_ALLERGEN_WORDS` now carries "Part of the ingredient list isn't in English", so `foreign_exposed` fell from 1,925 to 96 (all records) and from 930 to 57 (scanned). The remaining ones are words the engine deliberately leaves out of its list (ei, ble, mani, latte) but the bench diagnostic keeps.
 
-Each round's rules are in their own commit of `measure.mjs`, so any round can be reproduced from its commit.
+Each round's rules are in their own commit of `measure.mjs` in the application repository, so a round can be reproduced from that commit plus the snapshot named in the table (the 7 October 2026 snapshot unless stated otherwise); the commits are not in this repository.
 
 ## Decisive answers on scanned products (run 12 October 2026)
 
@@ -229,6 +229,8 @@ How often does the engine give a decisive answer ("avoid" or "no listed allergen
 | milk + celery | 473,247 (30.5%) | 1,079,129 (69.5%) | 190,629 (72.0%) | 282,618 (21.9%) |
 
 Of the decisive answers for the milk profile, 277,847 are "avoid" and 185,917 "no listed allergens". Records without English ingredient text can only be decisive through their allergen and traces tags, since the engine reads English text only. Both bases are given so the two numbers are not confused: 17.0% of scanned records carry English ingredient text. This counts verdicts, not correctness; the precision work above is the check on that.
+
+"English ingredient text" has two definitions in this document, on the same 1,552,376 scanned records: here it means a non-empty `ingredients_text_en` field (264,667 records, 17.0%); in the strict count (`measure.mjs`) it also counts a record with any `en:` ingredient tag (689,596 records, 44.4%; `english` in [`results-strict-round10-2026-10-10.json`](results-strict-round10-2026-10-10.json)).
 
 Command (from `bench/`): `for i in 0 1 2 3 4 5 6 7; do python3 -I off_rows.py food.parquet $i 8 | node --experimental-strip-types decisive.mjs > shard_$i.json & done; wait`, with `decisive.mjs` as kept in the run folder (the same loop as `measure.mjs`, calling `checkProduct` per profile and counting `overall`).
 
@@ -270,6 +272,8 @@ node --experimental-strip-types foreign_judge.mjs < phrases.jsonl
 ```
 
 ## Method
+
+Commit hashes in this document refer to the application repository (Allergy Crosscheck), whose history this package was split from; they are not resolvable in this repository.
 
 - **`off_rows.py`:** streams the parquet export by row group. For each record it builds the same fields the server requests from the Open Food Facts API:
   - `allergens_tags`, `traces_tags`, `ingredients_tags`, and `ingredients_original_tags` (the label's own ingredients);
@@ -314,6 +318,8 @@ node --experimental-strip-types foreign_judge.mjs < phrases.jsonl
 
 You need Python 3 with pyarrow, Node 22.6+, and about 8 GB of disk.
 
+`$C` in this document is a local cache directory (`~/Library/Caches/allergy-crosscheck`) holding the Open Food Facts snapshot and run outputs; it is not published, and the steps below rebuild it.
+
 ```
 curl -L -o food.parquet https://huggingface.co/datasets/openfoodfacts/product-database/resolve/main/food.parquet
 node --experimental-strip-types measure.mjs < fixtures.jsonl
@@ -333,3 +339,7 @@ Eight shards took between 20 and 47.5 minutes wall clock on a 10-core laptop, an
 ## Data
 
 Data from [Open Food Facts](https://openfoodfacts.org), available under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/). Published here: aggregate counts, record codes, and short quotes from the hand-checked records.
+
+### Data licence
+
+The snapshot is Open Food Facts data under the Open Database License (ODbL) 1.0. The files `fixtures.jsonl`, `foreign-*.json` and `results-*.json` in this folder contain or derive from that data and are ODbL, not MIT. Attribution: Open Food Facts, https://world.openfoodfacts.org.
