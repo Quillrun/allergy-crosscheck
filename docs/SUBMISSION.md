@@ -20,7 +20,7 @@ Who at the table can eat tonight's dinner, and why? Allergy Crosscheck answers t
 What is real and what is simulated: the MCP server, the allergen engine, the Echo Show screen and the phone scan are the shipped code; the Alexa+ host in the video is a simulator driven by a local model, because Amazon's Alexa+ add-on tools are a partner-only preview that hackathon participants can't access (hackathon FAQ; details under "Simulated Alexa+" below).
 
 **For the judges, in their four criteria**
-- **Tech implementation:** self-hosted MCP server, spec 2025-11-25 over Streamable HTTP, 9 tools, MCP Apps screen with tap-to-choose; 158 automated tests, 93 in the engine.
+- **Tech implementation:** self-hosted MCP server, spec 2025-11-25 over Streamable HTTP, 9 tools, MCP Apps screen with tap-to-choose; 205 automated tests, 99 in the engine.
 - **Design:** one ask gives a verdict per person on the Echo Show screen and in speech, with the risky ingredients and swaps; guests expire; the screen is authored at the guide's 768×480 base canvas.
 - **Potential impact:** 1 in 15 US adults has a food allergy. A real cocoa mix lists milk only as "may contain" while its ingredients hold nonfat dry milk, whey and caseinate; this catches it. 72.3% of the 4.8 million Open Food Facts records, and 53.2% of the products scanned in its app, carry no allergen data and no ingredient list, so the only honest answer is "can't confirm", and that is the answer, never "allergen-free". Where a record carries English ingredient text, it gives a decisive answer for 57 to 72% of records; across all products scanned in the US, 37.5 to 47.1%.
 - **Quality of the idea:** three of Amazon's own "creative" examples built (agentic workflow in one turn, state across sessions, MCP Apps), and a cross-check that catches a real cocoa mix whose tags say milk is only "may contain".
@@ -69,7 +69,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
   - a **no-tool guard**: a keyword filter that blocks common verdict and action phrases when no tool has returned a result.
 
   On a real Alexa+, add-ons can't script speech. What ships is the server's side: every check result starts with a `VERDICT:` line, and every result carries the exact sentence to say. A verbatim hint for safety answers is the top item in the product feedback's feature requests.
-- **158 automated tests** (93 of them in the engine package), including:
+- **205 automated tests** (99 of them in the engine package), including:
   - 54 ingredient–allergen pairs that must never pass (peanut butter, pesto, ghee, amaretto…);
   - look-alikes that must not be flagged;
   - MCP end to end over HTTP;
@@ -78,7 +78,7 @@ Say Maya can't have peanuts or tree nuts, and Leo from next door, who can't have
 
 ### What was and wasn't tested
 - **Tested:**
-  - the 158 automated tests;
+  - the 205 automated tests;
   - the full demo conversation, end to end in the simulator, on a local Qwen3.5 9B model with live data;
   - the scan page in headless Chrome, with a camera feed of a real barcode;
   - every demo screen, measured in headless Chrome at 768×480 (the guide's base canvas, dark and light) and at 1280×800 with the 1.667 root scale (dark theme only; the simulator's Echo Show 8 frame).
@@ -149,7 +149,7 @@ The demo-script buttons call the MCP tools directly and need no model or API key
 - the spread with no ingredient list gives "Can't confirm";
 - the cocoa mix whose tags carry milk only as "may contain" gives "Avoid" for Leo, with the milk ingredients named.
 
-To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 158 tests.
+To talk to it, set `LLM_BASE_URL` and `LLM_MODEL` to any OpenAI-compatible endpoint with tool calling (see the README). Any MCP client can connect to `http://127.0.0.1:8787/mcp`. `npm test` runs the 205 tests.
 
 ### New or existing project
 New: the repository's first commit is 4 October 2026, after the submission period opened on 31 August 2026 ([rules](https://amazonappdev2026.devpost.com/rules)).
@@ -246,4 +246,4 @@ Paste `docs/FRICTION_LOG.md`: seven entries, in the format the rules ask for.
   - three verdicts, none of which is "safe";
   - product checks that read Open Food Facts allergen tags, traces and ingredient text together;
   - swaps filtered against everyone's allergies, and never a plant relative of what they replace.
-- **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 93 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents. The engine is open source (MIT), so any allergy feature can start fail-closed.
+- **Why it matters:** allergy features keep being rebuilt in apps and assistants, and the easy version (trust the allergen tags, answer "safe") is dangerous. This gives anyone a tested, fail-closed core. It has 99 tests of its own, including 54 ingredient–allergen pairs that must never pass. The Open Food Facts measurement (above) shows the failure it prevents. The engine is open source (MIT), so any allergy feature can start fail-closed.
