@@ -117,3 +117,27 @@ test("simulator: a failed server call is answered with isError, not silence", as
     assert.equal(result.structuredContent, undefined, name);
   }
 });
+
+test("widget: the root scale comes from the host's canvas in either shape (Alexa+ flat fields or MCP Apps containerDimensions)", async () => {
+  const page = await loadPage("widget.html");
+  const root = page.win.document.documentElement;
+  const context = async (params: Record<string, unknown>) => {
+    await page.win.dispatchMessage({ jsonrpc: "2.0", method: "ui/notifications/host-context-changed", params });
+    return root.style.zoom;
+  };
+  // Alexa+ layout guide: maxWidth/maxHeight at the top level (the simulator's Echo Show 8: 1280x800 over 768x480).
+  assert.equal(await context({ maxWidth: 1280, maxHeight: 800 }), String(1280 / 768));
+  // MCP Apps 2026-01-26: nested under containerDimensions, as maxWidth/maxHeight or width/height. A fresh page each time: the context merges.
+  const nested = await loadPage("widget.html");
+  await nested.win.dispatchMessage({ jsonrpc: "2.0", method: "ui/notifications/host-context-changed", params: { containerDimensions: { maxWidth: 1280, maxHeight: 800 } } });
+  assert.equal(nested.win.document.documentElement.style.zoom, String(1280 / 768));
+  const exact = await loadPage("widget.html");
+  await exact.win.dispatchMessage({ jsonrpc: "2.0", method: "ui/notifications/host-context-changed", params: { containerDimensions: { width: 1280, height: 800 } } });
+  assert.equal(exact.win.document.documentElement.style.zoom, String(1280 / 768));
+  // No size at all: no zoom. A phone-sized canvas never scales below 1.
+  const none = await loadPage("widget.html");
+  await none.win.dispatchMessage({ jsonrpc: "2.0", method: "ui/notifications/host-context-changed", params: { theme: "dark" } });
+  assert.equal(none.win.document.documentElement.style.zoom, "");
+  await none.win.dispatchMessage({ jsonrpc: "2.0", method: "ui/notifications/host-context-changed", params: { containerDimensions: { maxWidth: 390, maxHeight: 700 } } });
+  assert.equal(none.win.document.documentElement.style.zoom, "");
+});

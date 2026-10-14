@@ -6,7 +6,8 @@
 <title>Allergy Crosscheck</title>
 <style>
   /* Authored at the Alexa+ MCP design guide's 768x480 base canvas, with its type, spacing and corner-radius
-     tokens. One root scale is applied (zoom on <html>), derived from hostContext maxWidth/maxHeight only (deviceClass
+     tokens. One root scale is applied (zoom on <html>), derived from the host's canvas size only (hostContext
+     maxWidth/maxHeight as the Alexa+ layout guide lists them, or the MCP Apps spec's containerDimensions; deviceClass
      is not read), so nothing below is sized per device. Layout uses no viewport-width breakpoints except the phone fallback:
      under zoom a media query still sees the host's pixels. */
   :root {
@@ -128,8 +129,16 @@
   // keeps readable text and gets the one-column layout instead of a shrunken canvas.
   const BASE = { width: 768, height: 480 };
   let host = {};
-  const rootScale = ({ maxWidth, maxHeight }) =>
-    maxWidth > 0 && maxHeight > 0 ? Math.max(1, Math.min(maxWidth / BASE.width, maxHeight / BASE.height)) : 1;
+  // The Alexa+ layout guide lists maxWidth/maxHeight at the top of hostContext; the MCP Apps spec (2026-01-26) nests
+  // them under containerDimensions as width or maxWidth, height or maxHeight. Both shapes are read, top level first.
+  const canvas = (h) => {
+    const c = h.containerDimensions ?? {};
+    return { width: h.maxWidth ?? c.width ?? c.maxWidth, height: h.maxHeight ?? c.height ?? c.maxHeight };
+  };
+  const rootScale = (h) => {
+    const { width, height } = canvas(h);
+    return width > 0 && height > 0 ? Math.max(1, Math.min(width / BASE.width, height / BASE.height)) : 1;
+  };
 
   function applyContext(ctx) {
     if (!ctx) return;
