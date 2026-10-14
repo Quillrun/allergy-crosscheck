@@ -34,7 +34,7 @@ The submitted video (2:41, 3840×2160 at 60 fps, recorded 12 October 2026) is a 
 | 2:23 | Slide: under the hood (Alexa+ → MCP server → MCP Apps screen; allergen engine → open data), and the captured tool result as the server ships it ("VERDICT: UNSAFE / Say to the user: …", the `_meta.ui.resourceUri`), captioned "ships to Alexa+ as is; the verdict lock is my test harness" | "Under the hood: a self-hosted MCP server with nine tools, an MCP Apps screen built to the Alexa+ design guide, and an open-source allergen engine measured on 4.8 million real products." |
 | 2:36 | End card | "Allergy Crosscheck: who at the table can eat it, and why." |
 
-The point the v8 video made on a slide ("keeping the model honest": the simulator's verdict lock and no-tool guard) is in the docs and, since v10, on the under-the-hood slide's caption.
+The point an earlier cut made on a slide ("keeping the model honest": the simulator's verdict lock and no-tool guard) is in the docs and, in the final cut, on the under-the-hood slide's caption.
 
 ## Recording it yourself
 

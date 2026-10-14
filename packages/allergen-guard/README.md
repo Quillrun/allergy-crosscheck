@@ -36,4 +36,4 @@ Not medical advice. Always check the label.
 
 MIT licensed. The bench data is not: it is Open Food Facts data under the Open Database License (ODbL) 1.0, as set out under "Data licence" in [`bench/README.md`](bench/README.md).
 
-This repository is the canonical copy of the engine; the Allergy Crosscheck application vendors it under `packages/allergen-guard`.
+The published copy of this engine is https://github.com/Quillrun/allergen-guard; this folder is kept identical to it apart from packaging.
